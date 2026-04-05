@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-12">
+    <div class="glass-bg p-12 rounded-[3.5rem] shadow-2xl border border-slate-50">
+        <h1 class="text-5xl font-black mb-4 text-slate-800 tracking-tighter">Edit Site Content</h1>
+        <p class="text-xl text-slate-500 font-medium mb-12 italic border-b border-slate-100 pb-8 leading-relaxed">Customize the messaging on your home page.</p>
+        
+        <form method="POST" class="space-y-8">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            
+            <div class="space-y-2">
+                <label for="hero_title" class="block text-sm font-bold uppercase tracking-widest text-slate-400">Hero Main Title</label>
+                <textarea name="hero_title" id="hero_title" rows="3" required class="w-full px-6 py-4 rounded-2xl bg-slate-100 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all font-bold text-xl">{{ title }}</textarea>
+            </div>
+
+            <div class="space-y-2">
+                <label for="hero_subtitle" class="block text-sm font-bold uppercase tracking-widest text-slate-400">Hero Subtitle</label>
+                <textarea name="hero_subtitle" id="hero_subtitle" rows="4" required class="w-full px-6 py-4 rounded-2xl bg-slate-100 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all font-bold text-lg">{{ subtitle }}</textarea>
+            </div>
+
+            <div class="flex space-x-4 pt-6">
+                <button type="submit" class="flex-1 bg-blue-600 py-4 rounded-2xl text-white font-black text-xl hover:bg-blue-700 shadow-xl transition-all">Save Changes</button>
+                <a href="{{ url_for('admin.dashboard') }}" class="px-8 py-4 bg-slate-100 rounded-2xl text-slate-400 font-bold hover:bg-slate-200 transition-all">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

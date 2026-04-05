@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto py-12">
+    <div class="flex items-center justify-between mb-16">
+        <h1 class="text-6xl font-black text-slate-900 tracking-tighter">Election Results</h1>
+        <div class="flex space-x-4">
+            <button onclick="window.print()" class="bg-indigo-600 text-white px-8 py-3 rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-xl">Print Report</button>
+            <a href="{{ url_for('admin.dashboard') }}" class="bg-slate-100 text-slate-600 px-8 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all border border-slate-200 shadow-sm">Dashboard</a>
+        </div>
+    </div>
+
+    {% if data %}
+        <div class="grid grid-cols-1 gap-16">
+            {% for p_data in data %}
+                <section class="bg-white p-14 rounded-[4rem] shadow-2xl border border-slate-50 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-blue-50/30 rounded-full blur-3xl -mr-20 -mt-20"></div>
+                    
+                    <h2 class="text-4xl font-extrabold mb-12 text-slate-800 tracking-tight flex items-center">
+                        <span class="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white mr-6 shadow-lg text-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </span>
+                        {{ p_data.title }}
+                    </h2>
+
+                    <div class="overflow-hidden rounded-3xl border border-slate-100 shadow-sm">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 text-slate-400 uppercase tracking-widest text-sm font-black border-b border-slate-100">
+                                <tr>
+                                    <th class="px-10 py-6">Candidate Name</th>
+                                    <th class="px-10 py-6">Total Votes</th>
+                                    <th class="px-10 py-6">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50">
+                                {% for cand in p_data.results|sort(attribute='count', reverse=True) %}
+                                    <tr class="{% if loop.first and cand.count > 0 %}bg-blue-50/30{% endif %} hover:bg-slate-50 transition-colors">
+                                        <td class="px-10 py-8">
+                                            <div class="flex items-center space-x-4">
+                                                <div class="text-2xl font-black text-slate-800">{{ cand.name }}</div>
+                                                {% if loop.first and cand.count > 0 %}
+                                                    <span class="px-4 py-1 bg-blue-600 text-white rounded-full text-xs font-bold uppercase tracking-widest animate-bounce">Leading</span>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td class="px-10 py-8">
+                                            <div class="text-3xl font-black text-blue-600 tracking-tighter">{{ cand.count }}</div>
+                                        </td>
+                                        <td class="px-10 py-8">
+                                            {% if cand.count > 0 %}
+                                                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden min-w-[200px]">
+                                                    <div class="h-full bg-blue-600 rounded-full" style="width: 100%"></div>
+                                                </div>
+                                            {% else %}
+                                                <span class="text-slate-300 font-bold italic">No votes yet</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-32 glass-bg rounded-[3.5rem] shadow-2xl border border-slate-100">
+            <h3 class="text-3xl font-bold text-slate-400 mb-4">Awaiting Data...</h3>
+            <p class="text-slate-400 font-medium italic">Create portfolios and candidates to see live results here.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

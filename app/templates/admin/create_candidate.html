@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-12">
+    <div class="glass-bg p-12 rounded-[3.5rem] shadow-2xl border border-slate-50">
+        <h1 class="text-5xl font-black mb-4 text-slate-800 tracking-tighter">Add Candidate</h1>
+        <p class="text-xl text-slate-500 font-medium mb-12 italic border-b border-slate-100 pb-8 leading-relaxed">Enter candidate details and their portfolio assignment.</p>
+        
+        <form method="POST" enctype="multipart/form-data" class="space-y-8">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <div class="space-y-2">
+                <label for="portfolio_id" class="block text-sm font-bold uppercase tracking-widest text-slate-400">Target Portfolio</label>
+                <select name="portfolio_id" id="portfolio_id" required class="w-full px-6 py-4 rounded-2xl bg-slate-100 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all font-bold text-lg">
+                    {% for portfolio in portfolios %}
+                    <option value="{{ portfolio.id }}">{{ portfolio.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="space-y-2">
+                <label for="name" class="block text-sm font-bold uppercase tracking-widest text-slate-400">Full Name</label>
+                <input type="text" name="name" id="name" required placeholder="e.g. John Doe" class="w-full px-6 py-4 rounded-2xl bg-slate-100 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all font-bold text-lg">
+            </div>
+            <div class="space-y-2">
+                <label for="image_file" class="block text-sm font-bold uppercase tracking-widest text-slate-400">Candidate Photo (Upload)</label>
+                <input type="file" name="image_file" id="image_file" class="w-full px-6 py-4 rounded-2xl bg-slate-100 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all font-bold text-lg">
+            </div>
+            <div class="space-y-2">
+                <label for="image_url" class="block text-sm font-bold uppercase tracking-widest text-slate-400">Image URL (Optional Fallback)</label>
+                <input type="text" name="image_url" id="image_url" placeholder="https://..." class="w-full px-6 py-4 rounded-2xl bg-slate-100 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all font-bold text-lg">
+            </div>
+            <div class="space-y-2">
+                <label for="manifesto_summary" class="block text-sm font-bold uppercase tracking-widest text-slate-400">Manifesto Summary</label>
+                <textarea name="manifesto_summary" id="manifesto_summary" rows="4" required placeholder="Brief summary of their manifesto..." class="w-full px-6 py-4 rounded-2xl bg-slate-100 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all font-bold text-lg"></textarea>
+            </div>
+            <div class="flex space-x-4 pt-6">
+                <button type="submit" class="flex-1 bg-blue-600 py-4 rounded-2xl text-white font-black text-xl hover:bg-blue-700 shadow-xl transition-all">Add Candidate</button>
+                <a href="{{ url_for('admin.dashboard') }}" class="px-8 py-4 bg-slate-100 rounded-2xl text-slate-400 font-bold hover:bg-slate-200 transition-all">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

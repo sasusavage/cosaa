@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-12">
+    <div class="mb-16">
+        <h1 class="text-6xl font-black text-slate-900 mb-4 tracking-tighter">Student Resources</h1>
+        <p class="text-xl text-slate-500 font-medium italic">Everything you need to succeed in your CS journey.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+        <div class="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-50 hover:shadow-blue-200 transition-all cursor-pointer group">
+            <div class="w-16 h-16 bg-blue-100/50 text-blue-600 rounded-2xl flex items-center justify-center mb-8 shadow-sm group-hover:scale-110 transition-transform">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+            </div>
+            <h3 class="text-2xl font-black text-slate-800 mb-4 group-hover:text-blue-600">e-Library</h3>
+            <p class="text-slate-500 mb-8 leading-relaxed">Access a curated list of textbooks, lecture notes, and research papers from KNUST and beyond.</p>
+            <a href="#" class="inline-block bg-slate-100 px-6 py-2 rounded-xl text-slate-600 font-bold hover:bg-blue-600 hover:text-white transition-all">Explore &rarr;</a>
+        </div>
+
+        <div class="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-50 hover:shadow-indigo-200 transition-all cursor-pointer group">
+            <div class="w-16 h-16 bg-indigo-100/50 text-indigo-600 rounded-2xl flex items-center justify-center mb-8 shadow-sm group-hover:scale-110 transition-transform">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                </svg>
+            </div>
+            <h3 class="text-2xl font-black text-slate-800 mb-4 group-hover:text-indigo-600">Dev Kits</h3>
+            <p class="text-slate-500 mb-8 leading-relaxed">Industry-standard tools, IDEs, and software licenses available for free to registered CS students.</p>
+            <a href="#" class="inline-block bg-slate-100 px-6 py-2 rounded-xl text-slate-600 font-bold hover:bg-indigo-600 hover:text-white transition-all">Download &rarr;</a>
+        </div>
+
+        <div class="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-50 hover:shadow-emerald-200 transition-all cursor-pointer group">
+            <div class="w-16 h-16 bg-emerald-100/50 text-emerald-600 rounded-2xl flex items-center justify-center mb-8 shadow-sm group-hover:scale-110 transition-transform">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+            </div>
+            <h3 class="text-2xl font-black text-slate-800 mb-4 group-hover:text-emerald-600">Career Hub</h3>
+            <p class="text-slate-500 mb-8 leading-relaxed">Resume templates, interview prep guides, and job listings specifically for computing roles.</p>
+            <a href="#" class="inline-block bg-slate-100 px-6 py-2 rounded-xl text-slate-600 font-bold hover:bg-emerald-600 hover:text-white transition-all">Browse &rarr;</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

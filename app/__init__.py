@@ -1,0 +1,68 @@
+import os
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
+from flask_migrate import Migrate
+from flask_wtf import CSRFProtect
+from dotenv import load_dotenv
+
+load_dotenv()
+
+db = SQLAlchemy()
+login_manager = LoginManager()
+login_manager.login_view = 'voting.login'
+migrate = Migrate()
+csrf = CSRFProtect()
+
+def create_app(config_class=None):
+    app = Flask(__name__)
+    
+    # Default configuration
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default-key-shhh')
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql://username:password@localhost/cossa_db')
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+    if config_class:
+        app.config.from_object(config_class)
+
+    db.init_app(app)
+    login_manager.init_app(app)
+    migrate.init_app(app, db)
+    csrf.init_app(app)
+
+    # Register Blueprints
+    from .blueprints.main.routes import main as main_blueprint
+    app.register_blueprint(main_blueprint)
+
+    from .blueprints.voting.routes import voting as voting_blueprint
+    app.register_blueprint(voting_blueprint, url_prefix='/vote')
+
+    from .blueprints.admin.routes import admin as admin_blueprint
+    app.register_blueprint(admin_blueprint, url_prefix='/admin')
+
+    from .models import User
+
+    @app.route('/uploads/<filename>')
+    def uploaded_file(filename):
+        from flask import send_from_directory
+        return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
+
+    from .models import User
+    with app.app_context():
+        db.create_all()
+        # Seed default admin if missing
+        admin = User.query.filter_by(username='admin').first()
+        if not admin:
+            admin = User(username='admin', student_id='admin', role='admin')
+            admin.set_password('admin123')
+            db.session.add(admin)
+            db.session.commit()
+        elif admin.role != 'admin':
+            admin.role = 'admin'
+            db.session.commit()
+
+    return app

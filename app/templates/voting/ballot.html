@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-12">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 px-6">
+        <div>
+            <h1 class="text-6xl font-black mb-4 text-slate-900 tracking-tighter">Official Ballot</h1>
+            <p class="text-xl text-slate-500 font-medium leading-relaxed">CoSSA Executive Elections 2026/2027. Your vote is secure and anonymous.</p>
+        </div>
+        <div class="mt-6 md:mt-0 px-6 py-3 bg-emerald-100 text-emerald-800 rounded-2xl font-bold border border-emerald-200">
+            Authenticated as: {{ current_user.student_id }}
+        </div>
+    </div>
+
+    <form action="{{ url_for('voting.submit_vote') }}" method="POST" id="ballot-form" class="space-y-16">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        
+        {% for portfolio in portfolios %}
+        <section class="bg-white p-10 md:p-14 rounded-[3rem] shadow-2xl border border-slate-50 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-48 h-48 bg-blue-50/50 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-blue-100/50 transition-colors"></div>
+            
+            <h2 class="text-4xl font-extrabold mb-10 text-slate-800 tracking-tight flex items-center">
+                <span class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white mr-4 shadow-lg text-lg">{% if loop.index < 10 %}0{% endif %}{{ loop.index }}</span>
+                {{ portfolio.title }}
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {% for candidate in portfolio.candidates %}
+                <label class="relative block group-candidate cursor-pointer">
+                    <input type="radio" name="portfolio_{{ portfolio.id }}" value="{{ candidate.id }}" required class="peer absolute opacity-0 invisible">
+                    <div class="p-8 rounded-[2rem] border-4 border-slate-200 peer-checked:border-blue-600 peer-checked:bg-blue-50/50 transition-all hover:border-slate-300 hover:bg-slate-50 group-hover:shadow-xl shadow-md">
+                        <div class="flex items-start space-x-6">
+                            <div class="w-24 h-24 rounded-2xl overflow-hidden shadow-lg flex-shrink-0 group-candidate-hover:scale-105 transition-transform">
+                                <img src="{{ candidate.image_url }}" alt="{{ candidate.name }}" class="w-full h-full object-cover">
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-2xl font-bold mb-2 group-candidate-checked:text-blue-700 transition-colors">{{ candidate.name }}</h3>
+                                <p class="text-slate-500 text-sm leading-relaxed mb-4 line-clamp-2 italic">"{{ candidate.manifesto_summary }}"</p>
+                                <div class="w-8 h-8 rounded-full border-2 border-slate-300 peer-checked:bg-blue-600 peer-checked:border-transparent flex items-center justify-center transition-all bg-white shadow-inner ml-auto">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white opacity-0 peer-checked:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </label>
+                {% endfor %}
+            </div>
+        </section>
+        {% endfor %}
+
+        <div class="bg-blue-900 p-12 rounded-[3.5rem] shadow-2xl mt-20 text-center relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-10 -left-10 w-64 h-64 bg-blue-400/20 rounded-full blur-3xl"></div>
+            <h3 class="text-4xl font-bold text-white mb-6 tracking-tight">Ready to cast your ballot?</h3>
+            <p class="text-indigo-100 text-xl mb-12 max-w-2xl mx-auto leading-relaxed">Please review your selections carefully. Once submitted, your vote is final and cannot be changed.</p>
+            <button type="button" onclick="showConfirm()" class="bg-white text-blue-900 px-16 py-5 rounded-[2rem] font-black text-2xl hover:bg-slate-100 transform active:scale-95 transition-all shadow-2xl">Confirm Selection</button>
+        </div>
+    </form>
+</div>
+
+<!-- Custom Confirmation Modal -->
+<div id="confirmModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-blue-900/40 backdrop-blur-md p-6">
+    <div class="bg-white max-w-md w-full rounded-[2.5rem] shadow-2xl p-10 transform scale-90 opacity-0 transition-all duration-300 transform-origin-center">
+        <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-3xl flex items-center justify-center mb-8 mx-auto shadow-xl">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </div>
+        <h3 class="text-3xl font-black mb-4 text-center text-slate-800">Final Confirmation</h3>
+        <p class="text-slate-500 text-center mb-10 text-lg leading-relaxed">Are you absolutely sure about your selections? This action is irreversible.</p>
+        <div class="flex flex-col space-y-4">
+            <button onclick="document.getElementById('ballot-form').submit()" class="bg-blue-600 py-4 rounded-2xl text-white font-black text-xl hover:bg-blue-700 shadow-xl transition-all">Yes, Submit Ballot</button>
+            <button onclick="hideConfirm()" class="bg-slate-100 py-4 rounded-2xl text-slate-500 font-bold text-lg hover:bg-slate-200 transition-all">Go Back & Review</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showConfirm() {
+        const modal = document.getElementById('confirmModal');
+        const content = modal.children[0];
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        setTimeout(() => {
+            content.classList.remove('scale-90', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+    function hideConfirm() {
+        const modal = document.getElementById('confirmModal');
+        const content = modal.children[0];
+        content.classList.add('scale-90', 'opacity-0');
+        content.classList.remove('scale-100', 'opacity-100');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }, 300);
+    }
+</script>
+
+<style>
+    .peer:checked + div {
+        border-color: #2563eb !important;
+        background-color: #eff6ff !important;
+    }
+    .peer:checked + div h3 {
+        color: #1e40af;
+    }
+    .peer:checked + div .w-8 {
+        background-color: #2563eb;
+        border-color: transparent;
+    }
+    .peer:checked + div .w-8 svg {
+        opacity: 1;
+    }
+</style>
+{% endblock %}
