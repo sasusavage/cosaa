@@ -67,7 +67,7 @@
                                             <span>{{ count }} votes ({{ percentage|round(1) }}%)</span>
                                         </div>
                                         <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden shadow-inner">
-                                            <div class="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full transition-all duration-1000 ease-out" style="width: {{ percentage }}%"></div>
+                                            <div class="progress-bar h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full transition-all duration-1000 ease-out" style="width: 0%;" data-width="{{ percentage|round(1)|default(0) }}%"></div>
                                         </div>
                                     </div>
                                 {% endfor %}
@@ -86,4 +86,13 @@
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            document.querySelectorAll('.progress-bar').forEach(bar => {
+                bar.style.width = bar.getAttribute('data-width');
+            });
+        }, 100);
+    });
+</script>
 {% endblock %}
