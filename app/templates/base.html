@@ -37,7 +37,60 @@
                 <a href="{{ url_for('voting.login') }}" class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 shadow-md transition-all">Login</a>
             {% endif %}
         </div>
+        
+        <!-- Mobile Menu Button -->
+        <button id="menu-btn" class="md:hidden text-slate-800 focus:outline-none p-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+        </button>
     </nav>
+
+    <!-- Mobile Drawer -->
+    <div id="mobile-menu" class="fixed inset-0 z-[60] hidden bg-white/95 backdrop-blur-xl p-10 flex flex-col space-y-6 text-center transform translate-x-full transition-transform duration-300">
+        <button id="close-btn" class="absolute top-6 right-6 text-slate-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+        <div class="flex items-center justify-center space-x-3 mb-10">
+            <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-2xl">C</div>
+            <span class="brand text-3xl font-bold text-blue-900">CoSSA</span>
+        </div>
+        <a href="{{ url_for('main.index') }}" class="text-2xl font-bold hover:text-blue-600">Home</a>
+        <a href="{{ url_for('main.about') }}" class="text-2xl font-bold hover:text-blue-600">About</a>
+        <a href="{{ url_for('main.executives') }}" class="text-2xl font-bold hover:text-blue-600">Executives</a>
+        <a href="{{ url_for('main.resources') }}" class="text-2xl font-bold hover:text-blue-600">Resources</a>
+        <hr class="border-slate-100 my-4">
+        {% if current_user.is_authenticated %}
+            {% if current_user.role == 'admin' %}
+                <a href="{{ url_for('admin.dashboard') }}" class="text-2xl font-bold text-indigo-600">Admin Dashboard</a>
+            {% endif %}
+            <a href="{{ url_for('voting.ballot') }}" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold text-xl shadow-xl">Vote Now</a>
+            <a href="{{ url_for('voting.logout') }}" class="text-red-500 font-bold text-xl">Logout</a>
+        {% else %}
+            <a href="{{ url_for('voting.login') }}" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold text-xl shadow-xl">Login to Portal</a>
+        {% endif %}
+    </div>
+
+    <script>
+        const menuBtn = document.getElementById('menu-btn');
+        const closeBtn = document.getElementById('close-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.remove('hidden', 'translate-x-full');
+            mobileMenu.classList.add('flex', 'translate-x-0');
+        });
+
+        closeBtn.addEventListener('click', () => {
+            mobileMenu.classList.add('translate-x-full');
+            setTimeout(() => {
+                mobileMenu.classList.add('hidden');
+                mobileMenu.classList.remove('flex');
+            }, 300);
+        });
+    </script>
 
     <main class="container mx-auto px-6 py-8">
         {% with messages = get_flashed_messages(with_categories=true) %}

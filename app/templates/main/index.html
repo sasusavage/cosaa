@@ -1,21 +1,24 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<section class="py-20 text-center relative overflow-hidden bg-gradient-to-br from-blue-900 to-indigo-900 rounded-3xl p-10 shadow-2xl mb-24">
-    <div class="relative z-10 max-w-4xl mx-auto">
-        <h1 class="text-5xl md:text-7xl font-extrabold mb-6 leading-tight text-white tracking-tight drop-shadow-lg">
+<section class="relative overflow-hidden bg-white border border-slate-100 rounded-[3rem] shadow-2xl mb-24 min-h-[500px] flex flex-col md:flex-row items-center">
+    <div class="w-full md:w-1/2 p-10 md:p-20 z-10 text-center md:text-left">
+        <h1 class="text-5xl md:text-7xl font-extrabold mb-6 leading-tight text-slate-900 tracking-tight drop-shadow-sm">
             {{ hero_title }}
         </h1>
-        <p class="text-xl md:text-2xl mb-12 text-slate-200 leading-relaxed max-w-3xl mx-auto">
+        <p class="text-xl md:text-2xl mb-12 text-slate-500 leading-relaxed">
             {{ hero_subtitle }}
         </p>
-        <div class="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4">
-            <a href="{{ url_for('voting.ballot') }}" class="bg-blue-600 px-10 py-4 rounded-xl text-white font-bold text-lg hover:bg-blue-700 shadow-xl transition-all hover:scale-105 active:scale-95">Go to Voting Portal</a>
-            <a href="{{ url_for('main.about') }}" class="bg-white/20 backdrop-blur-md px-10 py-4 rounded-xl text-white font-bold text-lg border border-white/30 hover:bg-white/30 transition-all">Learn More</a>
+        <div class="flex flex-col sm:flex-row justify-center md:justify-start space-y-4 sm:space-y-0 sm:space-x-4">
+            <a href="{{ url_for('voting.ballot') }}" class="bg-blue-600 px-10 py-5 rounded-2xl text-white font-bold text-lg hover:bg-blue-700 shadow-xl transition-all hover:scale-105 active:scale-95">Go to Voting Portal</a>
+            <a href="{{ url_for('main.about') }}" class="bg-slate-100 px-10 py-5 rounded-2xl text-slate-600 font-bold text-lg hover:bg-slate-200 transition-all border border-slate-200">Learn More</a>
         </div>
     </div>
-    <div class="absolute -top-20 -left-20 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl"></div>
-    <div class="absolute -bottom-20 -right-20 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl"></div>
+    <div class="w-full md:w-1/2 h-[300px] md:h-full relative overflow-hidden">
+        <img src="{{ hero_image }}" class="w-full h-full object-cover rounded-b-[3rem] md:rounded-r-[3rem] md:rounded-bl-none">
+        <div class="absolute inset-0 bg-gradient-to-r from-white via-transparent to-transparent hidden md:block"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-white via-transparent to-transparent md:hidden"></div>
+    </div>
 </section>
 
 <section class="max-w-7xl mx-auto mb-24">

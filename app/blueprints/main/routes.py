@@ -8,6 +8,7 @@ def index():
     # Dynamic home page content managed by admin
     hero_title = Setting.get('hero_title', 'Empowering the Next Generation of African Innovators.')
     hero_subtitle = Setting.get('hero_subtitle', 'Welcome to CoSSA. Join our vibrant community of learners and leaders in tech.')
+    hero_image = Setting.get('hero_image', 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&h=600&fit=crop')
     
     # Fetch data for public portal
     portfolios = Portfolio.query.all()

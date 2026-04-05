@@ -131,9 +131,18 @@ def edit_content():
     if request.method == 'POST':
         hero_title = request.form.get('hero_title')
         hero_subtitle = request.form.get('hero_subtitle')
+        hero_image = request.form.get('hero_image')
+
+        # Handle hero image upload
+        if 'hero_image_file' in request.files:
+            file = request.files['hero_image_file']
+            if file and file.filename != '' and allowed_file(file.filename):
+                filename = secure_filename(f"hero_{file.filename}")
+                file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+                hero_image = url_for('uploaded_file', filename=filename)
         
         # Update or create settings
-        for key, value in [('hero_title', hero_title), ('hero_subtitle', hero_subtitle)]:
+        for key, value in [('hero_title', hero_title), ('hero_subtitle', hero_subtitle), ('hero_image', hero_image)]:
             setting = Setting.query.filter_by(key=key).first()
             if not setting:
                 setting = Setting(key=key, value=value)
@@ -147,7 +156,8 @@ def edit_content():
     
     current_title = Setting.get('hero_title', 'Empowering the Next Generation of African Innovators.')
     current_subtitle = Setting.get('hero_subtitle', 'Welcome to CoSSA. Join our vibrant community of learners and leaders in tech.')
-    return render_template('admin/edit_content.html', title=current_title, subtitle=current_subtitle)
+    current_image = Setting.get('hero_image', 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&h=600&fit=crop')
+    return render_template('admin/edit_content.html', title=current_title, subtitle=current_subtitle, image=current_image)
 
 @admin.route('/results')
 @admin_required
