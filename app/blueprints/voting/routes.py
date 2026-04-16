@@ -4,6 +4,26 @@ from app.models import User, Portfolio, Vote, Setting, db
 
 voting = Blueprint('voting', __name__)
 
+def _voting_window():
+    """Returns (is_open, start_str, end_str). start/end may be None."""
+    from datetime import datetime, timezone
+    start_s = Setting.get('voting_start')
+    end_s   = Setting.get('voting_end')
+    if not start_s or not end_s:
+        return False, start_s, end_s
+    try:
+        now   = datetime.now(timezone.utc)
+        start = datetime.fromisoformat(start_s)
+        end   = datetime.fromisoformat(end_s)
+        # Make timezone-aware if naive
+        if start.tzinfo is None:
+            start = start.replace(tzinfo=timezone.utc)
+        if end.tzinfo is None:
+            end = end.replace(tzinfo=timezone.utc)
+        return start <= now <= end, start_s, end_s
+    except Exception:
+        return False, start_s, end_s
+
 @voting.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -11,10 +31,17 @@ def login():
             return redirect(url_for('admin.dashboard'))
         return redirect(url_for('voting.ballot'))
     if request.method == 'POST':
-        student_id = request.form.get('student_id')
-        password = request.form.get('password')
-        user = User.query.filter_by(student_id=student_id).first()
-        if user and user.check_password(password):
+        raw_id = (request.form.get('student_id') or '').strip().upper()
+        # Try password login first (admin), then ID-only for students
+        user = User.query.filter(
+            db.func.upper(User.student_id) == raw_id
+        ).first()
+        password = request.form.get('password', '').strip()
+        if user:
+            # Admin always needs a password; students can log in with ID alone
+            if user.role == 'admin' and not user.check_password(password):
+                flash('Invalid credentials.', 'error')
+                return render_template('voting/login.html', admin_mode=True)
             login_user(user)
             next_page = request.args.get('next')
             if next_page:
@@ -22,7 +49,7 @@ def login():
             if user.role == 'admin':
                 return redirect(url_for('admin.dashboard'))
             return redirect(url_for('voting.ballot'))
-        flash('Invalid Student ID or password', 'error')
+        flash('Student ID not found. Please check and try again.', 'error')
     return render_template('voting/login.html')
 
 @voting.route('/logout')
@@ -39,6 +66,10 @@ def ballot():
         return redirect(url_for('admin.dashboard'))
     if current_user.has_voted:
         return redirect(url_for('voting.already_voted'))
+    is_open, _, _ = _voting_window()
+    if not is_open:
+        show_stats = Setting.get('live_stats_public', '0') == '1'
+        return render_template('voting/voting_closed.html', show_stats=show_stats)
     portfolios = Portfolio.query.all()
     return render_template('voting/ballot.html', portfolios=portfolios)
 
@@ -47,6 +78,9 @@ def ballot():
 def submit_vote():
     if current_user.role == 'admin':
         return redirect(url_for('admin.dashboard'))
+    is_open, _, _ = _voting_window()
+    if not is_open:
+        return redirect(url_for('voting.ballot'))
     # Double-check both the flag and the DB to prevent any race condition
     if current_user.has_voted:
         flash('You have already cast your ballot.', 'info')

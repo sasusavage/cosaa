@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Voting Closed - CoSSA{% endblock %}
+{% block content %}
+<div class="max-w-xl mx-auto pt-16 text-center">
+    <div class="bg-white rounded-[3rem] shadow-2xl border border-slate-50 p-14">
+        <div class="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-8">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-14 w-14 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+        </div>
+        <h1 class="text-4xl font-black text-slate-900 mb-4 tracking-tight">Voting is Closed</h1>
+        <p class="text-xl text-slate-500 mb-10 leading-relaxed">
+            The voting window is not currently open.<br>
+            Check back when the election is active.
+        </p>
+        <a href="{{ url_for('main.index') }}" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 shadow-xl transition-all">Back to Home</a>
+    </div>
+</div>
+
+{% if show_stats %}
+    {% include 'voting/_live_stats.html' %}
+{% endif %}
+{% endblock %}

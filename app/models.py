@@ -6,18 +6,32 @@ from datetime import datetime
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), unique=True, index=True)
-    hashed_password = db.Column(db.String(255))
-    student_id = db.Column(db.String(20), unique=True, index=True)
+    # student_id stored as UPPERCASE — lookup is case-insensitive
+    student_id = db.Column(db.String(30), unique=True, index=True, nullable=False)
+    username = db.Column(db.String(150))          # full display name
+    hashed_password = db.Column(db.String(255))   # nullable — ID-only login students have no password
+    surname = db.Column(db.String(100))
+    firstname = db.Column(db.String(100))
+    othernames = db.Column(db.String(100))
+    program = db.Column(db.String(200))
+    department = db.Column(db.String(200))
+    campus = db.Column(db.String(100))
     has_voted = db.Column(db.Boolean, default=False)
-    role = db.Column(db.String(10), default='student') # 'student' or 'admin'
+    role = db.Column(db.String(10), default='student')  # 'student' or 'admin'
     votes = db.relationship('Vote', backref='voter', lazy=True)
+
+    @property
+    def full_name(self):
+        parts = [self.firstname or '', self.othernames or '', self.surname or '']
+        return ' '.join(p for p in parts if p).strip() or self.student_id
 
     def set_password(self, password):
         self.hashed_password = generate_password_hash(password)
 
     def check_password(self, password):
-        return check_password_hash(self.hashed_password, password)
+        if self.hashed_password:
+            return check_password_hash(self.hashed_password, password)
+        return False
 
 class Portfolio(db.Model):
     __tablename__ = 'portfolios'

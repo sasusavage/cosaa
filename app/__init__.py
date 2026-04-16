@@ -73,18 +73,35 @@ def create_app(config_class=None):
         db.create_all()
 
         # ── Schema migrations (idempotent) ────────────────────────────────────
-        # Add votes.user_id if the column doesn't exist yet (existing deployments).
         from sqlalchemy import text, inspect as sa_inspect
         insp = sa_inspect(db.engine)
+
+        # votes.user_id
         if 'votes' in insp.get_table_names():
             existing_cols = [c['name'] for c in insp.get_columns('votes')]
             if 'user_id' not in existing_cols:
                 with db.engine.connect() as conn:
-                    # Add nullable first so existing rows don't violate NOT NULL
                     conn.execute(text(
                         'ALTER TABLE votes ADD COLUMN user_id INTEGER REFERENCES users(id)'
                     ))
                     conn.commit()
+
+        # New User columns (added when we extended the model)
+        if 'users' in insp.get_table_names():
+            user_cols = [c['name'] for c in insp.get_columns('users')]
+            new_user_cols = {
+                'surname':    'VARCHAR(100)',
+                'firstname':  'VARCHAR(100)',
+                'othernames': 'VARCHAR(100)',
+                'program':    'VARCHAR(200)',
+                'department': 'VARCHAR(200)',
+                'campus':     'VARCHAR(100)',
+            }
+            with db.engine.connect() as conn:
+                for col, col_type in new_user_cols.items():
+                    if col not in user_cols:
+                        conn.execute(text(f'ALTER TABLE users ADD COLUMN {col} {col_type}'))
+                conn.commit()
 
         # ── Seed default admin ────────────────────────────────────────────────
         admin = User.query.filter_by(username='admin').first()

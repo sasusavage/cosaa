@@ -1,15 +1,33 @@
 from flask import Blueprint, render_template
 from app.models import Portfolio, Setting, Executive, Resource, Event
+from datetime import datetime, timezone
 
 main = Blueprint('main', __name__)
 
 def _s(key, default=''):
     return Setting.get(key, default)
 
+def _voting_open():
+    start_s = Setting.get('voting_start')
+    end_s   = Setting.get('voting_end')
+    if not start_s or not end_s:
+        return False
+    try:
+        now = datetime.now(timezone.utc)
+        s = datetime.fromisoformat(start_s)
+        e = datetime.fromisoformat(end_s)
+        if s.tzinfo is None: s = s.replace(tzinfo=timezone.utc)
+        if e.tzinfo is None: e = e.replace(tzinfo=timezone.utc)
+        return s <= now <= e
+    except Exception:
+        return False
+
 @main.route('/')
 def index():
+    voting_open = _voting_open()
     return render_template('main/index.html',
-        portfolios=Portfolio.query.all(),
+        voting_open=voting_open,
+        portfolios=Portfolio.query.all() if voting_open else [],
         upcoming_events=Event.query.order_by(Event.order).all(),
         executives=Executive.query.order_by(Executive.order).limit(4).all(),
         hero_title=_s('hero_title', 'Empowering the Next Generation of African Innovators.'),

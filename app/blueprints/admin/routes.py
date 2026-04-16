@@ -60,12 +60,82 @@ def dashboard():
     turnout = (voted_count / total_users * 100) if total_users > 0 else 0
     portfolios = Portfolio.query.all()
     live_stats_on = Setting.get('live_stats_public', '0') == '1'
+    voting_start = Setting.get('voting_start', '')
+    voting_end   = Setting.get('voting_end', '')
+    from datetime import datetime, timezone
+    voting_open = False
+    if voting_start and voting_end:
+        try:
+            now = datetime.now(timezone.utc)
+            s = datetime.fromisoformat(voting_start)
+            e = datetime.fromisoformat(voting_end)
+            if s.tzinfo is None: s = s.replace(tzinfo=timezone.utc)
+            if e.tzinfo is None: e = e.replace(tzinfo=timezone.utc)
+            voting_open = s <= now <= e
+        except Exception:
+            pass
     return render_template('admin/dashboard.html',
                           total_users=total_users,
                           voted_count=voted_count,
                           turnout=turnout,
                           portfolios=portfolios,
-                          live_stats_on=live_stats_on)
+                          live_stats_on=live_stats_on,
+                          voting_open=voting_open,
+                          voting_start=voting_start,
+                          voting_end=voting_end)
+
+@admin.route('/voting-window', methods=['POST'])
+@admin_required
+def set_voting_window():
+    start = request.form.get('voting_start', '').strip()
+    end   = request.form.get('voting_end', '').strip()
+    Setting.set('voting_start', start)
+    Setting.set('voting_end', end)
+    db.session.commit()
+    flash('Voting window saved.', 'success')
+    return redirect(url_for('admin.dashboard'))
+
+@admin.route('/students/import-excel', methods=['GET', 'POST'])
+@admin_required
+def import_excel():
+    if request.method == 'POST':
+        if 'excel_file' not in request.files:
+            flash('No file uploaded.', 'error')
+            return redirect(request.url)
+        f = request.files['excel_file']
+        if not f.filename.endswith(('.xlsx', '.xls')):
+            flash('Please upload an .xlsx or .xls file.', 'error')
+            return redirect(request.url)
+        import openpyxl, io
+        wb = openpyxl.load_workbook(io.BytesIO(f.read()), data_only=True)
+        ws = wb.active
+        added = skipped = 0
+        for i, row in enumerate(ws.iter_rows(values_only=True)):
+            if i == 0:  # skip header
+                continue
+            if not row[0]:
+                continue
+            sid = str(row[0]).strip().upper()
+            surname    = str(row[1]).strip() if row[1] else ''
+            firstname  = str(row[2]).strip() if row[2] else ''
+            othernames = str(row[3]).strip() if row[3] else ''
+            program    = str(row[4]).strip() if row[4] else ''
+            campus     = str(row[5]).strip() if row[5] else ''
+            department = str(row[8]).strip() if len(row) > 8 and row[8] else ''
+            full_name  = ' '.join(p for p in [firstname, othernames, surname] if p)
+            if User.query.filter(db.func.upper(User.student_id) == sid).first():
+                skipped += 1
+                continue
+            u = User(student_id=sid, username=full_name,
+                     surname=surname, firstname=firstname, othernames=othernames,
+                     program=program, campus=campus, department=department,
+                     role='student')
+            db.session.add(u)
+            added += 1
+        db.session.commit()
+        flash(f'Import complete: {added} students added, {skipped} already existed.', 'success')
+        return redirect(url_for('admin.dashboard'))
+    return render_template('admin/import_excel.html')
 
 @admin.route('/toggle-live-stats', methods=['POST'])
 @admin_required
