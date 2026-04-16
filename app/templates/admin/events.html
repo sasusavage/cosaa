@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Manage Events{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto py-12">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+        <h1 class="text-4xl font-black text-slate-900 tracking-tighter">Events</h1>
+        <div class="flex flex-wrap gap-3">
+            <a href="{{ url_for('admin.create_event') }}" class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold hover:bg-blue-700 shadow-xl text-sm">+ Add Event</a>
+            <a href="{{ url_for('admin.dashboard') }}" class="bg-slate-100 text-slate-600 px-6 py-3 rounded-2xl font-bold hover:bg-slate-200 border border-slate-200 text-sm">Dashboard</a>
+        </div>
+    </div>
+
+    {% if events %}
+    <div class="space-y-4">
+        {% for ev in events %}
+        <div class="bg-white rounded-[2rem] shadow-xl border border-slate-50 p-8 flex items-center gap-6">
+            <div class="flex-1 min-w-0">
+                <div class="font-black text-slate-800 text-xl">{{ ev.title }}</div>
+                <div class="text-blue-600 font-bold text-sm mt-1">{{ ev.date }}</div>
+                <div class="text-slate-500 text-sm mt-1">{{ ev.description }}</div>
+            </div>
+            <div class="flex flex-col gap-2 flex-shrink-0">
+                <a href="{{ url_for('admin.edit_event', ev_id=ev.id) }}" class="bg-indigo-100 text-indigo-700 px-4 py-2 rounded-xl font-bold text-sm hover:bg-indigo-200 transition-all text-center">Edit</a>
+                <form method="POST" action="{{ url_for('admin.delete_event', ev_id=ev.id) }}" onsubmit="return confirm('Remove this event?')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="w-full bg-red-100 text-red-600 px-4 py-2 rounded-xl font-bold text-sm hover:bg-red-200 transition-all">Delete</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-24 glass-bg rounded-[3rem] shadow-2xl border border-slate-100">
+        <p class="text-slate-400 text-xl font-medium italic">No events yet. Add the first one!</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

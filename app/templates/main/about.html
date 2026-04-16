@@ -1,25 +1,23 @@
 {% extends 'base.html' %}
-
 {% block title %}About - CoSSA{% endblock %}
-
 {% block content %}
 <div class="max-w-4xl mx-auto py-12">
     <h1 class="text-4xl md:text-6xl font-black text-slate-900 mb-10 tracking-tighter">About CoSSA</h1>
-    
+
     <div class="space-y-12 leading-relaxed text-lg text-slate-600">
         <section class="bg-white p-12 rounded-[3.5rem] shadow-2xl border border-slate-50 italic">
             <h2 class="text-3xl font-bold text-blue-900 mb-6 font-Inter">Our Mission</h2>
-            <p>The Computer Science Students Association (CoSSA) aims to foster a collaborative environment where computing students can grow, innovate, and lead. We bridge the gap between classroom theory and industry practice through workshops, hackathons, and community building.</p>
+            <p>{{ about_mission }}</p>
         </section>
 
         <section class="grid grid-cols-1 md:grid-cols-2 gap-10">
             <div class="bg-slate-100 p-10 rounded-[3rem] border border-slate-200">
                 <h3 class="text-2xl font-bold mb-4 text-slate-800 tracking-tight">Vibrant Community</h3>
-                <p>Join over 1,500 active members sharing knowledge and building the future of technology in Africa.</p>
+                <p>{{ about_community }}</p>
             </div>
             <div class="bg-indigo-900 p-10 rounded-[3rem] text-white">
                 <h3 class="text-2xl font-bold mb-4 tracking-tight">Industry Focus</h3>
-                <p>We partner with top tech firms to provide internships and mentorship opportunities for our members.</p>
+                <p>{{ about_industry }}</p>
             </div>
         </section>
 

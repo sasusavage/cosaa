@@ -5,9 +5,13 @@
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-16">
         <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter">Admin Dashboard</h1>
         <div class="flex flex-wrap gap-3">
-            <a href="{{ url_for('admin.edit_content') }}" class="bg-indigo-900 text-white px-5 py-3 rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-xl text-sm">Edit Site</a>
-            <a href="{{ url_for('admin.create_portfolio') }}" class="bg-indigo-600 text-white px-5 py-3 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-xl text-sm">+ New Portfolio</a>
-            <a href="{{ url_for('admin.create_candidate') }}" class="bg-blue-600 text-white px-5 py-3 rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-xl text-sm">+ Add Candidate</a>
+            <a href="{{ url_for('admin.edit_content') }}" class="bg-indigo-900 text-white px-5 py-3 rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-xl text-sm">Hero Image</a>
+            <a href="{{ url_for('admin.edit_about') }}" class="bg-indigo-700 text-white px-5 py-3 rounded-2xl font-bold hover:bg-indigo-800 transition-all shadow-xl text-sm">About Page</a>
+            <a href="{{ url_for('admin.list_executives') }}" class="bg-indigo-600 text-white px-5 py-3 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-xl text-sm">Executives</a>
+            <a href="{{ url_for('admin.list_events') }}" class="bg-blue-700 text-white px-5 py-3 rounded-2xl font-bold hover:bg-blue-800 transition-all shadow-xl text-sm">Events</a>
+            <a href="{{ url_for('admin.list_resources') }}" class="bg-blue-600 text-white px-5 py-3 rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-xl text-sm">Resources</a>
+            <a href="{{ url_for('admin.create_portfolio') }}" class="bg-emerald-600 text-white px-5 py-3 rounded-2xl font-bold hover:bg-emerald-700 transition-all shadow-xl text-sm">+ Portfolio</a>
+            <a href="{{ url_for('admin.create_candidate') }}" class="bg-emerald-500 text-white px-5 py-3 rounded-2xl font-bold hover:bg-emerald-600 transition-all shadow-xl text-sm">+ Candidate</a>
             <a href="{{ url_for('admin.upload_credentials') }}" class="bg-slate-100 text-slate-600 px-5 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all border border-slate-200 shadow-sm text-sm">Import Students</a>
         </div>
     </div>
@@ -55,7 +59,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
                     {% for portfolio in portfolios %}
                     <div class="space-y-6">
-                        <h3 class="text-xl font-bold text-slate-700 uppercase tracking-widest border-l-4 border-indigo-500 pl-4">{{ portfolio.title }}</h3>
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xl font-bold text-slate-700 uppercase tracking-widest border-l-4 border-indigo-500 pl-4">{{ portfolio.title }}</h3>
+                            <form method="POST" action="{{ url_for('admin.delete_portfolio', port_id=portfolio.id) }}" onsubmit="return confirm('Delete portfolio and all its candidates?')">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <button type="submit" class="text-red-400 hover:text-red-600 text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-lg hover:bg-red-50 transition-all">Delete</button>
+                            </form>
+                        </div>
                         <div class="space-y-4">
                             {% if portfolio.candidates %}
                                 {% for candidate in portfolio.candidates %}
@@ -63,7 +73,13 @@
                                     {% set percentage = (count / voted_count * 100) if voted_count > 0 else 0 %}
                                     <div class="space-y-2">
                                         <div class="flex justify-between font-bold text-slate-800">
-                                            <span>{{ candidate.name }}</span>
+                                            <div class="flex items-center gap-3">
+                                                <span>{{ candidate.name }}</span>
+                                                <form method="POST" action="{{ url_for('admin.delete_candidate', cand_id=candidate.id) }}" onsubmit="return confirm('Remove {{ candidate.name }}?')">
+                                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                                    <button type="submit" class="text-red-400 hover:text-red-600 text-xs font-bold px-2 py-0.5 rounded hover:bg-red-50 transition-all">✕</button>
+                                                </form>
+                                            </div>
                                             <span>{{ count }} votes ({{ percentage|round(1) }}%)</span>
                                         </div>
                                         <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden shadow-inner">

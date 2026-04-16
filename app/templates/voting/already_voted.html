@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Already Voted - CoSSA{% endblock %}
+{% block content %}
+<div class="max-w-xl mx-auto py-24 text-center">
+    <div class="bg-white rounded-[3rem] shadow-2xl border border-slate-50 p-16">
+        <div class="w-24 h-24 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-8">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-14 w-14 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </div>
+        <h1 class="text-4xl font-black text-slate-900 mb-4 tracking-tight">Already Voted</h1>
+        <p class="text-xl text-slate-500 mb-10 leading-relaxed">You have already cast your ballot for this election. Each student may only vote once.</p>
+        <a href="{{ url_for('main.index') }}" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 shadow-xl transition-all">Back to Home</a>
+    </div>
+</div>
+{% endblock %}

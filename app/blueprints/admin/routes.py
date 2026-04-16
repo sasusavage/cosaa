@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
-from app.models import User, Portfolio, Candidate, Vote, Setting, db
+from app.models import User, Portfolio, Candidate, Vote, Setting, Executive, Resource, Event, db
 from functools import wraps
 from werkzeug.utils import secure_filename
 import csv
@@ -160,6 +160,213 @@ def edit_content():
     current_subtitle = Setting.get('hero_subtitle', 'Welcome to CoSSA. Join our vibrant community of learners and leaders in tech.')
     current_image = Setting.get('hero_image', 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&h=600&fit=crop')
     return render_template('admin/edit_content.html', title=current_title, subtitle=current_subtitle, image=current_image)
+
+# ── About page content ────────────────────────────────────────────────────────
+
+@admin.route('/about', methods=['GET', 'POST'])
+@admin_required
+def edit_about():
+    if request.method == 'POST':
+        for key in ('about_mission', 'about_community', 'about_industry'):
+            Setting.set(key, request.form.get(key, ''))
+        db.session.commit()
+        flash('About page updated.', 'success')
+        return redirect(url_for('admin.dashboard'))
+    return render_template('admin/edit_about.html',
+        about_mission=Setting.get('about_mission', ''),
+        about_community=Setting.get('about_community', ''),
+        about_industry=Setting.get('about_industry', ''))
+
+# ── Executives ─────────────────────────────────────────────────────────────────
+
+@admin.route('/executives')
+@admin_required
+def list_executives():
+    execs = Executive.query.order_by(Executive.order).all()
+    return render_template('admin/executives.html', executives=execs)
+
+@admin.route('/executives/create', methods=['GET', 'POST'])
+@admin_required
+def create_executive():
+    if request.method == 'POST':
+        image_url = request.form.get('image_url', '')
+        if 'image_file' in request.files:
+            file = request.files['image_file']
+            if file and file.filename != '' and allowed_file(file.filename):
+                filename = secure_filename(f"exec_{file.filename}")
+                upload_path = current_app.config['UPLOAD_FOLDER']
+                os.makedirs(upload_path, exist_ok=True)
+                file.save(os.path.join(upload_path, filename))
+                image_url = url_for('uploaded_file', filename=filename)
+        exec_ = Executive(
+            name=request.form.get('name'),
+            role=request.form.get('role'),
+            bio=request.form.get('bio'),
+            image_url=image_url,
+            linkedin_url=request.form.get('linkedin_url'),
+            twitter_url=request.form.get('twitter_url'),
+            order=int(request.form.get('order', 0))
+        )
+        db.session.add(exec_)
+        db.session.commit()
+        flash('Executive added.', 'success')
+        return redirect(url_for('admin.list_executives'))
+    return render_template('admin/create_executive.html')
+
+@admin.route('/executives/<int:exec_id>/edit', methods=['GET', 'POST'])
+@admin_required
+def edit_executive(exec_id):
+    exec_ = Executive.query.get_or_404(exec_id)
+    if request.method == 'POST':
+        exec_.name = request.form.get('name')
+        exec_.role = request.form.get('role')
+        exec_.bio = request.form.get('bio')
+        exec_.linkedin_url = request.form.get('linkedin_url')
+        exec_.twitter_url = request.form.get('twitter_url')
+        exec_.order = int(request.form.get('order', 0))
+        if 'image_file' in request.files:
+            file = request.files['image_file']
+            if file and file.filename != '' and allowed_file(file.filename):
+                filename = secure_filename(f"exec_{file.filename}")
+                upload_path = current_app.config['UPLOAD_FOLDER']
+                os.makedirs(upload_path, exist_ok=True)
+                file.save(os.path.join(upload_path, filename))
+                exec_.image_url = url_for('uploaded_file', filename=filename)
+        elif request.form.get('image_url'):
+            exec_.image_url = request.form.get('image_url')
+        db.session.commit()
+        flash('Executive updated.', 'success')
+        return redirect(url_for('admin.list_executives'))
+    return render_template('admin/create_executive.html', exec=exec_)
+
+@admin.route('/executives/<int:exec_id>/delete', methods=['POST'])
+@admin_required
+def delete_executive(exec_id):
+    exec_ = Executive.query.get_or_404(exec_id)
+    db.session.delete(exec_)
+    db.session.commit()
+    flash('Executive removed.', 'success')
+    return redirect(url_for('admin.list_executives'))
+
+# ── Resources ──────────────────────────────────────────────────────────────────
+
+@admin.route('/resources')
+@admin_required
+def list_resources():
+    resources = Resource.query.order_by(Resource.order).all()
+    return render_template('admin/resources.html', resources=resources)
+
+@admin.route('/resources/create', methods=['GET', 'POST'])
+@admin_required
+def create_resource():
+    if request.method == 'POST':
+        res = Resource(
+            title=request.form.get('title'),
+            description=request.form.get('description'),
+            link=request.form.get('link'),
+            link_label=request.form.get('link_label', 'Explore'),
+            icon_color=request.form.get('icon_color', 'blue'),
+            order=int(request.form.get('order', 0))
+        )
+        db.session.add(res)
+        db.session.commit()
+        flash('Resource added.', 'success')
+        return redirect(url_for('admin.list_resources'))
+    return render_template('admin/create_resource.html')
+
+@admin.route('/resources/<int:res_id>/edit', methods=['GET', 'POST'])
+@admin_required
+def edit_resource(res_id):
+    res = Resource.query.get_or_404(res_id)
+    if request.method == 'POST':
+        res.title = request.form.get('title')
+        res.description = request.form.get('description')
+        res.link = request.form.get('link')
+        res.link_label = request.form.get('link_label', 'Explore')
+        res.icon_color = request.form.get('icon_color', 'blue')
+        res.order = int(request.form.get('order', 0))
+        db.session.commit()
+        flash('Resource updated.', 'success')
+        return redirect(url_for('admin.list_resources'))
+    return render_template('admin/create_resource.html', resource=res)
+
+@admin.route('/resources/<int:res_id>/delete', methods=['POST'])
+@admin_required
+def delete_resource(res_id):
+    res = Resource.query.get_or_404(res_id)
+    db.session.delete(res)
+    db.session.commit()
+    flash('Resource removed.', 'success')
+    return redirect(url_for('admin.list_resources'))
+
+# ── Events ─────────────────────────────────────────────────────────────────────
+
+@admin.route('/events')
+@admin_required
+def list_events():
+    events = Event.query.order_by(Event.order).all()
+    return render_template('admin/events.html', events=events)
+
+@admin.route('/events/create', methods=['GET', 'POST'])
+@admin_required
+def create_event():
+    if request.method == 'POST':
+        ev = Event(
+            title=request.form.get('title'),
+            date=request.form.get('date'),
+            description=request.form.get('description'),
+            order=int(request.form.get('order', 0))
+        )
+        db.session.add(ev)
+        db.session.commit()
+        flash('Event added.', 'success')
+        return redirect(url_for('admin.list_events'))
+    return render_template('admin/create_event.html')
+
+@admin.route('/events/<int:ev_id>/edit', methods=['GET', 'POST'])
+@admin_required
+def edit_event(ev_id):
+    ev = Event.query.get_or_404(ev_id)
+    if request.method == 'POST':
+        ev.title = request.form.get('title')
+        ev.date = request.form.get('date')
+        ev.description = request.form.get('description')
+        ev.order = int(request.form.get('order', 0))
+        db.session.commit()
+        flash('Event updated.', 'success')
+        return redirect(url_for('admin.list_events'))
+    return render_template('admin/create_event.html', event=ev)
+
+@admin.route('/events/<int:ev_id>/delete', methods=['POST'])
+@admin_required
+def delete_event(ev_id):
+    ev = Event.query.get_or_404(ev_id)
+    db.session.delete(ev)
+    db.session.commit()
+    flash('Event removed.', 'success')
+    return redirect(url_for('admin.list_events'))
+
+# ── Candidate management ───────────────────────────────────────────────────────
+
+@admin.route('/candidates/<int:cand_id>/delete', methods=['POST'])
+@admin_required
+def delete_candidate(cand_id):
+    candidate = Candidate.query.get_or_404(cand_id)
+    db.session.delete(candidate)
+    db.session.commit()
+    flash('Candidate removed.', 'success')
+    return redirect(url_for('admin.dashboard'))
+
+@admin.route('/portfolios/<int:port_id>/delete', methods=['POST'])
+@admin_required
+def delete_portfolio(port_id):
+    portfolio = Portfolio.query.get_or_404(port_id)
+    db.session.delete(portfolio)
+    db.session.commit()
+    flash('Portfolio removed.', 'success')
+    return redirect(url_for('admin.dashboard'))
+
+# ── Results ────────────────────────────────────────────────────────────────────
 
 @admin.route('/results')
 @admin_required

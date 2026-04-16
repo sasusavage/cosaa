@@ -36,34 +36,49 @@ def logout():
 @login_required
 def ballot():
     if current_user.has_voted:
-        flash('You have already cast your ballot. Thank you!', 'info')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('voting.already_voted'))
     portfolios = Portfolio.query.all()
     return render_template('voting/ballot.html', portfolios=portfolios)
 
 @voting.route('/submit-vote', methods=['POST'])
 @login_required
 def submit_vote():
+    # Double-check both the flag and the DB to prevent any race condition
     if current_user.has_voted:
-        return redirect(url_for('main.index'))
-    
+        flash('You have already cast your ballot.', 'info')
+        return redirect(url_for('voting.already_voted'))
+
+    existing = Vote.query.filter_by(user_id=current_user.id).first()
+    if existing:
+        current_user.has_voted = True
+        db.session.commit()
+        return redirect(url_for('voting.already_voted'))
+
     portfolios = Portfolio.query.all()
     try:
-        # Collect votes from all portfolios
         for portfolio in portfolios:
             selection = request.form.get(f'portfolio_{portfolio.id}')
             if selection:
                 candidate_id = int(selection)
-                vote = Vote(candidate_id=candidate_id, portfolio_id=portfolio.id)
+                vote = Vote(user_id=current_user.id, candidate_id=candidate_id, portfolio_id=portfolio.id)
                 db.session.add(vote)
-        
-        # Atomically update user status
+
         current_user.has_voted = True
         db.session.commit()
         flash('Ballot submitted successfully! Your voice has been heard.', 'success')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('voting.vote_confirmed'))
     except Exception as e:
         db.session.rollback()
         flash('An error occurred during submission. Please try again.', 'error')
         print(f"Error submitting vote: {e}")
         return redirect(url_for('voting.ballot'))
+
+@voting.route('/confirmed')
+@login_required
+def vote_confirmed():
+    return render_template('voting/confirmed.html')
+
+@voting.route('/already-voted')
+@login_required
+def already_voted():
+    return render_template('voting/already_voted.html')

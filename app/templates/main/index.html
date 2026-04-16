@@ -44,39 +44,18 @@
         <p class="text-slate-500 text-lg">Meet the dedicated leaders of CoSSA 2025/2026 academic year.</p>
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 max-w-7xl mx-auto">
-        {# Mocking some executive cards #}
+        {% for exec in executives %}
         <div class="group">
             <div class="relative w-full aspect-square mb-6 overflow-hidden rounded-3xl shadow-lg border-4 border-white group-hover:border-blue-600 transition-all">
-                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                <img src="{{ exec.image_url or 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop' }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="{{ exec.name }}">
                 <div class="absolute inset-0 bg-blue-900/40 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </div>
-            <h4 class="text-xl font-bold text-center group-hover:text-blue-600">John Mensah</h4>
-            <p class="text-center text-slate-500 font-medium">President</p>
+            <h4 class="text-xl font-bold text-center group-hover:text-blue-600">{{ exec.name }}</h4>
+            <p class="text-center text-slate-500 font-medium">{{ exec.role }}</p>
         </div>
-        <div class="group">
-            <div class="relative w-full aspect-square mb-6 overflow-hidden rounded-3xl shadow-lg border-4 border-white group-hover:border-blue-600 transition-all">
-                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                <div class="absolute inset-0 bg-blue-900/40 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            </div>
-            <h4 class="text-xl font-bold text-center group-hover:text-blue-600">Abena Boateng</h4>
-            <p class="text-center text-slate-500 font-medium">General Secretary</p>
-        </div>
-        <div class="group">
-            <div class="relative w-full aspect-square mb-6 overflow-hidden rounded-3xl shadow-lg border-4 border-white group-hover:border-blue-600 transition-all">
-                <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                <div class="absolute inset-0 bg-blue-900/40 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            </div>
-            <h4 class="text-xl font-bold text-center group-hover:text-blue-600">Kofi Annan</h4>
-            <p class="text-center text-slate-500 font-medium">Treasurer</p>
-        </div>
-        <div class="group">
-            <div class="relative w-full aspect-square mb-6 overflow-hidden rounded-3xl shadow-lg border-4 border-white group-hover:border-blue-600 transition-all">
-                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                <div class="absolute inset-0 bg-blue-900/40 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            </div>
-            <h4 class="text-xl font-bold text-center group-hover:text-blue-600">Sarah Owusu</h4>
-            <p class="text-center text-slate-500 font-medium">Organizer</p>
-        </div>
+        {% else %}
+        <p class="text-slate-400 italic col-span-4 text-center">Executive profiles coming soon.</p>
+        {% endfor %}
     </div>
 </section>
 
