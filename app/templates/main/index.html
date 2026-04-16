@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
+{# ── Hero ──────────────────────────────────────────────────────────────────── #}
 <section class="relative overflow-hidden bg-white border border-slate-100 rounded-[3rem] shadow-2xl mb-24 min-h-[500px] flex flex-col md:flex-row items-center">
     <div class="w-full md:w-1/2 p-10 md:p-20 z-10 text-center md:text-left">
         <h1 class="text-5xl md:text-7xl font-extrabold mb-6 leading-tight text-slate-900 tracking-tight drop-shadow-sm">
@@ -9,22 +11,98 @@
         <p class="text-xl md:text-2xl mb-12 text-slate-500 leading-relaxed">
             {{ hero_subtitle }}
         </p>
-        <div class="flex flex-col sm:flex-row justify-center md:justify-start space-y-4 sm:space-y-0 sm:space-x-4">
-            <a href="{{ url_for('voting.ballot') }}" class="bg-blue-600 px-10 py-5 rounded-2xl text-white font-bold text-lg hover:bg-blue-700 shadow-xl transition-all hover:scale-105 active:scale-95">Go to Voting Portal</a>
+        <div class="flex flex-col sm:flex-row justify-center md:justify-start gap-4">
+            {% if current_user.is_authenticated and current_user.role != 'admin' %}
+                {% if current_user.has_voted %}
+                    <span class="bg-emerald-100 border border-emerald-300 text-emerald-800 px-10 py-5 rounded-2xl font-bold text-lg">✓ You have voted</span>
+                {% else %}
+                    <a href="{{ url_for('voting.ballot') }}" class="bg-blue-600 px-10 py-5 rounded-2xl text-white font-bold text-lg hover:bg-blue-700 shadow-xl transition-all hover:scale-105 active:scale-95">Cast Your Vote Now →</a>
+                {% endif %}
+            {% else %}
+                <a href="#candidates" class="bg-blue-600 px-10 py-5 rounded-2xl text-white font-bold text-lg hover:bg-blue-700 shadow-xl transition-all hover:scale-105 active:scale-95">View Candidates →</a>
+            {% endif %}
             <a href="{{ url_for('main.about') }}" class="bg-slate-100 px-10 py-5 rounded-2xl text-slate-600 font-bold text-lg hover:bg-slate-200 transition-all border border-slate-200">Learn More</a>
         </div>
     </div>
     <div class="w-full md:w-1/2 h-[300px] md:h-full relative overflow-hidden">
-        <img src="{{ hero_image }}" class="w-full h-full object-cover rounded-b-[3rem] md:rounded-r-[3rem] md:rounded-bl-none">
+        <img src="{{ hero_image }}" class="w-full h-full object-cover rounded-b-[3rem] md:rounded-r-[3rem] md:rounded-bl-none" alt="CoSSA">
         <div class="absolute inset-0 bg-gradient-to-r from-white via-transparent to-transparent hidden md:block"></div>
         <div class="absolute inset-0 bg-gradient-to-b from-white via-transparent to-transparent md:hidden"></div>
     </div>
 </section>
 
+{# ── Candidates + Vote Now ─────────────────────────────────────────────────── #}
+{% if portfolios %}
+<section id="candidates" class="max-w-7xl mx-auto mb-24 scroll-mt-24">
+
+    {# Big Vote Now CTA #}
+    <div class="bg-gradient-to-r from-blue-700 to-indigo-700 rounded-[2.5rem] p-10 md:p-14 mb-16 flex flex-col md:flex-row items-center gap-8 shadow-2xl">
+        <div class="flex-1 text-center md:text-left">
+            <h2 class="text-4xl md:text-5xl font-black text-white mb-3 tracking-tight">CoSSA Election 2026/2027</h2>
+            <p class="text-blue-100 text-lg leading-relaxed">Browse the candidates below, then log in to cast your secure, anonymous vote.</p>
+        </div>
+        {% if current_user.is_authenticated and current_user.role != 'admin' %}
+            {% if current_user.has_voted %}
+            <div class="bg-white/20 border-2 border-white/40 text-white px-10 py-5 rounded-2xl font-black text-xl flex-shrink-0">✓ Vote Cast</div>
+            {% else %}
+            <a href="{{ url_for('voting.ballot') }}" class="bg-white text-blue-700 px-12 py-5 rounded-2xl font-black text-xl hover:bg-blue-50 shadow-xl transition-all hover:scale-105 active:scale-95 flex-shrink-0">Vote Now →</a>
+            {% endif %}
+        {% else %}
+        <a href="{{ url_for('voting.login') }}?next={{ url_for('voting.ballot') }}" class="bg-white text-blue-700 px-12 py-5 rounded-2xl font-black text-xl hover:bg-blue-50 shadow-xl transition-all hover:scale-105 active:scale-95 flex-shrink-0">Login to Vote →</a>
+        {% endif %}
+    </div>
+
+    {# Candidates by portfolio #}
+    <div class="space-y-16">
+        {% for portfolio in portfolios %}
+        {% if portfolio.candidates %}
+        <div>
+            <div class="flex items-center gap-4 mb-8">
+                <span class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-black text-lg shadow-lg flex-shrink-0">{{ loop.index }}</span>
+                <h3 class="text-3xl font-black text-slate-800 tracking-tight">{{ portfolio.title }}</h3>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for candidate in portfolio.candidates %}
+                <div class="bg-white rounded-[2rem] shadow-xl border border-slate-50 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all group">
+                    <div class="h-52 overflow-hidden">
+                        <img src="{{ candidate.image_url or 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop' }}"
+                             alt="{{ candidate.name }}"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    </div>
+                    <div class="p-6">
+                        <h4 class="text-xl font-black text-slate-800 mb-1">{{ candidate.name }}</h4>
+                        <p class="text-blue-600 font-bold text-sm uppercase tracking-widest mb-4">{{ portfolio.title }}</p>
+                        {% if candidate.manifesto_summary %}
+                        <p class="text-slate-500 text-sm leading-relaxed italic line-clamp-3">"{{ candidate.manifesto_summary }}"</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    {# Bottom Vote Now CTA #}
+    <div class="mt-16 text-center">
+        {% if current_user.is_authenticated and current_user.role != 'admin' %}
+            {% if not current_user.has_voted %}
+            <a href="{{ url_for('voting.ballot') }}" class="inline-block bg-blue-600 text-white px-16 py-6 rounded-2xl font-black text-2xl hover:bg-blue-700 shadow-2xl transition-all hover:scale-105 active:scale-95">Cast Your Vote →</a>
+            {% endif %}
+        {% else %}
+        <a href="{{ url_for('voting.login') }}?next={{ url_for('voting.ballot') }}" class="inline-block bg-blue-600 text-white px-16 py-6 rounded-2xl font-black text-2xl hover:bg-blue-700 shadow-2xl transition-all hover:scale-105 active:scale-95">Login to Vote →</a>
+        <p class="text-slate-400 mt-4 font-medium">Use your Student ID and password to log in</p>
+        {% endif %}
+    </div>
+</section>
+{% endif %}
+
+{# ── Events ────────────────────────────────────────────────────────────────── #}
+{% if upcoming_events %}
 <section class="max-w-7xl mx-auto mb-24">
     <div class="flex items-center justify-between mb-12">
         <h2 class="text-4xl font-bold border-l-8 border-blue-600 pl-6 text-slate-800">Upcoming Events</h2>
-        <a href="#" class="text-blue-600 font-bold hover:underline">View Calendar &rarr;</a>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         {% for event in upcoming_events %}
@@ -32,39 +110,42 @@
             <div class="text-blue-600 font-bold uppercase text-sm tracking-widest mb-2">{{ event.date }}</div>
             <h3 class="text-3xl font-bold mb-4 text-slate-800">{{ event.title }}</h3>
             <p class="text-slate-600 mb-6 leading-relaxed">{{ event.description }}</p>
-            <button class="bg-slate-100 px-6 py-2 rounded-lg text-slate-800 font-bold hover:bg-blue-600 hover:text-white transition-colors">RSVP Now</button>
         </div>
         {% endfor %}
     </div>
 </section>
+{% endif %}
 
+{# ── Executives strip ──────────────────────────────────────────────────────── #}
+{% if executives %}
 <section class="bg-slate-100 -mx-6 px-6 py-24 mb-24 rounded-3xl md:rounded-none">
     <div class="container mx-auto text-center max-w-3xl mb-16">
         <h2 class="text-4xl font-bold mb-6 text-slate-900">Current Executives</h2>
         <p class="text-slate-500 text-lg">{{ home_execs_subtitle }}</p>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 max-w-7xl mx-auto">
+    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-10 max-w-7xl mx-auto">
         {% for exec in executives %}
         <div class="group">
             <div class="relative w-full aspect-square mb-6 overflow-hidden rounded-3xl shadow-lg border-4 border-white group-hover:border-blue-600 transition-all">
                 <img src="{{ exec.image_url or 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop' }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="{{ exec.name }}">
                 <div class="absolute inset-0 bg-blue-900/40 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </div>
-            <h4 class="text-xl font-bold text-center group-hover:text-blue-600">{{ exec.name }}</h4>
-            <p class="text-center text-slate-500 font-medium">{{ exec.role }}</p>
+            <h4 class="text-lg md:text-xl font-bold text-center group-hover:text-blue-600">{{ exec.name }}</h4>
+            <p class="text-center text-slate-500 font-medium text-sm md:text-base">{{ exec.role }}</p>
         </div>
-        {% else %}
-        <p class="text-slate-400 italic col-span-4 text-center">Executive profiles coming soon.</p>
         {% endfor %}
     </div>
 </section>
+{% endif %}
 
+{# ── Newsletter ────────────────────────────────────────────────────────────── #}
 <section class="max-w-4xl mx-auto py-24 px-10 bg-white rounded-3xl shadow-2xl border border-slate-100 text-center">
-    <h2 class="text-5xl font-black mb-6 text-slate-900 tracking-tight">{{ home_newsletter_title }}</h2>
+    <h2 class="text-4xl md:text-5xl font-black mb-6 text-slate-900 tracking-tight">{{ home_newsletter_title }}</h2>
     <p class="text-xl text-slate-500 mb-10 leading-relaxed">{{ home_newsletter_body }}</p>
-    <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+    <div class="flex flex-col md:flex-row gap-4">
         <input type="email" placeholder="Your University Email" class="flex-1 bg-slate-100 px-6 py-4 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600 font-bold transition-all">
         <button class="bg-blue-600 px-10 py-4 rounded-xl text-white font-bold hover:bg-blue-700 transition-all shadow-lg">Subscribe</button>
     </div>
 </section>
+
 {% endblock %}

@@ -37,6 +37,16 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+@admin.route('/cms')
+@admin_required
+def cms():
+    return render_template('admin/cms.html',
+        exec_count=Executive.query.count(),
+        event_count=Event.query.count(),
+        resource_count=Resource.query.count(),
+        portfolio_count=Portfolio.query.count(),
+    )
+
 @admin.route('/')
 @admin_required
 def root_redirect():

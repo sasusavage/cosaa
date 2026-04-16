@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% block title %}Content Manager{% endblock %}
+{% block content %}
+<div class="max-w-6xl mx-auto py-12">
+
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+        <div>
+            <h1 class="text-4xl font-black text-slate-900 tracking-tighter">Content Manager</h1>
+            <p class="text-slate-500 mt-1 font-medium">Everything the public sees — edit it here.</p>
+        </div>
+        <a href="{{ url_for('admin.dashboard') }}" class="bg-slate-100 text-slate-600 px-6 py-3 rounded-2xl font-bold hover:bg-slate-200 border border-slate-200 text-sm flex-shrink-0">← Dashboard</a>
+    </div>
+
+    {# ── Page Sections ──────────────────────────────────────────────────────── #}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+
+        {# Home Page #}
+        <div class="bg-white rounded-[2rem] shadow-xl border border-slate-50 overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-5 flex items-center gap-3">
+                <span class="text-2xl">🏠</span>
+                <h2 class="text-white font-black text-xl">Home Page</h2>
+            </div>
+            <div class="p-8 space-y-3">
+                <a href="{{ url_for('admin.edit_content') }}" class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-blue-50 hover:border-blue-200 border border-transparent transition-all group">
+                    <div>
+                        <p class="font-bold text-slate-700 group-hover:text-blue-700">Hero Section</p>
+                        <p class="text-slate-400 text-sm">Title, subtitle, background image</p>
+                    </div>
+                    <span class="text-blue-400 font-bold text-lg">→</span>
+                </a>
+                <a href="{{ url_for('admin.edit_content') }}#newsletter" class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-blue-50 hover:border-blue-200 border border-transparent transition-all group">
+                    <div>
+                        <p class="font-bold text-slate-700 group-hover:text-blue-700">Newsletter Section</p>
+                        <p class="text-slate-400 text-sm">Heading and body text</p>
+                    </div>
+                    <span class="text-blue-400 font-bold text-lg">→</span>
+                </a>
+                <a href="{{ url_for('admin.edit_content') }}#footer" class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-blue-50 hover:border-blue-200 border border-transparent transition-all group">
+                    <div>
+                        <p class="font-bold text-slate-700 group-hover:text-blue-700">Footer</p>
+                        <p class="text-slate-400 text-sm">Description, email, address, copyright</p>
+                    </div>
+                    <span class="text-blue-400 font-bold text-lg">→</span>
+                </a>
+            </div>
+        </div>
+
+        {# About Page #}
+        <div class="bg-white rounded-[2rem] shadow-xl border border-slate-50 overflow-hidden">
+            <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 px-8 py-5 flex items-center gap-3">
+                <span class="text-2xl">📖</span>
+                <h2 class="text-white font-black text-xl">About Page</h2>
+            </div>
+            <div class="p-8 space-y-3">
+                <a href="{{ url_for('admin.edit_about') }}" class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-indigo-50 hover:border-indigo-200 border border-transparent transition-all group">
+                    <div>
+                        <p class="font-bold text-slate-700 group-hover:text-indigo-700">Mission & Community Text</p>
+                        <p class="text-slate-400 text-sm">Mission statement, community blurb, industry focus</p>
+                    </div>
+                    <span class="text-indigo-400 font-bold text-lg">→</span>
+                </a>
+            </div>
+        </div>
+
+        {# Executives #}
+        <div class="bg-white rounded-[2rem] shadow-xl border border-slate-50 overflow-hidden">
+            <div class="bg-gradient-to-r from-violet-600 to-violet-700 px-8 py-5 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">👥</span>
+                    <h2 class="text-white font-black text-xl">Executives</h2>
+                </div>
+                <span class="bg-white/20 text-white text-sm font-bold px-3 py-1 rounded-full">{{ exec_count }} listed</span>
+            </div>
+            <div class="p-8 space-y-3">
+                <a href="{{ url_for('admin.list_executives') }}" class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-violet-50 hover:border-violet-200 border border-transparent transition-all group">
+                    <div>
+                        <p class="font-bold text-slate-700 group-hover:text-violet-700">Manage All Executives</p>
+                        <p class="text-slate-400 text-sm">Add, edit, reorder, delete</p>
+                    </div>
+                    <span class="text-violet-400 font-bold text-lg">→</span>
+                </a>
+                <a href="{{ url_for('admin.create_executive') }}" class="flex items-center justify-between p-4 bg-violet-600 rounded-2xl hover:bg-violet-700 transition-all group">
+                    <p class="font-bold text-white">+ Add New Executive</p>
+                    <span class="text-white/70 font-bold text-lg">→</span>
+                </a>
+            </div>
+        </div>
+
+        {# Events #}
+        <div class="bg-white rounded-[2rem] shadow-xl border border-slate-50 overflow-hidden">
+            <div class="bg-gradient-to-r from-amber-500 to-amber-600 px-8 py-5 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">📅</span>
+                    <h2 class="text-white font-black text-xl">Events</h2>
+                </div>
+                <span class="bg-white/20 text-white text-sm font-bold px-3 py-1 rounded-full">{{ event_count }} upcoming</span>
+            </div>
+            <div class="p-8 space-y-3">
+                <a href="{{ url_for('admin.list_events') }}" class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-amber-50 hover:border-amber-200 border border-transparent transition-all group">
+                    <div>
+                        <p class="font-bold text-slate-700 group-hover:text-amber-700">Manage All Events</p>
+                        <p class="text-slate-400 text-sm">Add, edit, delete upcoming events</p>
+                    </div>
+                    <span class="text-amber-400 font-bold text-lg">→</span>
+                </a>
+                <a href="{{ url_for('admin.create_event') }}" class="flex items-center justify-between p-4 bg-amber-500 rounded-2xl hover:bg-amber-600 transition-all group">
+                    <p class="font-bold text-white">+ Add New Event</p>
+                    <span class="text-white/70 font-bold text-lg">→</span>
+                </a>
+            </div>
+        </div>
+
+        {# Resources #}
+        <div class="bg-white rounded-[2rem] shadow-xl border border-slate-50 overflow-hidden">
+            <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 px-8 py-5 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">📚</span>
+                    <h2 class="text-white font-black text-xl">Resources Page</h2>
+                </div>
+                <span class="bg-white/20 text-white text-sm font-bold px-3 py-1 rounded-full">{{ resource_count }} listed</span>
+            </div>
+            <div class="p-8 space-y-3">
+                <a href="{{ url_for('admin.list_resources') }}" class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-emerald-50 hover:border-emerald-200 border border-transparent transition-all group">
+                    <div>
+                        <p class="font-bold text-slate-700 group-hover:text-emerald-700">Manage All Resources</p>
+                        <p class="text-slate-400 text-sm">Add, edit, delete resource cards</p>
+                    </div>
+                    <span class="text-emerald-400 font-bold text-lg">→</span>
+                </a>
+                <a href="{{ url_for('admin.create_resource') }}" class="flex items-center justify-between p-4 bg-emerald-600 rounded-2xl hover:bg-emerald-700 transition-all group">
+                    <p class="font-bold text-white">+ Add New Resource</p>
+                    <span class="text-white/70 font-bold text-lg">→</span>
+                </a>
+            </div>
+        </div>
+
+        {# Voting / Candidates #}
+        <div class="bg-white rounded-[2rem] shadow-xl border border-slate-50 overflow-hidden">
+            <div class="bg-gradient-to-r from-slate-700 to-slate-800 px-8 py-5 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">🗳</span>
+                    <h2 class="text-white font-black text-xl">Voting & Candidates</h2>
+                </div>
+                <span class="bg-white/20 text-white text-sm font-bold px-3 py-1 rounded-full">{{ portfolio_count }} portfolios</span>
+            </div>
+            <div class="p-8 space-y-3">
+                <a href="{{ url_for('admin.create_portfolio') }}" class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 border border-transparent transition-all group">
+                    <div>
+                        <p class="font-bold text-slate-700">+ Add Portfolio</p>
+                        <p class="text-slate-400 text-sm">e.g. President, Secretary, Treasurer</p>
+                    </div>
+                    <span class="text-slate-400 font-bold text-lg">→</span>
+                </a>
+                <a href="{{ url_for('admin.create_candidate') }}" class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 border border-transparent transition-all group">
+                    <div>
+                        <p class="font-bold text-slate-700">+ Add Candidate</p>
+                        <p class="text-slate-400 text-sm">Add a candidate to a portfolio</p>
+                    </div>
+                    <span class="text-slate-400 font-bold text-lg">→</span>
+                </a>
+                <a href="{{ url_for('admin.preview_ballot') }}" class="flex items-center justify-between p-4 bg-blue-600 rounded-2xl hover:bg-blue-700 transition-all group">
+                    <p class="font-bold text-white">Preview Ballot</p>
+                    <span class="text-white/70 font-bold text-lg">→</span>
+                </a>
+                <a href="{{ url_for('admin.upload_credentials') }}" class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 border border-transparent transition-all group">
+                    <div>
+                        <p class="font-bold text-slate-700">Import Student Credentials</p>
+                        <p class="text-slate-400 text-sm">Upload CSV of student IDs</p>
+                    </div>
+                    <span class="text-slate-400 font-bold text-lg">→</span>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    {# ── Quick Preview ──────────────────────────────────────────────────────── #}
+    <div class="bg-slate-800 rounded-[2rem] p-8 flex flex-col md:flex-row md:items-center gap-6">
+        <div class="flex-1">
+            <p class="text-white font-black text-lg">Preview the site as a visitor</p>
+            <p class="text-slate-400 text-sm mt-1">Opens in a new tab — your admin session stays active.</p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+            <a href="{{ url_for('main.index') }}" target="_blank" class="bg-white text-slate-800 px-5 py-3 rounded-xl font-bold text-sm hover:bg-slate-100 transition-all">🏠 Home</a>
+            <a href="{{ url_for('main.about') }}" target="_blank" class="bg-white text-slate-800 px-5 py-3 rounded-xl font-bold text-sm hover:bg-slate-100 transition-all">About</a>
+            <a href="{{ url_for('main.executives') }}" target="_blank" class="bg-white text-slate-800 px-5 py-3 rounded-xl font-bold text-sm hover:bg-slate-100 transition-all">Executives</a>
+            <a href="{{ url_for('main.resources') }}" target="_blank" class="bg-white text-slate-800 px-5 py-3 rounded-xl font-bold text-sm hover:bg-slate-100 transition-all">Resources</a>
+            <a href="{{ url_for('admin.preview_ballot') }}" class="bg-blue-500 text-white px-5 py-3 rounded-xl font-bold text-sm hover:bg-blue-400 transition-all">🗳 Ballot</a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -2,32 +2,24 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto py-12">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-16">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
         <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter">Admin Dashboard</h1>
         <div class="flex flex-wrap gap-3">
-            <a href="{{ url_for('admin.edit_content') }}" class="bg-indigo-900 text-white px-5 py-3 rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-xl text-sm">Edit Home</a>
-            <a href="{{ url_for('admin.edit_about') }}" class="bg-indigo-700 text-white px-5 py-3 rounded-2xl font-bold hover:bg-indigo-800 transition-all shadow-xl text-sm">About Page</a>
-            <a href="{{ url_for('admin.list_executives') }}" class="bg-indigo-600 text-white px-5 py-3 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-xl text-sm">Executives</a>
-            <a href="{{ url_for('admin.list_events') }}" class="bg-blue-700 text-white px-5 py-3 rounded-2xl font-bold hover:bg-blue-800 transition-all shadow-xl text-sm">Events</a>
-            <a href="{{ url_for('admin.list_resources') }}" class="bg-blue-600 text-white px-5 py-3 rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-xl text-sm">Resources</a>
-            <a href="{{ url_for('admin.create_portfolio') }}" class="bg-emerald-600 text-white px-5 py-3 rounded-2xl font-bold hover:bg-emerald-700 transition-all shadow-xl text-sm">+ Portfolio</a>
-            <a href="{{ url_for('admin.create_candidate') }}" class="bg-emerald-500 text-white px-5 py-3 rounded-2xl font-bold hover:bg-emerald-600 transition-all shadow-xl text-sm">+ Candidate</a>
-            <a href="{{ url_for('admin.upload_credentials') }}" class="bg-slate-100 text-slate-600 px-5 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all border border-slate-200 shadow-sm text-sm">Import Students</a>
+            <a href="{{ url_for('admin.cms') }}" class="bg-blue-600 text-white px-7 py-3 rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-xl">✏️ Manage Content</a>
+            <a href="{{ url_for('admin.upload_credentials') }}" class="bg-slate-100 text-slate-600 px-7 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all border border-slate-200 shadow-sm">Import Students</a>
+            <a href="{{ url_for('admin.results') }}" class="bg-indigo-600 text-white px-7 py-3 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-xl">View Results</a>
         </div>
     </div>
 
-    <!-- Preview Links -->
-    <div class="bg-slate-800 rounded-[2rem] p-8 mb-10 flex flex-col md:flex-row md:items-center gap-6">
-        <div class="flex-1">
-            <p class="text-white font-black text-lg">Preview the site as a visitor or student</p>
-            <p class="text-slate-400 text-sm mt-1">Open these links to see exactly what users see. Your admin session stays active.</p>
-        </div>
-        <div class="flex flex-wrap gap-3">
-            <a href="{{ url_for('main.index') }}" target="_blank" class="bg-white text-slate-800 px-5 py-3 rounded-xl font-bold text-sm hover:bg-slate-100 transition-all">🏠 Home</a>
-            <a href="{{ url_for('main.about') }}" target="_blank" class="bg-white text-slate-800 px-5 py-3 rounded-xl font-bold text-sm hover:bg-slate-100 transition-all">About</a>
-            <a href="{{ url_for('main.executives') }}" target="_blank" class="bg-white text-slate-800 px-5 py-3 rounded-xl font-bold text-sm hover:bg-slate-100 transition-all">Executives</a>
-            <a href="{{ url_for('main.resources') }}" target="_blank" class="bg-white text-slate-800 px-5 py-3 rounded-xl font-bold text-sm hover:bg-slate-100 transition-all">Resources</a>
-            <a href="{{ url_for('admin.preview_ballot') }}" class="bg-blue-500 text-white px-5 py-3 rounded-xl font-bold text-sm hover:bg-blue-400 transition-all">🗳 Ballot Preview</a>
+    <!-- Preview strip -->
+    <div class="bg-slate-800 rounded-[2rem] px-8 py-5 mb-10 flex flex-col md:flex-row md:items-center gap-4">
+        <p class="text-slate-400 text-sm font-bold flex-1">Preview as visitor →</p>
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ url_for('main.index') }}" target="_blank" class="bg-white/10 text-white px-4 py-2 rounded-xl font-bold text-xs hover:bg-white/20 transition-all">🏠 Home</a>
+            <a href="{{ url_for('main.about') }}" target="_blank" class="bg-white/10 text-white px-4 py-2 rounded-xl font-bold text-xs hover:bg-white/20 transition-all">About</a>
+            <a href="{{ url_for('main.executives') }}" target="_blank" class="bg-white/10 text-white px-4 py-2 rounded-xl font-bold text-xs hover:bg-white/20 transition-all">Executives</a>
+            <a href="{{ url_for('main.resources') }}" target="_blank" class="bg-white/10 text-white px-4 py-2 rounded-xl font-bold text-xs hover:bg-white/20 transition-all">Resources</a>
+            <a href="{{ url_for('admin.preview_ballot') }}" class="bg-blue-500/80 text-white px-4 py-2 rounded-xl font-bold text-xs hover:bg-blue-500 transition-all">🗳 Ballot</a>
         </div>
     </div>
 
