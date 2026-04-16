@@ -24,6 +24,10 @@ def create_app(config_class=None):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
     app.config['SQLALCHEMY_DATABASE_URI'] = db_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    upload_folder = os.environ.get('UPLOAD_FOLDER') or os.path.join(os.path.abspath(os.path.dirname(__file__)), 'static', 'uploads')
+    app.config['UPLOAD_FOLDER'] = upload_folder
+    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB
+    os.makedirs(upload_folder, exist_ok=True)
 
     if config_class:
         app.config.from_object(config_class)

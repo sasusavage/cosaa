@@ -2,13 +2,13 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto py-12">
-    <div class="flex items-center justify-between mb-16">
-        <h1 class="text-5xl font-black text-slate-900 tracking-tighter">Admin Dashboard</h1>
-        <div class="flex space-x-4">
-            <a href="{{ url_for('admin.edit_content') }}" class="bg-indigo-900 text-white px-8 py-3 rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-xl">Edit Site</a>
-            <a href="{{ url_for('admin.create_portfolio') }}" class="bg-indigo-600 text-white px-8 py-3 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-xl">+ New Portfolio</a>
-            <a href="{{ url_for('admin.create_candidate') }}" class="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-xl">+ Add Candidate</a>
-            <a href="{{ url_for('admin.upload_credentials') }}" class="bg-slate-100 text-slate-600 px-8 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all border border-slate-200 shadow-sm">Import Students</a>
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-16">
+        <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter">Admin Dashboard</h1>
+        <div class="flex flex-wrap gap-3">
+            <a href="{{ url_for('admin.edit_content') }}" class="bg-indigo-900 text-white px-5 py-3 rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-xl text-sm">Edit Site</a>
+            <a href="{{ url_for('admin.create_portfolio') }}" class="bg-indigo-600 text-white px-5 py-3 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-xl text-sm">+ New Portfolio</a>
+            <a href="{{ url_for('admin.create_candidate') }}" class="bg-blue-600 text-white px-5 py-3 rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-xl text-sm">+ Add Candidate</a>
+            <a href="{{ url_for('admin.upload_credentials') }}" class="bg-slate-100 text-slate-600 px-5 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all border border-slate-200 shadow-sm text-sm">Import Students</a>
         </div>
     </div>
 

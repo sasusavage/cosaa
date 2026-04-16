@@ -138,7 +138,9 @@ def edit_content():
             file = request.files['hero_image_file']
             if file and file.filename != '' and allowed_file(file.filename):
                 filename = secure_filename(f"hero_{file.filename}")
-                file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+                upload_path = current_app.config['UPLOAD_FOLDER']
+                os.makedirs(upload_path, exist_ok=True)
+                file.save(os.path.join(upload_path, filename))
                 hero_image = url_for('uploaded_file', filename=filename)
         
         # Update or create settings
