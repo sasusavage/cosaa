@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
-from app.models import User, Portfolio, Candidate, Vote, db
-from functools import wraps
+from app.models import User, Portfolio, Vote, db
 
 voting = Blueprint('voting', __name__)
 
@@ -35,6 +34,9 @@ def logout():
 @voting.route('/ballot')
 @login_required
 def ballot():
+    if current_user.role == 'admin':
+        flash('Admins manage the system and cannot cast a vote.', 'info')
+        return redirect(url_for('admin.dashboard'))
     if current_user.has_voted:
         return redirect(url_for('voting.already_voted'))
     portfolios = Portfolio.query.all()
@@ -43,6 +45,8 @@ def ballot():
 @voting.route('/submit-vote', methods=['POST'])
 @login_required
 def submit_vote():
+    if current_user.role == 'admin':
+        return redirect(url_for('admin.dashboard'))
     # Double-check both the flag and the DB to prevent any race condition
     if current_user.has_voted:
         flash('You have already cast your ballot.', 'info')

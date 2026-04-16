@@ -54,6 +54,16 @@ def create_app(config_class=None):
         from flask import send_from_directory
         return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+    @app.context_processor
+    def inject_site_settings():
+        from .models import Setting
+        return {
+            'site_footer_description': Setting.get('footer_description', 'The Computer Science Students Association is dedicated to building the future of African tech leaders through community and innovation.'),
+            'site_footer_email':       Setting.get('footer_email', 'info@cossa.com'),
+            'site_footer_address':     Setting.get('footer_address', 'CS Dept block, VVU'),
+            'site_footer_copyright':   Setting.get('footer_copyright', '2026 CoSSA. Designed for Excellence.'),
+        }
+
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))

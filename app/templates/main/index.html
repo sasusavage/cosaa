@@ -41,7 +41,7 @@
 <section class="bg-slate-100 -mx-6 px-6 py-24 mb-24 rounded-3xl md:rounded-none">
     <div class="container mx-auto text-center max-w-3xl mb-16">
         <h2 class="text-4xl font-bold mb-6 text-slate-900">Current Executives</h2>
-        <p class="text-slate-500 text-lg">Meet the dedicated leaders of CoSSA 2025/2026 academic year.</p>
+        <p class="text-slate-500 text-lg">{{ home_execs_subtitle }}</p>
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 max-w-7xl mx-auto">
         {% for exec in executives %}
@@ -60,8 +60,8 @@
 </section>
 
 <section class="max-w-4xl mx-auto py-24 px-10 bg-white rounded-3xl shadow-2xl border border-slate-100 text-center">
-    <h2 class="text-5xl font-black mb-6 text-slate-900 tracking-tight">Stay Informed, Join Now.</h2>
-    <p class="text-xl text-slate-500 mb-10 leading-relaxed">Don't miss out on important announcements and upcoming CS workshops. Subscribe to the CoSSA Newsletter.</p>
+    <h2 class="text-5xl font-black mb-6 text-slate-900 tracking-tight">{{ home_newsletter_title }}</h2>
+    <p class="text-xl text-slate-500 mb-10 leading-relaxed">{{ home_newsletter_body }}</p>
     <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
         <input type="email" placeholder="Your University Email" class="flex-1 bg-slate-100 px-6 py-4 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600 font-bold transition-all">
         <button class="bg-blue-600 px-10 py-4 rounded-xl text-white font-bold hover:bg-blue-700 transition-all shadow-lg">Subscribe</button>

@@ -142,38 +142,48 @@ def upload_credentials():
 @admin_required
 def edit_content():
     if request.method == 'POST':
-        hero_title = request.form.get('hero_title')
-        hero_subtitle = request.form.get('hero_subtitle')
         hero_image = request.form.get('hero_image')
-
-        # Handle hero image upload
         if 'hero_image_file' in request.files:
             file = request.files['hero_image_file']
             if file and file.filename != '' and allowed_file(file.filename):
-                delete_upload(Setting.get('hero_image'))  # remove old file
+                delete_upload(Setting.get('hero_image'))
                 filename = secure_filename(f"hero_{file.filename}")
                 upload_path = current_app.config['UPLOAD_FOLDER']
                 os.makedirs(upload_path, exist_ok=True)
                 file.save(os.path.join(upload_path, filename))
                 hero_image = url_for('uploaded_file', filename=filename)
-        
-        # Update or create settings
-        for key, value in [('hero_title', hero_title), ('hero_subtitle', hero_subtitle), ('hero_image', hero_image)]:
-            setting = Setting.query.filter_by(key=key).first()
-            if not setting:
-                setting = Setting(key=key, value=value)
-                db.session.add(setting)
-            else:
-                setting.value = value
-        
+
+        simple_keys = [
+            'hero_title', 'hero_subtitle', 'hero_image',
+            'home_execs_subtitle', 'home_newsletter_title', 'home_newsletter_body',
+            'footer_description', 'footer_email', 'footer_address', 'footer_copyright',
+        ]
+        for key in simple_keys:
+            val = hero_image if key == 'hero_image' else request.form.get(key, '')
+            Setting.set(key, val)
         db.session.commit()
         flash('Site content updated successfully.', 'success')
-        return redirect(url_for('admin.dashboard'))
-    
-    current_title = Setting.get('hero_title', 'Empowering the Next Generation of African Innovators.')
-    current_subtitle = Setting.get('hero_subtitle', 'Welcome to CoSSA. Join our vibrant community of learners and leaders in tech.')
-    current_image = Setting.get('hero_image', 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&h=600&fit=crop')
-    return render_template('admin/edit_content.html', title=current_title, subtitle=current_subtitle, image=current_image)
+        return redirect(url_for('admin.edit_content'))
+
+    ctx = {k: Setting.get(k, d) for k, d in [
+        ('hero_title',             'Empowering the Next Generation of African Innovators.'),
+        ('hero_subtitle',          'Welcome to CoSSA. Join our vibrant community of learners and leaders in tech.'),
+        ('hero_image',             'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&h=600&fit=crop'),
+        ('home_execs_subtitle',    'Meet the dedicated leaders of CoSSA 2025/2026 academic year.'),
+        ('home_newsletter_title',  'Stay Informed, Join Now.'),
+        ('home_newsletter_body',   "Don't miss out on important announcements and upcoming CS workshops. Subscribe to the CoSSA Newsletter."),
+        ('footer_description',     'The Computer Science Students Association is dedicated to building the future of African tech leaders through community and innovation.'),
+        ('footer_email',           'info@cossa.com'),
+        ('footer_address',         'CS Dept block, VVU'),
+        ('footer_copyright',       '2026 CoSSA. Designed for Excellence.'),
+    ]}
+    return render_template('admin/edit_content.html', **ctx)
+
+@admin.route('/preview/ballot')
+@admin_required
+def preview_ballot():
+    portfolios = Portfolio.query.all()
+    return render_template('admin/preview_ballot.html', portfolios=portfolios)
 
 # ── About page content ────────────────────────────────────────────────────────
 

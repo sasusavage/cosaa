@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}Ballot Preview{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto py-12">
+
+    <!-- Admin notice banner -->
+    <div class="bg-amber-50 border-2 border-amber-300 rounded-2xl px-8 py-5 mb-10 flex items-center gap-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-amber-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        </svg>
+        <div>
+            <p class="font-black text-amber-800">Admin Preview Mode</p>
+            <p class="text-amber-700 text-sm">This is how the ballot looks to students. Voting is disabled for admins.</p>
+        </div>
+        <a href="{{ url_for('admin.dashboard') }}" class="ml-auto bg-amber-200 text-amber-900 px-5 py-2 rounded-xl font-bold text-sm hover:bg-amber-300 transition-all flex-shrink-0">Back to Dashboard</a>
+    </div>
+
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 px-6">
+        <div>
+            <h1 class="text-6xl font-black mb-4 text-slate-900 tracking-tighter">Official Ballot</h1>
+            <p class="text-xl text-slate-500 font-medium leading-relaxed">CoSSA Executive Elections 2026/2027. Your vote is secure and anonymous.</p>
+        </div>
+        <div class="mt-6 md:mt-0 px-6 py-3 bg-indigo-100 text-indigo-800 rounded-2xl font-bold border border-indigo-200">
+            Previewing as: Admin
+        </div>
+    </div>
+
+    {% if portfolios %}
+    <div class="space-y-16 opacity-90">
+        {% for portfolio in portfolios %}
+        <section class="bg-white p-10 md:p-14 rounded-[3rem] shadow-2xl border border-slate-50 relative overflow-hidden">
+            <h2 class="text-4xl font-extrabold mb-10 text-slate-800 tracking-tight flex items-center">
+                <span class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white mr-4 shadow-lg text-lg">{% if loop.index < 10 %}0{% endif %}{{ loop.index }}</span>
+                {{ portfolio.title }}
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {% for candidate in portfolio.candidates %}
+                <div class="p-8 rounded-[2rem] border-4 border-slate-200 shadow-md bg-slate-50/50">
+                    <div class="flex items-start space-x-6">
+                        <div class="w-24 h-24 rounded-2xl overflow-hidden shadow-lg flex-shrink-0">
+                            <img src="{{ candidate.image_url }}" alt="{{ candidate.name }}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold mb-2">{{ candidate.name }}</h3>
+                            <p class="text-slate-500 text-sm leading-relaxed italic line-clamp-2">"{{ candidate.manifesto_summary }}"</p>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-slate-400 italic col-span-2">No candidates registered for this portfolio yet.</p>
+                {% endfor %}
+            </div>
+        </section>
+        {% endfor %}
+    </div>
+
+    <div class="bg-slate-200 p-12 rounded-[3.5rem] mt-16 text-center border-4 border-dashed border-slate-300">
+        <p class="text-slate-500 font-black text-2xl">Submit Ballot button appears here for students</p>
+        <p class="text-slate-400 mt-2">Admins cannot vote.</p>
+    </div>
+
+    {% else %}
+    <div class="text-center py-32 glass-bg rounded-[3.5rem] shadow-2xl border border-slate-100">
+        <p class="text-slate-400 text-xl font-medium italic">No portfolios created yet. Add portfolios and candidates first.</p>
+        <a href="{{ url_for('admin.create_portfolio') }}" class="mt-6 inline-block bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-blue-700 shadow-xl transition-all">+ Create Portfolio</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
