@@ -6,13 +6,26 @@ from werkzeug.utils import secure_filename
 import csv
 import io
 import os
-import random
-import string
 
 admin = Blueprint('admin', __name__)
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
+
+def delete_upload(image_url):
+    """Delete the physical file for a /uploads/<filename> URL. Safe to call with any URL."""
+    if not image_url:
+        return
+    try:
+        from urllib.parse import urlparse
+        path = urlparse(image_url).path  # e.g. /uploads/hero_photo.jpg
+        if path.startswith('/uploads/'):
+            filename = os.path.basename(path)
+            full_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            if os.path.isfile(full_path):
+                os.remove(full_path)
+    except Exception:
+        pass  # Never crash a delete because of a missing file
 
 def admin_required(f):
     @wraps(f)
@@ -137,6 +150,7 @@ def edit_content():
         if 'hero_image_file' in request.files:
             file = request.files['hero_image_file']
             if file and file.filename != '' and allowed_file(file.filename):
+                delete_upload(Setting.get('hero_image'))  # remove old file
                 filename = secure_filename(f"hero_{file.filename}")
                 upload_path = current_app.config['UPLOAD_FOLDER']
                 os.makedirs(upload_path, exist_ok=True)
@@ -227,6 +241,7 @@ def edit_executive(exec_id):
         if 'image_file' in request.files:
             file = request.files['image_file']
             if file and file.filename != '' and allowed_file(file.filename):
+                delete_upload(exec_.image_url)  # remove old file
                 filename = secure_filename(f"exec_{file.filename}")
                 upload_path = current_app.config['UPLOAD_FOLDER']
                 os.makedirs(upload_path, exist_ok=True)
@@ -243,6 +258,7 @@ def edit_executive(exec_id):
 @admin_required
 def delete_executive(exec_id):
     exec_ = Executive.query.get_or_404(exec_id)
+    delete_upload(exec_.image_url)
     db.session.delete(exec_)
     db.session.commit()
     flash('Executive removed.', 'success')
@@ -352,6 +368,7 @@ def delete_event(ev_id):
 @admin_required
 def delete_candidate(cand_id):
     candidate = Candidate.query.get_or_404(cand_id)
+    delete_upload(candidate.image_url)
     db.session.delete(candidate)
     db.session.commit()
     flash('Candidate removed.', 'success')

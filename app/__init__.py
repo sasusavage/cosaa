@@ -61,7 +61,22 @@ def create_app(config_class=None):
     from .models import User
     with app.app_context():
         db.create_all()
-        # Seed default admin if missing
+
+        # ── Schema migrations (idempotent) ────────────────────────────────────
+        # Add votes.user_id if the column doesn't exist yet (existing deployments).
+        from sqlalchemy import text, inspect as sa_inspect
+        insp = sa_inspect(db.engine)
+        if 'votes' in insp.get_table_names():
+            existing_cols = [c['name'] for c in insp.get_columns('votes')]
+            if 'user_id' not in existing_cols:
+                with db.engine.connect() as conn:
+                    # Add nullable first so existing rows don't violate NOT NULL
+                    conn.execute(text(
+                        'ALTER TABLE votes ADD COLUMN user_id INTEGER REFERENCES users(id)'
+                    ))
+                    conn.commit()
+
+        # ── Seed default admin ────────────────────────────────────────────────
         admin = User.query.filter_by(username='admin').first()
         if not admin:
             admin = User(username='admin', student_id='admin', role='admin')
