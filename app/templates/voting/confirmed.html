@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 {% block title %}Vote Confirmed - CoSSA{% endblock %}
 {% block content %}
-<div class="max-w-xl mx-auto py-24 text-center">
-    <div class="bg-white rounded-[3rem] shadow-2xl border border-slate-50 p-16">
+<div class="max-w-xl mx-auto pt-16 text-center">
+    <div class="bg-white rounded-[3rem] shadow-2xl border border-slate-50 p-14">
         <div class="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-8">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-14 w-14 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -13,4 +13,9 @@
         <a href="{{ url_for('main.index') }}" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 shadow-xl transition-all">Back to Home</a>
     </div>
 </div>
+
+{% if show_stats %}
+    {% include 'voting/_live_stats.html' %}
+    <p class="text-center text-slate-400 text-sm mt-4 pb-12">Results update automatically every 5 seconds.</p>
+{% endif %}
 {% endblock %}

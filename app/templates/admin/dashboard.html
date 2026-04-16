@@ -1,17 +1,19 @@
 {% extends 'base.html' %}
-
+{% block title %}Admin Dashboard{% endblock %}
 {% block content %}
 <div class="max-w-7xl mx-auto py-12">
+
+    {# ── Header ──────────────────────────────────────────────────────────────── #}
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
         <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter">Admin Dashboard</h1>
         <div class="flex flex-wrap gap-3">
             <a href="{{ url_for('admin.cms') }}" class="bg-blue-600 text-white px-7 py-3 rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-xl">✏️ Manage Content</a>
             <a href="{{ url_for('admin.upload_credentials') }}" class="bg-slate-100 text-slate-600 px-7 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all border border-slate-200 shadow-sm">Import Students</a>
-            <a href="{{ url_for('admin.results') }}" class="bg-indigo-600 text-white px-7 py-3 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-xl">View Results</a>
+            <a href="{{ url_for('admin.results') }}" class="bg-indigo-600 text-white px-7 py-3 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-xl">Full Results</a>
         </div>
     </div>
 
-    <!-- Preview strip -->
+    {# ── Preview strip ────────────────────────────────────────────────────────── #}
     <div class="bg-slate-800 rounded-[2rem] px-8 py-5 mb-10 flex flex-col md:flex-row md:items-center gap-4">
         <p class="text-slate-400 text-sm font-bold flex-1">Preview as visitor →</p>
         <div class="flex flex-wrap gap-2">
@@ -23,99 +25,154 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-20">
+    {# ── Summary cards ────────────────────────────────────────────────────────── #}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
         <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl border border-slate-50 flex flex-col items-center">
-            <div class="w-16 h-16 bg-blue-100/50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm font-black text-2xl">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
+            <div class="w-16 h-16 bg-blue-100/50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
             </div>
-            <div class="text-5xl font-black text-slate-800 mb-2 tracking-tighter">{{ total_users }}</div>
+            <div id="stat-total" class="text-5xl font-black text-slate-800 mb-2 tracking-tighter">{{ total_users }}</div>
             <div class="text-slate-400 font-bold uppercase tracking-widest text-sm">Total Students</div>
         </div>
         <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl border border-slate-50 flex flex-col items-center">
-            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm font-black text-2xl">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </div>
-            <div class="text-5xl font-black text-slate-800 mb-2 tracking-tighter">{{ voted_count }}</div>
-            <div class="text-slate-400 font-bold uppercase tracking-widest text-sm">Total Ballots Cast</div>
+            <div id="stat-voted" class="text-5xl font-black text-slate-800 mb-2 tracking-tighter">{{ voted_count }}</div>
+            <div class="text-slate-400 font-bold uppercase tracking-widest text-sm">Ballots Cast</div>
         </div>
         <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl border border-slate-50 flex flex-col items-center">
-            <div class="w-16 h-16 bg-indigo-100/50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm font-black text-2xl">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-                </svg>
+            <div class="w-16 h-16 bg-indigo-100/50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /></svg>
             </div>
-            <div class="text-5xl font-black text-slate-800 mb-2 tracking-tighter">{{ turnout|round(1) }}%</div>
+            <div id="stat-turnout" class="text-5xl font-black text-slate-800 mb-2 tracking-tighter">{{ turnout|round(1) }}%</div>
             <div class="text-slate-400 font-bold uppercase tracking-widest text-sm">Voter Turnout</div>
         </div>
     </div>
 
-    <div class="bg-white rounded-[3rem] shadow-2xl border border-slate-50 relative overflow-hidden">
-        <div class="px-10 py-10 flex justify-between items-end border-b border-slate-100">
-            <div>
-                <h2 class="text-3xl font-black text-slate-800 tracking-tight mb-2">Live Vote Statistics</h2>
-                <p class="text-slate-400 font-medium italic">Updates are near real-time.</p>
-            </div>
-            <a href="{{ url_for('admin.results') }}" class="text-blue-600 font-bold hover:underline">Full Detailed View &rarr;</a>
+    {# ── Live stats toggle ────────────────────────────────────────────────────── #}
+    <div class="bg-white rounded-[2rem] shadow-xl border border-slate-50 px-8 py-6 mb-10 flex flex-col md:flex-row md:items-center gap-4">
+        <div class="flex-1">
+            <p class="font-black text-slate-800 text-lg">Show live results to voters</p>
+            <p class="text-slate-400 text-sm mt-1">When ON, logged-in students see live vote tallies after casting their ballot.</p>
         </div>
-        <div class="p-10">
+        <form method="POST" action="{{ url_for('admin.toggle_live_stats') }}" class="flex-shrink-0">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <button type="submit"
+                class="relative inline-flex items-center gap-3 px-6 py-3 rounded-2xl font-black text-base transition-all shadow-lg
+                {% if live_stats_on %}bg-emerald-500 hover:bg-emerald-600 text-white{% else %}bg-slate-200 hover:bg-slate-300 text-slate-600{% endif %}">
+                <span class="w-5 h-5 rounded-full border-2 {% if live_stats_on %}bg-white border-white{% else %}bg-slate-400 border-slate-400{% endif %}"></span>
+                {% if live_stats_on %}Live Stats: ON{% else %}Live Stats: OFF{% endif %}
+            </button>
+        </form>
+    </div>
+
+    {# ── Live Vote Statistics ──────────────────────────────────────────────────── #}
+    <div class="bg-white rounded-[3rem] shadow-2xl border border-slate-50 relative overflow-hidden">
+        <div class="px-10 py-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100">
+            <div class="flex items-center gap-4">
+                <div>
+                    <h2 class="text-3xl font-black text-slate-800 tracking-tight">Live Vote Statistics</h2>
+                    <p class="text-slate-400 font-medium italic text-sm mt-1">Auto-updates every 5 seconds — no refresh needed.</p>
+                </div>
+                <span id="live-dot" class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse flex-shrink-0"></span>
+            </div>
+            <a href="{{ url_for('admin.results') }}" class="text-blue-600 font-bold hover:underline text-sm flex-shrink-0">Full Detailed View →</a>
+        </div>
+
+        <div id="stats-container" class="p-10">
             {% if portfolios %}
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    {% for portfolio in portfolios %}
-                    <div class="space-y-6">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-xl font-bold text-slate-700 uppercase tracking-widest border-l-4 border-indigo-500 pl-4">{{ portfolio.title }}</h3>
-                            <form method="POST" action="{{ url_for('admin.delete_portfolio', port_id=portfolio.id) }}" onsubmit="return confirm('Delete portfolio and all its candidates?')">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                                <button type="submit" class="text-red-400 hover:text-red-600 text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-lg hover:bg-red-50 transition-all">Delete</button>
-                            </form>
-                        </div>
-                        <div class="space-y-4">
-                            {% if portfolio.candidates %}
-                                {% for candidate in portfolio.candidates %}
-                                    {% set count = candidate.votes_received|length %}
-                                    {% set percentage = (count / voted_count * 100) if voted_count > 0 else 0 %}
-                                    <div class="space-y-2">
-                                        <div class="flex justify-between font-bold text-slate-800">
-                                            <div class="flex items-center gap-3">
-                                                <span>{{ candidate.name }}</span>
-                                                <form method="POST" action="{{ url_for('admin.delete_candidate', cand_id=candidate.id) }}" onsubmit="return confirm('Remove {{ candidate.name }}?')">
-                                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                                                    <button type="submit" class="text-red-400 hover:text-red-600 text-xs font-bold px-2 py-0.5 rounded hover:bg-red-50 transition-all">✕</button>
-                                                </form>
-                                            </div>
-                                            <span>{{ count }} votes ({{ percentage|round(1) }}%)</span>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                {% for portfolio in portfolios %}
+                <div class="space-y-5" data-portfolio-id="{{ portfolio.id }}">
+                    <h3 class="text-xl font-bold text-slate-700 uppercase tracking-widest border-l-4 border-indigo-500 pl-4">{{ portfolio.title }}</h3>
+                    <div class="space-y-4">
+                        {% if portfolio.candidates %}
+                            {% for candidate in portfolio.candidates %}
+                                {% set count = candidate.votes_received|length %}
+                                {% set pct = (count / voted_count * 100)|round(1) if voted_count > 0 else 0 %}
+                                <div class="flex items-center gap-4" data-candidate-id="{{ candidate.id }}">
+                                    <img src="{{ candidate.image_url or 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop' }}"
+                                         alt="{{ candidate.name }}"
+                                         class="w-12 h-12 rounded-xl object-cover flex-shrink-0 shadow-md">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex justify-between font-bold text-slate-800 mb-1">
+                                            <span class="truncate candidate-name">{{ candidate.name }}</span>
+                                            <span class="flex-shrink-0 ml-3 text-slate-500 text-sm candidate-stat">{{ count }} votes ({{ pct }}%)</span>
                                         </div>
                                         <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden shadow-inner">
-                                            <div class="progress-bar h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full transition-all duration-1000 ease-out" style="width: 0%;" data-width="{{ percentage|round(1)|default(0) }}%"></div>
+                                            <div class="progress-bar h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full transition-all duration-700 ease-out"
+                                                 style="width: 0%"
+                                                 data-width="{{ pct }}%"></div>
                                         </div>
                                     </div>
-                                {% endfor %}
-                            {% else %}
-                                <p class="text-slate-400 italic">No candidates registered.</p>
-                            {% endif %}
-                        </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-slate-400 italic text-sm">No candidates registered.</p>
+                        {% endif %}
                     </div>
-                    {% endfor %}
                 </div>
+                {% endfor %}
+            </div>
             {% else %}
-                <div class="text-center py-20">
-                    <p class="text-slate-400 text-xl font-medium italic">No portfolios created yet.</p>
-                </div>
+            <div class="text-center py-20">
+                <p class="text-slate-400 text-xl font-medium italic">No portfolios yet.</p>
+                <a href="{{ url_for('admin.cms') }}" class="mt-4 inline-block bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold hover:bg-blue-700 shadow-xl transition-all text-sm">Go to Content Manager →</a>
+            </div>
             {% endif %}
         </div>
     </div>
+
 </div>
+
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => {
-            document.querySelectorAll('.progress-bar').forEach(bar => {
-                bar.style.width = bar.getAttribute('data-width');
-            });
-        }, 100);
+const STATS_URL = "{{ url_for('admin.stats_json') }}";
+
+// Animate bars on first load
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(animateBars, 150);
+});
+
+function animateBars() {
+    document.querySelectorAll('.progress-bar[data-width]').forEach(bar => {
+        bar.style.width = bar.getAttribute('data-width');
     });
+}
+
+function updateDashboard(data) {
+    // Update summary cards
+    const elTotal = document.getElementById('stat-total');
+    const elVoted = document.getElementById('stat-voted');
+    const elTurnout = document.getElementById('stat-turnout');
+    if (elTotal) elTotal.textContent = data.total_users;
+    if (elVoted) elVoted.textContent = data.voted_count;
+    if (elTurnout) elTurnout.textContent = data.turnout + '%';
+
+    // Update each candidate row
+    data.portfolios.forEach(portfolio => {
+        portfolio.candidates.forEach(c => {
+            const row = document.querySelector(`[data-candidate-id="${c.id}"]`);
+            if (!row) return;
+            const stat = row.querySelector('.candidate-stat');
+            const bar = row.querySelector('.progress-bar');
+            if (stat) stat.textContent = `${c.votes} votes (${c.pct}%)`;
+            if (bar) bar.style.width = c.pct + '%';
+        });
+    });
+}
+
+// Poll every 5 seconds
+setInterval(() => {
+    fetch(STATS_URL)
+        .then(r => r.json())
+        .then(data => {
+            updateDashboard(data);
+            // Flash the live dot green briefly
+            const dot = document.getElementById('live-dot');
+            if (dot) { dot.classList.add('bg-blue-400'); setTimeout(() => dot.classList.remove('bg-blue-400'), 600); }
+        })
+        .catch(() => {}); // silent fail — don't break the UI
+}, 5000);
 </script>
 {% endblock %}

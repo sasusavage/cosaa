@@ -1,6 +1,6 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
-from app.models import User, Portfolio, Vote, db
+from app.models import User, Portfolio, Vote, Setting, db
 
 voting = Blueprint('voting', __name__)
 
@@ -80,9 +80,29 @@ def submit_vote():
 @voting.route('/confirmed')
 @login_required
 def vote_confirmed():
-    return render_template('voting/confirmed.html')
+    show_stats = Setting.get('live_stats_public', '0') == '1'
+    return render_template('voting/confirmed.html', show_stats=show_stats)
 
 @voting.route('/already-voted')
 @login_required
 def already_voted():
-    return render_template('voting/already_voted.html')
+    show_stats = Setting.get('live_stats_public', '0') == '1'
+    return render_template('voting/already_voted.html', show_stats=show_stats)
+
+@voting.route('/live-stats.json')
+@login_required
+def live_stats_json():
+    voted_count = User.query.filter_by(has_voted=True).count()
+    total_users = User.query.count()
+    portfolios = Portfolio.query.all()
+    data = []
+    for p in portfolios:
+        candidates = []
+        for c in p.candidates:
+            count = len(c.votes_received)
+            pct = round(count / voted_count * 100, 1) if voted_count > 0 else 0
+            candidates.append({'id': c.id, 'name': c.name, 'image_url': c.image_url or '', 'votes': count, 'pct': pct})
+        data.append({'id': p.id, 'title': p.title, 'candidates': candidates})
+    return jsonify(voted_count=voted_count, total_users=total_users,
+                   turnout=round(voted_count / total_users * 100, 1) if total_users else 0,
+                   portfolios=data)

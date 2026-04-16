@@ -59,11 +59,40 @@ def dashboard():
     voted_count = User.query.filter_by(has_voted=True).count()
     turnout = (voted_count / total_users * 100) if total_users > 0 else 0
     portfolios = Portfolio.query.all()
-    return render_template('admin/dashboard.html', 
-                          total_users=total_users, 
-                          voted_count=voted_count, 
+    live_stats_on = Setting.get('live_stats_public', '0') == '1'
+    return render_template('admin/dashboard.html',
+                          total_users=total_users,
+                          voted_count=voted_count,
                           turnout=turnout,
-                          portfolios=portfolios)
+                          portfolios=portfolios,
+                          live_stats_on=live_stats_on)
+
+@admin.route('/toggle-live-stats', methods=['POST'])
+@admin_required
+def toggle_live_stats():
+    current = Setting.get('live_stats_public', '0')
+    Setting.set('live_stats_public', '0' if current == '1' else '1')
+    db.session.commit()
+    return redirect(url_for('admin.dashboard'))
+
+@admin.route('/stats.json')
+@admin_required
+def stats_json():
+    from flask import jsonify
+    total_users = User.query.count()
+    voted_count = User.query.filter_by(has_voted=True).count()
+    portfolios = Portfolio.query.all()
+    data = []
+    for p in portfolios:
+        candidates = []
+        for c in p.candidates:
+            count = len(c.votes_received)
+            pct = round(count / voted_count * 100, 1) if voted_count > 0 else 0
+            candidates.append({'id': c.id, 'name': c.name, 'image_url': c.image_url or '', 'votes': count, 'pct': pct})
+        data.append({'id': p.id, 'title': p.title, 'candidates': candidates})
+    return jsonify(total_users=total_users, voted_count=voted_count,
+                   turnout=round(voted_count / total_users * 100, 1) if total_users else 0,
+                   portfolios=data)
 
 @admin.route('/candidates/create', methods=['GET', 'POST'])
 @admin_required
