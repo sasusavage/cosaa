@@ -552,9 +552,10 @@ def archive_election():
     import json
     from datetime import datetime, timezone
 
-    academic_year = Setting.get('academic_year', '').strip()
+    # Accept year from the inline form field first, fall back to stored setting
+    academic_year = request.form.get('academic_year', '').strip() or Setting.get('academic_year', '').strip()
     if not academic_year:
-        flash('Please set an Academic Year in the Voting Window form before archiving.', 'error')
+        flash('Please enter an Academic Year before archiving.', 'error')
         return redirect(url_for('admin.dashboard'))
 
     # Build snapshot
@@ -587,9 +588,9 @@ def archive_election():
     )
     db.session.add(record)
 
-    # Reset all votes and has_voted flags
+    # Reset all votes and has_voted flags (all roles — admin can get flagged during testing)
     Vote.query.delete()
-    User.query.filter_by(role='student').update({'has_voted': False})
+    User.query.update({'has_voted': False})
 
     # Clear voting window and academic year so system is clean for next election
     for key in ('voting_start', 'voting_end', 'academic_year'):
