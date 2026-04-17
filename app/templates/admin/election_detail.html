@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}{{ record.academic_year }} Election Results{% endblock %}
+{% block content %}
+<div class="max-w-6xl mx-auto py-12">
+
+    {# Header #}
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+        <div>
+            <a href="{{ url_for('admin.election_history') }}" class="text-slate-400 hover:text-slate-700 font-bold text-sm">← Election History</a>
+            <h1 class="text-4xl font-black text-slate-900 tracking-tighter mt-2">CoSSA {{ record.academic_year }} Election</h1>
+            <p class="text-slate-400 text-sm mt-1">Archived {{ record.archived_at.strftime('%d %B %Y at %H:%M') }} UTC &nbsp;·&nbsp; Permanent record — read only</p>
+        </div>
+    </div>
+
+    {# Summary cards #}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div class="bg-white rounded-[2rem] shadow-xl border border-slate-50 p-8 flex flex-col items-center">
+            <div class="text-4xl font-black text-slate-800 mb-1">{{ record.total_students }}</div>
+            <div class="text-slate-400 font-bold uppercase tracking-widest text-xs">Registered Students</div>
+        </div>
+        <div class="bg-white rounded-[2rem] shadow-xl border border-slate-50 p-8 flex flex-col items-center">
+            <div class="text-4xl font-black text-emerald-600 mb-1">{{ record.total_voted }}</div>
+            <div class="text-slate-400 font-bold uppercase tracking-widest text-xs">Ballots Cast</div>
+        </div>
+        <div class="bg-white rounded-[2rem] shadow-xl border border-slate-50 p-8 flex flex-col items-center">
+            <div class="text-4xl font-black text-indigo-600 mb-1">
+                {{ ((record.total_voted / record.total_students * 100) | round(1)) if record.total_students else 0 }}%
+            </div>
+            <div class="text-slate-400 font-bold uppercase tracking-widest text-xs">Voter Turnout</div>
+        </div>
+    </div>
+
+    {# Results by portfolio #}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+        {% for portfolio in portfolios %}
+        <div class="bg-white rounded-[2rem] shadow-xl border border-slate-50 overflow-hidden">
+            <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 px-8 py-5">
+                <h2 class="text-white font-black text-lg uppercase tracking-widest">{{ portfolio.title }}</h2>
+            </div>
+            <div class="p-8 space-y-5">
+                {% for candidate in portfolio.candidates %}
+                {% set is_winner = loop.first and candidate.votes > 0 %}
+                <div class="flex items-center gap-4 {% if is_winner %}bg-emerald-50 border border-emerald-100 rounded-2xl p-3 -mx-2{% endif %}">
+                    {% if candidate.image_url %}
+                    <img src="{{ candidate.image_url }}" alt="{{ candidate.name }}"
+                         class="w-12 h-12 rounded-xl object-cover flex-shrink-0 shadow-md">
+                    {% else %}
+                    <div class="w-12 h-12 rounded-xl bg-slate-200 flex items-center justify-center flex-shrink-0 text-slate-400 font-black text-lg">
+                        {{ candidate.name[0] }}
+                    </div>
+                    {% endif %}
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-center font-bold text-slate-800 mb-1">
+                            <span class="truncate">
+                                {{ candidate.name }}
+                                {% if is_winner %}
+                                <span class="ml-2 bg-emerald-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">Winner</span>
+                                {% endif %}
+                            </span>
+                            <span class="flex-shrink-0 ml-3 text-slate-500 text-sm">{{ candidate.votes }} votes ({{ candidate.pct }}%)</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full {% if is_winner %}bg-gradient-to-r from-emerald-400 to-emerald-600{% else %}bg-gradient-to-r from-blue-400 to-blue-600{% endif %}"
+                                 style="width: {{ candidate.pct }}%"></div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Election History{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto py-12">
+
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+        <div>
+            <h1 class="text-4xl font-black text-slate-900 tracking-tighter">Election History</h1>
+            <p class="text-slate-500 mt-1 font-medium">Permanent records of past CoSSA elections.</p>
+        </div>
+        <a href="{{ url_for('admin.dashboard') }}" class="bg-slate-100 text-slate-600 px-6 py-3 rounded-2xl font-bold hover:bg-slate-200 border border-slate-200 text-sm flex-shrink-0">← Dashboard</a>
+    </div>
+
+    {% if records %}
+    <div class="space-y-5">
+        {% for rec in records %}
+        <a href="{{ url_for('admin.election_detail', record_id=rec.id) }}"
+           class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white rounded-[2rem] shadow-xl border border-slate-50 px-8 py-6 hover:shadow-2xl hover:-translate-y-0.5 transition-all group">
+            <div class="flex items-center gap-5">
+                <div class="w-14 h-14 bg-indigo-100 rounded-2xl flex items-center justify-center flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-xl font-black text-slate-800 group-hover:text-indigo-700 transition-colors">CoSSA {{ rec.academic_year }} Election</p>
+                    <p class="text-slate-400 text-sm font-medium">Archived {{ rec.archived_at.strftime('%d %b %Y, %H:%M') }} UTC</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-8 flex-shrink-0">
+                <div class="text-center">
+                    <p class="text-2xl font-black text-slate-800">{{ rec.total_voted }}</p>
+                    <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Votes Cast</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-2xl font-black text-slate-800">
+                        {{ ((rec.total_voted / rec.total_students * 100) | round(1)) if rec.total_students else 0 }}%
+                    </p>
+                    <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Turnout</p>
+                </div>
+                <span class="text-indigo-400 font-black text-xl group-hover:text-indigo-600 transition-colors">→</span>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-50 p-16 text-center">
+        <p class="text-slate-400 text-xl font-medium italic mb-2">No elections archived yet.</p>
+        <p class="text-slate-400 text-sm">After an election ends, use "Archive & Reset Election" on the dashboard to save a permanent record here.</p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

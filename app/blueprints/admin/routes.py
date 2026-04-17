@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
-from app.models import User, Portfolio, Candidate, Vote, Setting, Executive, Resource, Event, db
+from app.models import User, Portfolio, Candidate, Vote, Setting, Executive, Resource, Event, ElectionRecord, db
 from functools import wraps
 from werkzeug.utils import secure_filename
 import csv
@@ -543,6 +543,78 @@ def delete_portfolio(port_id):
     db.session.commit()
     flash('Portfolio removed.', 'success')
     return redirect(url_for('admin.dashboard'))
+
+# ── Election archive ───────────────────────────────────────────────────────────
+
+@admin.route('/archive-election', methods=['POST'])
+@admin_required
+def archive_election():
+    import json
+    from datetime import datetime, timezone
+
+    academic_year = Setting.get('academic_year', '').strip()
+    if not academic_year:
+        flash('Please set an Academic Year in the Voting Window form before archiving.', 'error')
+        return redirect(url_for('admin.dashboard'))
+
+    # Build snapshot
+    total_students = User.query.filter_by(role='student').count()
+    total_voted    = User.query.filter_by(has_voted=True).count()
+    portfolios     = Portfolio.query.all()
+    snapshot = []
+    for p in portfolios:
+        candidates = []
+        for c in p.candidates:
+            vote_count = len(c.votes_received)
+            candidates.append({
+                'id':         c.id,
+                'name':       c.name,
+                'image_url':  c.image_url or '',
+                'manifesto':  c.manifesto_summary or '',
+                'votes':      vote_count,
+                'pct':        round(vote_count / total_voted * 100, 1) if total_voted else 0,
+            })
+        # Sort by votes desc so winner is first
+        candidates.sort(key=lambda x: x['votes'], reverse=True)
+        snapshot.append({'id': p.id, 'title': p.title, 'candidates': candidates})
+
+    record = ElectionRecord(
+        academic_year=academic_year,
+        archived_at=datetime.now(timezone.utc),
+        total_students=total_students,
+        total_voted=total_voted,
+        results_json=json.dumps(snapshot),
+    )
+    db.session.add(record)
+
+    # Reset all votes and has_voted flags
+    Vote.query.delete()
+    User.query.filter_by(role='student').update({'has_voted': False})
+
+    # Clear voting window and academic year so system is clean for next election
+    for key in ('voting_start', 'voting_end', 'academic_year'):
+        Setting.set(key, '')
+
+    db.session.commit()
+    flash(f'Election {academic_year} archived successfully. Votes cleared — ready for next election.', 'success')
+    return redirect(url_for('admin.dashboard'))
+
+
+@admin.route('/elections')
+@admin_required
+def election_history():
+    records = ElectionRecord.query.order_by(ElectionRecord.archived_at.desc()).all()
+    return render_template('admin/election_history.html', records=records)
+
+
+@admin.route('/elections/<int:record_id>')
+@admin_required
+def election_detail(record_id):
+    import json
+    record = ElectionRecord.query.get_or_404(record_id)
+    portfolios = json.loads(record.results_json)
+    return render_template('admin/election_detail.html', record=record, portfolios=portfolios)
+
 
 # ── Results ────────────────────────────────────────────────────────────────────
 

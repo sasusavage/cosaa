@@ -103,6 +103,9 @@ def create_app(config_class=None):
                         conn.execute(text(f'ALTER TABLE users ADD COLUMN {col} {col_type}'))
                 conn.commit()
 
+        # ── election_records table (new) — created by db.create_all above ────
+        # No manual ALTER needed; SQLAlchemy creates it fresh if missing.
+
         # ── Seed default Settings ─────────────────────────────────────────────
         from .models import Setting
         _defaults = {

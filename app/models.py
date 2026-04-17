@@ -78,6 +78,17 @@ class Setting(db.Model):
         else:
             db.session.add(Setting(key=key, value=value))
 
+class ElectionRecord(db.Model):
+    """Immutable snapshot of a completed election — written once, never updated."""
+    __tablename__ = 'election_records'
+    id = db.Column(db.Integer, primary_key=True)
+    academic_year = db.Column(db.String(20), nullable=False)
+    archived_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    total_students = db.Column(db.Integer, default=0)
+    total_voted = db.Column(db.Integer, default=0)
+    # Full results snapshot stored as JSON text
+    results_json = db.Column(db.Text, nullable=False)
+
 class Executive(db.Model):
     __tablename__ = 'executives'
     id = db.Column(db.Integer, primary_key=True)
