@@ -103,6 +103,31 @@ def create_app(config_class=None):
                         conn.execute(text(f'ALTER TABLE users ADD COLUMN {col} {col_type}'))
                 conn.commit()
 
+        # ── Seed default Settings ─────────────────────────────────────────────
+        from .models import Setting
+        _defaults = {
+            'hero_title':            'Empowering the Next Generation of African Innovators.',
+            'hero_subtitle':         'Welcome to CoSSA. Join our vibrant community of learners and leaders in tech.',
+            'hero_image':            'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&h=600&fit=crop',
+            'home_execs_subtitle':   'Meet the dedicated leaders of CoSSA 2025/2026 academic year.',
+            'home_newsletter_title': 'Stay Informed, Join Now.',
+            'home_newsletter_body':  "Don't miss out on important announcements and upcoming CS workshops. Subscribe to the CoSSA Newsletter.",
+            'about_mission':         'The Computer Science Students Association (CoSSA) aims to foster a collaborative environment where computing students can grow, innovate, and lead. We bridge the gap between classroom theory and industry practice through workshops, hackathons, and community building.',
+            'about_community':       'Join over 1,500 active members sharing knowledge and building the future of technology in Africa.',
+            'about_industry':        'We partner with top tech firms to provide internships and mentorship opportunities for our members.',
+            'footer_description':    'The Computer Science Students Association is dedicated to building the future of African tech leaders through community and innovation.',
+            'footer_email':          'info@cossa.com',
+            'footer_address':        'CS Dept block, VVU',
+            'footer_copyright':      '2026 CoSSA. Designed for Excellence.',
+            'live_stats_public':     '0',
+            'stats_display_hours':   '48',
+            'academic_year':         '',
+        }
+        for key, value in _defaults.items():
+            if Setting.query.filter_by(key=key).first() is None:
+                db.session.add(Setting(key=key, value=value))
+        db.session.commit()
+
         # ── Seed default admin ────────────────────────────────────────────────
         admin = User.query.filter_by(username='admin').first()
         if not admin:

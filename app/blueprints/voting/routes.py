@@ -58,6 +58,27 @@ def logout():
     logout_user()
     return redirect(url_for('main.index'))
 
+def _should_show_stats():
+    """Show live stats if admin toggled on AND (voting still open OR within display-hours window after close)."""
+    if Setting.get('live_stats_public', '0') != '1':
+        return False
+    from datetime import datetime, timezone
+    end_s = Setting.get('voting_end')
+    if not end_s:
+        return True  # no end set — always show when toggled on
+    try:
+        end = datetime.fromisoformat(end_s)
+        if end.tzinfo is None:
+            end = end.replace(tzinfo=timezone.utc)
+        now = datetime.now(timezone.utc)
+        if now <= end:
+            return True  # voting still open
+        hours = float(Setting.get('stats_display_hours', '48') or '48')
+        from datetime import timedelta
+        return now <= end + timedelta(hours=hours)
+    except Exception:
+        return True
+
 @voting.route('/ballot')
 @login_required
 def ballot():
@@ -68,8 +89,9 @@ def ballot():
         return redirect(url_for('voting.already_voted'))
     is_open, _, _ = _voting_window()
     if not is_open:
-        show_stats = Setting.get('live_stats_public', '0') == '1'
-        return render_template('voting/voting_closed.html', show_stats=show_stats)
+        show_stats = _should_show_stats()
+        academic_year = Setting.get('academic_year', '')
+        return render_template('voting/voting_closed.html', show_stats=show_stats, academic_year=academic_year)
     portfolios = Portfolio.query.all()
     return render_template('voting/ballot.html', portfolios=portfolios)
 
@@ -114,14 +136,16 @@ def submit_vote():
 @voting.route('/confirmed')
 @login_required
 def vote_confirmed():
-    show_stats = Setting.get('live_stats_public', '0') == '1'
-    return render_template('voting/confirmed.html', show_stats=show_stats)
+    show_stats = _should_show_stats()
+    academic_year = Setting.get('academic_year', '')
+    return render_template('voting/confirmed.html', show_stats=show_stats, academic_year=academic_year)
 
 @voting.route('/already-voted')
 @login_required
 def already_voted():
-    show_stats = Setting.get('live_stats_public', '0') == '1'
-    return render_template('voting/already_voted.html', show_stats=show_stats)
+    show_stats = _should_show_stats()
+    academic_year = Setting.get('academic_year', '')
+    return render_template('voting/already_voted.html', show_stats=show_stats, academic_year=academic_year)
 
 @voting.route('/live-stats.json')
 @login_required

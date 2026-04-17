@@ -135,7 +135,7 @@
         </div>
 
         {# Voting / Candidates #}
-        <div class="bg-white rounded-[2rem] shadow-xl border border-slate-50 overflow-hidden">
+        <div class="bg-white rounded-[2rem] shadow-xl border border-slate-50 overflow-hidden md:col-span-2">
             <div class="bg-gradient-to-r from-slate-700 to-slate-800 px-8 py-5 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <span class="text-2xl">🗳</span>
@@ -143,32 +143,59 @@
                 </div>
                 <span class="bg-white/20 text-white text-sm font-bold px-3 py-1 rounded-full">{{ portfolio_count }} portfolios</span>
             </div>
-            <div class="p-8 space-y-3">
-                <a href="{{ url_for('admin.create_portfolio') }}" class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 border border-transparent transition-all group">
+            <div class="p-8">
+                {# Action buttons #}
+                <div class="flex flex-wrap gap-3 mb-8">
+                    <a href="{{ url_for('admin.create_portfolio') }}" class="bg-slate-100 text-slate-700 px-5 py-3 rounded-2xl font-bold text-sm hover:bg-slate-200 border border-slate-200 transition-all">+ Add Portfolio</a>
+                    <a href="{{ url_for('admin.create_candidate') }}" class="bg-slate-100 text-slate-700 px-5 py-3 rounded-2xl font-bold text-sm hover:bg-slate-200 border border-slate-200 transition-all">+ Add Candidate</a>
+                    <a href="{{ url_for('admin.preview_ballot') }}" class="bg-blue-600 text-white px-5 py-3 rounded-2xl font-bold text-sm hover:bg-blue-700 transition-all">Preview Ballot</a>
+                </div>
+
+                {# Candidates by portfolio #}
+                {% if portfolios %}
+                <div class="space-y-8">
+                    {% for portfolio in portfolios %}
                     <div>
-                        <p class="font-bold text-slate-700">+ Add Portfolio</p>
-                        <p class="text-slate-400 text-sm">e.g. President, Secretary, Treasurer</p>
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-base font-black text-slate-700 uppercase tracking-widest border-l-4 border-indigo-500 pl-3">{{ portfolio.title }}</h3>
+                            <form method="POST" action="{{ url_for('admin.delete_portfolio', port_id=portfolio.id) }}" onsubmit="return confirm('Delete this entire portfolio and all its candidates?')">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <button type="submit" class="text-xs text-red-400 hover:text-red-600 font-bold transition-all">Delete portfolio</button>
+                            </form>
+                        </div>
+                        {% if portfolio.candidates %}
+                        <div class="space-y-2">
+                            {% for candidate in portfolio.candidates %}
+                            <div class="flex items-center gap-4 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                                <img src="{{ candidate.image_url or 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop' }}"
+                                     alt="{{ candidate.name }}"
+                                     class="w-12 h-12 rounded-xl object-cover flex-shrink-0 shadow">
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-bold text-slate-800 truncate">{{ candidate.name }}</p>
+                                    {% if candidate.manifesto_summary %}
+                                    <p class="text-slate-400 text-xs truncate italic">{{ candidate.manifesto_summary }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="flex items-center gap-2 flex-shrink-0">
+                                    <a href="{{ url_for('admin.edit_candidate', cand_id=candidate.id) }}"
+                                       class="bg-blue-100 text-blue-700 px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-200 transition-all">Edit</a>
+                                    <form method="POST" action="{{ url_for('admin.delete_candidate', cand_id=candidate.id) }}" onsubmit="return confirm('Remove {{ candidate.name }}?')">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                        <button type="submit" class="bg-red-100 text-red-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-red-200 transition-all">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-slate-400 text-sm italic px-3">No candidates yet.</p>
+                        {% endif %}
                     </div>
-                    <span class="text-slate-400 font-bold text-lg">→</span>
-                </a>
-                <a href="{{ url_for('admin.create_candidate') }}" class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 border border-transparent transition-all group">
-                    <div>
-                        <p class="font-bold text-slate-700">+ Add Candidate</p>
-                        <p class="text-slate-400 text-sm">Add a candidate to a portfolio</p>
-                    </div>
-                    <span class="text-slate-400 font-bold text-lg">→</span>
-                </a>
-                <a href="{{ url_for('admin.preview_ballot') }}" class="flex items-center justify-between p-4 bg-blue-600 rounded-2xl hover:bg-blue-700 transition-all group">
-                    <p class="font-bold text-white">Preview Ballot</p>
-                    <span class="text-white/70 font-bold text-lg">→</span>
-                </a>
-                <a href="{{ url_for('admin.upload_credentials') }}" class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 border border-transparent transition-all group">
-                    <div>
-                        <p class="font-bold text-slate-700">Import Student Credentials</p>
-                        <p class="text-slate-400 text-sm">Upload CSV of student IDs</p>
-                    </div>
-                    <span class="text-slate-400 font-bold text-lg">→</span>
-                </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-slate-400 italic text-sm">No portfolios yet. Add one above.</p>
+                {% endif %}
             </div>
         </div>
 

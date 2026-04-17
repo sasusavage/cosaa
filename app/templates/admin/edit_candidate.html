@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Edit Candidate{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto py-12">
+    <div class="flex items-center gap-4 mb-8">
+        <a href="{{ url_for('admin.cms') }}" class="text-slate-400 hover:text-slate-700 font-bold text-sm">← CMS</a>
+        <span class="text-slate-300">/</span>
+        <h1 class="text-3xl font-black text-slate-900 tracking-tighter">Edit Candidate</h1>
+    </div>
+
+    <div class="bg-white rounded-[2.5rem] shadow-2xl border border-slate-50 p-10">
+
+        {# Current photo preview #}
+        {% if candidate.image_url %}
+        <div class="mb-8 flex items-center gap-6">
+            <img src="{{ candidate.image_url }}" alt="{{ candidate.name }}"
+                 class="w-24 h-24 rounded-2xl object-cover shadow-lg border border-slate-100">
+            <div>
+                <p class="font-bold text-slate-700 mb-1">Current photo</p>
+                <p class="text-slate-400 text-xs break-all">{{ candidate.image_url }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+            <div class="space-y-1">
+                <label class="block text-xs font-bold uppercase tracking-widest text-slate-400">Full Name</label>
+                <input type="text" name="name" value="{{ candidate.name }}" required
+                       class="w-full px-5 py-3 rounded-xl bg-slate-100 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 font-bold text-base transition-all">
+            </div>
+
+            <div class="space-y-1">
+                <label class="block text-xs font-bold uppercase tracking-widest text-slate-400">Portfolio</label>
+                <select name="portfolio_id"
+                        class="w-full px-5 py-3 rounded-xl bg-slate-100 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 font-bold text-base transition-all">
+                    {% for p in portfolios %}
+                    <option value="{{ p.id }}" {% if p.id == candidate.portfolio_id %}selected{% endif %}>{{ p.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="space-y-1">
+                <label class="block text-xs font-bold uppercase tracking-widest text-slate-400">Manifesto / Summary</label>
+                <textarea name="manifesto_summary" rows="4"
+                          class="w-full px-5 py-3 rounded-xl bg-slate-100 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 font-bold text-base transition-all resize-none">{{ candidate.manifesto_summary or '' }}</textarea>
+            </div>
+
+            {# Photo management #}
+            <div class="space-y-3 border border-slate-200 rounded-2xl p-6 bg-slate-50">
+                <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Photo</p>
+
+                <div class="space-y-1">
+                    <label class="block text-sm font-bold text-slate-500">Upload new photo (replaces current)</label>
+                    <input type="file" name="image_file" accept=".jpg,.jpeg,.png,.gif"
+                           class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 font-medium text-sm focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all">
+                </div>
+
+                <div class="space-y-1">
+                    <label class="block text-sm font-bold text-slate-500">Or paste an image URL</label>
+                    <input type="text" name="image_url" placeholder="https://..."
+                           class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 font-medium text-sm focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all">
+                </div>
+
+                {% if candidate.image_url %}
+                <label class="flex items-center gap-3 cursor-pointer mt-2">
+                    <input type="checkbox" name="clear_image" value="1" class="w-4 h-4 rounded">
+                    <span class="text-sm font-bold text-red-500">Remove current photo (use default avatar)</span>
+                </label>
+                {% endif %}
+            </div>
+
+            <div class="flex gap-4 pt-2">
+                <button type="submit" class="flex-1 bg-blue-600 py-4 rounded-2xl text-white font-black text-lg hover:bg-blue-700 shadow-xl transition-all">Save Changes</button>
+                <a href="{{ url_for('admin.cms') }}" class="px-8 py-4 bg-slate-100 rounded-2xl text-slate-400 font-bold hover:bg-slate-200 transition-all">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

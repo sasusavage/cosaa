@@ -9,7 +9,7 @@
             </svg>
         </div>
         <h1 class="text-4xl font-black text-slate-900 mb-4 tracking-tight">Ballot Submitted!</h1>
-        <p class="text-xl text-slate-500 mb-10 leading-relaxed">Your vote has been securely recorded. Thank you for participating in the CoSSA elections.</p>
+        <p class="text-xl text-slate-500 mb-10 leading-relaxed">Your vote has been securely recorded. Thank you for participating in the CoSSA{% if academic_year %} {{ academic_year }}{% endif %} elections.</p>
         <a href="{{ url_for('main.index') }}" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 shadow-xl transition-all">Back to Home</a>
     </div>
 </div>

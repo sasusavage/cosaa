@@ -45,6 +45,7 @@ def cms():
         event_count=Event.query.count(),
         resource_count=Resource.query.count(),
         portfolio_count=Portfolio.query.count(),
+        portfolios=Portfolio.query.all(),
     )
 
 @admin.route('/')
@@ -82,15 +83,23 @@ def dashboard():
                           live_stats_on=live_stats_on,
                           voting_open=voting_open,
                           voting_start=voting_start,
-                          voting_end=voting_end)
+                          voting_end=voting_end,
+                          academic_year=Setting.get('academic_year', ''),
+                          stats_display_hours=Setting.get('stats_display_hours', '48'))
 
 @admin.route('/voting-window', methods=['POST'])
 @admin_required
 def set_voting_window():
     start = request.form.get('voting_start', '').strip()
     end   = request.form.get('voting_end', '').strip()
+    academic_year = request.form.get('academic_year', '').strip()
+    stats_hours   = request.form.get('stats_display_hours', '').strip()
     Setting.set('voting_start', start)
     Setting.set('voting_end', end)
+    if academic_year:
+        Setting.set('academic_year', academic_year)
+    if stats_hours:
+        Setting.set('stats_display_hours', stats_hours)
     db.session.commit()
     flash('Voting window saved.', 'success')
     return redirect(url_for('admin.dashboard'))
@@ -483,6 +492,39 @@ def delete_event(ev_id):
 
 # ── Candidate management ───────────────────────────────────────────────────────
 
+@admin.route('/candidates/<int:cand_id>/edit', methods=['GET', 'POST'])
+@admin_required
+def edit_candidate(cand_id):
+    candidate = Candidate.query.get_or_404(cand_id)
+    portfolios = Portfolio.query.all()
+    if request.method == 'POST':
+        candidate.name = request.form.get('name', candidate.name)
+        candidate.manifesto_summary = request.form.get('manifesto_summary', '')
+        candidate.portfolio_id = int(request.form.get('portfolio_id', candidate.portfolio_id))
+
+        # Clear image
+        if request.form.get('clear_image'):
+            delete_upload(candidate.image_url)
+            candidate.image_url = None
+        # Upload new image
+        elif 'image_file' in request.files:
+            file = request.files['image_file']
+            if file and file.filename != '' and allowed_file(file.filename):
+                delete_upload(candidate.image_url)
+                filename = secure_filename(f"cand_{cand_id}_{file.filename}")
+                upload_path = current_app.config['UPLOAD_FOLDER']
+                os.makedirs(upload_path, exist_ok=True)
+                file.save(os.path.join(upload_path, filename))
+                candidate.image_url = url_for('uploaded_file', filename=filename)
+        # External URL override
+        elif request.form.get('image_url'):
+            candidate.image_url = request.form.get('image_url')
+
+        db.session.commit()
+        flash('Candidate updated.', 'success')
+        return redirect(url_for('admin.cms'))
+    return render_template('admin/edit_candidate.html', candidate=candidate, portfolios=portfolios)
+
 @admin.route('/candidates/<int:cand_id>/delete', methods=['POST'])
 @admin_required
 def delete_candidate(cand_id):
@@ -491,7 +533,7 @@ def delete_candidate(cand_id):
     db.session.delete(candidate)
     db.session.commit()
     flash('Candidate removed.', 'success')
-    return redirect(url_for('admin.dashboard'))
+    return redirect(url_for('admin.cms'))
 
 @admin.route('/portfolios/<int:port_id>/delete', methods=['POST'])
 @admin_required

@@ -10,8 +10,11 @@
         </div>
         <h1 class="text-4xl font-black text-slate-900 mb-4 tracking-tight">Voting is Closed</h1>
         <p class="text-xl text-slate-500 mb-10 leading-relaxed">
-            The voting window is not currently open.<br>
-            Check back when the election is active.
+            {% if academic_year %}
+                The CoSSA {{ academic_year }} election voting window has ended.<br>Thank you for your participation.
+            {% else %}
+                The voting window is not currently open.<br>Check back when the election is active.
+            {% endif %}
         </p>
         <a href="{{ url_for('main.index') }}" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 shadow-xl transition-all">Back to Home</a>
     </div>
