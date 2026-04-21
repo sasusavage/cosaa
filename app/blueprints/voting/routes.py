@@ -125,6 +125,33 @@ def verify_otp():
         
     return render_template('voting/verify_otp.html', student_id=student_id)
 
+@voting.route('/sms-callback', methods=['POST'])
+def sms_callback():
+    """
+    Webhook endpoint for Vynfy SMS delivery reports.
+    Vynfy sends a JSON payload with delivery status.
+    """
+    try:
+        data = request.get_json()
+        # Log the callback data for debugging and audit
+        print(f"SMS Webhook Received: {data}")
+        
+        # Example of data structure from Vynfy:
+        # {
+        #   "task_id": "...",
+        #   "recipient": "233...",
+        #   "status": "delivered", 
+        #   "delivered_at": "...",
+        #   "metadata": {}
+        # }
+        
+        # In a real scenario, you might want to update a 'sms_status' table here.
+        
+        return {"success": True}, 200
+    except Exception as e:
+        print(f"Error in SMS Webhook: {e}")
+        return {"success": False, "error": str(e)}, 400
+
 @voting.route('/logout')
 @login_required
 def logout():
