@@ -59,21 +59,27 @@ def login():
                 flash('Please provide your mobile phone number.', 'error')
                 return redirect(url_for('voting.login'))
             
-            # If user has a phone number registered, it must match the input
+            from app.utils import format_gh_number
+            formatted_input = format_gh_number(input_phone)
+            
             if user.phone_number:
-                from app.utils import format_gh_number
-                formatted_input = format_gh_number(input_phone)
                 formatted_stored = format_gh_number(user.phone_number)
                 
-                if formatted_input != formatted_stored:
+                # RECURRING LOGIN: If ID and Phone match, log in directly
+                if formatted_input == formatted_stored:
+                    login_user(user)
+                    flash(f'Welcome back, {user.username}!', 'success')
+                    return redirect(url_for('voting.ballot'))
+                else:
+                    # Hijack attempt or wrong number
                     flash('This Student ID is already registered with a different phone number. Please contact the administrator.', 'error')
                     return redirect(url_for('voting.login'))
             else:
-                # First time login - register the number
+                # FIRST TIME LOGIN: Register phone and send OTP
                 user.phone_number = input_phone
                 db.session.commit()
             
-            # Generate and send OTP
+            # Request ID + Phone doesn't have a verified session yet, send OTP
             otp = generate_otp()
             user.otp = otp
             user.otp_expiry = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(minutes=10)

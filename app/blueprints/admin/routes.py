@@ -190,8 +190,11 @@ def reset_student_vote(user_id):
     student = User.query.get_or_404(user_id)
     Vote.query.filter_by(user_id=student.id).delete()
     student.has_voted = False
+    student.phone_number = None
+    student.otp = None
+    student.otp_expiry = None
     db.session.commit()
-    flash(f'Voting status reset for {student.student_id}.', 'success')
+    flash(f'Voting status and phone registration reset for {student.student_id}.', 'success')
     return redirect(url_for('admin.list_students'))
 
 @admin.route('/toggle-live-stats', methods=['POST'])
@@ -636,9 +639,14 @@ def archive_election():
     )
     db.session.add(record)
 
-    # Reset all votes and has_voted flags (all roles — admin can get flagged during testing)
+    # Reset all votes and has_voted flags, and CLEAR phone/otp for the next election
     Vote.query.delete()
-    User.query.update({'has_voted': False})
+    User.query.update({
+        'has_voted': False,
+        'phone_number': None,
+        'otp': None,
+        'otp_expiry': None
+    })
 
     # Clear voting window and academic year so system is clean for next election
     for key in ('voting_start', 'voting_end', 'academic_year'):
