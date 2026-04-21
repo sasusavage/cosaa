@@ -2,13 +2,42 @@
 
 {% block content %}
 <div class="max-w-4xl mx-auto py-12">
-    <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 px-6">
-        <div>
-            <h1 class="text-6xl font-black mb-4 text-slate-900 tracking-tighter">Official Ballot</h1>
-            <p class="text-xl text-slate-500 font-medium leading-relaxed">CoSSA Executive Elections 2026/2027. Your vote is secure and anonymous.</p>
+<div class="max-w-4xl mx-auto py-12">
+    {# -- Dashboard Header -- #}
+    <div class="vibrant-card mb-12 p-8 md:p-12 overflow-hidden relative">
+        <div class="absolute top-0 right-0 p-8 opacity-10">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-32 w-32" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.040L3 14.535a12.02 12.02 0 008.182 4.423 12.02 12.02 0 008.182-4.423l-1.182-8.591z" /></svg>
         </div>
-        <div class="mt-6 md:mt-0 px-6 py-3 bg-emerald-100 text-emerald-800 rounded-2xl font-bold border border-emerald-200">
-            Authenticated as: {{ current_user.student_id }}
+        
+        <div class="relative z-10">
+            <div class="flex flex-wrap items-center gap-3 mb-6">
+                <span class="bg-blue-600 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] shadow-lg shadow-blue-200">Verified Identity</span>
+                <span class="bg-emerald-500 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] shadow-lg shadow-emerald-100 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                    Live Portal
+                </span>
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-black mb-4 text-slate-900 tracking-tighter">Election Dashboard</h1>
+            <p class="text-xl md:text-2xl text-slate-500 font-medium leading-relaxed max-w-2xl mb-10">
+                Welcome, <span class="text-blue-600 font-black italic">{{ current_user.username }}</span>. You are authorized to participate in the {{ academic_year|default('2026/2027') }} CoSSA Elections.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-end">
+                <div class="w-full">
+                    <div class="flex justify-between items-end mb-3">
+                        <span class="text-xs font-black uppercase tracking-widest text-slate-400">Voter Participation</span>
+                        <span class="text-xl font-black text-blue-600">{{ turnout|round(1) }}%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-4 rounded-full p-1 border border-slate-200 overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full shadow-md transition-all duration-1000" style="width: {{ turnout }}%"></div>
+                    </div>
+                </div>
+                <div class="text-right hidden md:block">
+                    <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Student Status</p>
+                    <p class="text-slate-800 font-mono font-black text-lg">{{ current_user.student_id }}</p>
+                </div>
+            </div>
         </div>
     </div>
 

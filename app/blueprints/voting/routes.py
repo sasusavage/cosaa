@@ -195,7 +195,17 @@ def ballot():
         academic_year = Setting.get('academic_year', '')
         return render_template('voting/voting_closed.html', show_stats=show_stats, academic_year=academic_year)
     portfolios = Portfolio.query.all()
-    return render_template('voting/ballot.html', portfolios=portfolios)
+    
+    # Calculate turnout for the dashboard header
+    voted_count = User.query.filter_by(has_voted=True).count()
+    total_users = User.query.count()
+    turnout = (voted_count / total_users * 100) if total_users > 0 else 0
+    
+    return render_template('voting/ballot.html', 
+                           portfolios=portfolios,
+                           voted_count=voted_count,
+                           total_users=total_users,
+                           turnout=turnout)
 
 @voting.route('/submit-vote', methods=['POST'])
 @login_required
