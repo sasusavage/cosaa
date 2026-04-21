@@ -62,22 +62,23 @@ def login():
             from app.utils import format_gh_number
             formatted_input = format_gh_number(input_phone)
             
-            if user.phone_number:
+            # Check if this student has ALREADY verified a number
+            if user.phone_verified:
                 formatted_stored = format_gh_number(user.phone_number)
                 
-                # RECURRING LOGIN: If ID and Phone match, log in directly
+                # RECURRING LOGIN: If ID and Phone match exactly, log in directly
                 if formatted_input == formatted_stored:
                     login_user(user)
                     flash(f'Welcome back, {user.username}!', 'success')
                     return redirect(url_for('voting.ballot'))
                 else:
-                    # Hijack attempt or wrong number
-                    flash('This Student ID is already registered with a different phone number. Please contact the administrator.', 'error')
+                    # Hijack attempt - ID requested but different phone entered
+                    flash('This Student ID is already linked to a different phone number. Verification required.', 'error')
                     return redirect(url_for('voting.login'))
-            else:
-                # FIRST TIME LOGIN: Register phone and send OTP
-                user.phone_number = input_phone
-                db.session.commit()
+            
+            # FIRST TIME OR UNVERIFIED: Send OTP
+            user.phone_number = input_phone
+            user.phone_verified = False # Reset flag until OTP succeeds
             
             # Request ID + Phone doesn't have a verified session yet, send OTP
             otp = generate_otp()
@@ -114,6 +115,7 @@ def verify_otp():
             # Clear OTP and login
             user.otp = None
             user.otp_expiry = None
+            user.phone_verified = True  # <--- SET VERIFICATION FLAG AS TRUE
             db.session.commit()
             login_user(user)
             flash(f'Welcome back, {user.username}!', 'success')

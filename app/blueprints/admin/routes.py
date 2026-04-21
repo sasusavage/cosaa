@@ -198,6 +198,7 @@ def reset_student_vote(user_id):
     Vote.query.filter_by(user_id=student.id).delete()
     student.has_voted = False
     student.phone_number = None
+    student.phone_verified = False
     student.otp = None
     student.otp_expiry = None
     db.session.commit()
@@ -651,6 +652,7 @@ def archive_election():
     User.query.update({
         'has_voted': False,
         'phone_number': None,
+        'phone_verified': False,
         'otp': None,
         'otp_expiry': None
     })

@@ -99,6 +99,7 @@ def create_app(config_class=None):
                 'department': 'VARCHAR(200)',
                 'campus':     'VARCHAR(100)',
                 'phone_number': 'VARCHAR(20)',
+                'phone_verified': 'BOOLEAN DEFAULT FALSE',
                 'otp':         'VARCHAR(10)',
                 'otp_expiry':  'TIMESTAMP',
             }

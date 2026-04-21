@@ -17,6 +17,7 @@ class User(db.Model, UserMixin):
     department = db.Column(db.String(200))
     campus = db.Column(db.String(100))
     phone_number = db.Column(db.String(20))
+    phone_verified = db.Column(db.Boolean, default=False)
     otp = db.Column(db.String(10))
     otp_expiry = db.Column(db.DateTime)
     has_voted = db.Column(db.Boolean, default=False)
