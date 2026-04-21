@@ -53,11 +53,27 @@ def login():
                     return render_template('voting/login.html', admin_mode=True)
             
             # ── STUDENT LOGIC (SMS OTP) ───────────────────────────────────────
-            if not user.phone_number:
-                # Phone missing - send to registration step
-                return render_template('voting/provide_phone.html', user=user)
+            input_phone = request.form.get('phone_number', '').strip()
             
-            # Phone exists - generate and send OTP
+            if not input_phone:
+                flash('Please provide your mobile phone number.', 'error')
+                return redirect(url_for('voting.login'))
+            
+            # If user has a phone number registered, it must match the input
+            if user.phone_number:
+                from app.utils import format_gh_number
+                formatted_input = format_gh_number(input_phone)
+                formatted_stored = format_gh_number(user.phone_number)
+                
+                if formatted_input != formatted_stored:
+                    flash('This Student ID is already registered with a different phone number. Please contact the administrator.', 'error')
+                    return redirect(url_for('voting.login'))
+            else:
+                # First time login - register the number
+                user.phone_number = input_phone
+                db.session.commit()
+            
+            # Generate and send OTP
             otp = generate_otp()
             user.otp = otp
             user.otp_expiry = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(minutes=10)
@@ -102,37 +118,6 @@ def verify_otp():
         flash('Invalid verification code. Please try again.', 'error')
         
     return render_template('voting/verify_otp.html', student_id=student_id)
-
-@voting.route('/register-phone', methods=['POST'])
-def register_phone():
-    student_id = request.form.get('student_id')
-    phone = request.form.get('phone_number').strip()
-    
-    if not phone:
-        flash('Phone number is required.', 'error')
-        return redirect(url_for('voting.login'))
-        
-    user = User.query.filter(
-        db.func.upper(User.student_id) == student_id.upper()
-    ).first()
-    
-    if user:
-        # Save phone number
-        user.phone_number = phone
-        
-        # Generate and send OTP immediately
-        otp = generate_otp()
-        user.otp = otp
-        user.otp_expiry = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(minutes=10)
-        db.session.commit()
-        
-        message = f"Your CoSSA Voting Verification Code is: {otp}. This code expires in 10 minutes."
-        if send_sms(user.phone_number, message):
-            return render_template('voting/verify_otp.html', student_id=user.student_id)
-        else:
-            flash('Phone saved but failed to send verification SMS. Please try again.', 'error')
-            
-    return redirect(url_for('voting.login'))
 
 @voting.route('/logout')
 @login_required
