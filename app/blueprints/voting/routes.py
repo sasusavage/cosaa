@@ -60,7 +60,7 @@ def login():
             # Phone exists - generate and send OTP
             otp = generate_otp()
             user.otp = otp
-            user.otp_expiry = datetime.now(timezone.utc) + timedelta(minutes=10)
+            user.otp_expiry = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(minutes=10)
             db.session.commit()
             
             # Send SMS
@@ -86,8 +86,9 @@ def verify_otp():
     ).first()
     
     if user and user.otp == otp_input:
-        # Check expiry
-        if user.otp_expiry and user.otp_expiry > datetime.now(timezone.utc):
+        # Check expiry using naive comparison
+        now_naive = datetime.now(timezone.utc).replace(tzinfo=None)
+        if user.otp_expiry and user.otp_expiry > now_naive:
             # Clear OTP and login
             user.otp = None
             user.otp_expiry = None
@@ -122,7 +123,7 @@ def register_phone():
         # Generate and send OTP immediately
         otp = generate_otp()
         user.otp = otp
-        user.otp_expiry = datetime.now(timezone.utc) + timedelta(minutes=10)
+        user.otp_expiry = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(minutes=10)
         db.session.commit()
         
         message = f"Your CoSSA Voting Verification Code is: {otp}. This code expires in 10 minutes."
