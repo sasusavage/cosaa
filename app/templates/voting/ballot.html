@@ -112,11 +112,14 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
         </div>
-        <h3 class="text-3xl font-black mb-4 text-center text-slate-800">Final Confirmation</h3>
-        <p class="text-slate-500 text-center mb-10 text-lg leading-relaxed">Are you absolutely sure about your selections? This action is irreversible.</p>
+        <h3 class="text-3xl font-black mb-4 text-center text-slate-800">Review Ballot</h3>
+        <p class="text-slate-500 text-center mb-10 text-lg leading-relaxed">
+            You are about to cast your vote. Please remember that you can only vote for <strong>one candidate</strong> in each section.<br><br>
+            Are you ready to submit your final ballot and exit the portal?
+        </p>
         <div class="flex flex-col space-y-4">
-            <button onclick="document.getElementById('ballot-form').submit()" class="bg-blue-600 py-4 rounded-2xl text-white font-black text-xl hover:bg-blue-700 shadow-xl transition-all">Yes, Submit Ballot</button>
-            <button onclick="hideConfirm()" class="bg-slate-100 py-4 rounded-2xl text-slate-500 font-bold text-lg hover:bg-slate-200 transition-all">Go Back & Review</button>
+            <button onclick="document.getElementById('ballot-form').submit()" class="bg-blue-600 py-4 rounded-2xl text-white font-black text-xl hover:bg-blue-700 shadow-xl transition-all">Yes, Submit & Exit</button>
+            <button onclick="hideConfirm()" class="bg-slate-100 py-4 rounded-2xl text-slate-500 font-bold text-lg hover:bg-slate-200 transition-all">Back to Ballot</button>
         </div>
     </div>
 </div>
