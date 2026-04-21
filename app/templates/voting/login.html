@@ -1,53 +1,57 @@
 {% extends 'base.html' %}
 {% block title %}Login - CoSSA{% endblock %}
 {% block content %}
-<div class="max-w-md mx-auto my-20">
-    <div class="glass-bg p-10 rounded-3xl shadow-2xl border border-slate-100 flex flex-col items-center">
-        <div class="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center text-white mb-8 shadow-xl">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+<div class="max-w-md mx-auto my-16 md:my-28">
+    <div class="vibrant-card p-10 md:p-14 border border-white/50 backdrop-blur-3xl flex flex-col items-center">
+        <div class="w-24 h-24 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-[2rem] flex items-center justify-center text-white mb-10 shadow-2xl shadow-blue-200 rotate-3 group hover:rotate-0 transition-transform duration-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-4.514A11.042 11.042 0 005 11c0-5.908 4.42-10.831 10-11.734M12 11c0-3.517 1.009-6.799 2.753-9.571m3.44 4.514A11.042 11.042 0 0119 11c0 5.908-4.42 10.831-10 11.734" />
             </svg>
         </div>
-        <h2 class="text-4xl font-extrabold mb-2 text-slate-800 tracking-tight">Voter Login</h2>
-        <p class="text-slate-500 mb-10 text-center text-base leading-relaxed font-medium">
-            Enter your Student ID.<br>
-            <span class="text-emerald-600 font-bold bg-emerald-50 px-3 py-1 rounded-full text-xs uppercase tracking-widest mt-3 inline-block">🔐 SECURE SMS VERIFICATION REQUIRED</span>
+        
+        <h2 class="text-4xl md:text-5xl font-black mb-3 text-slate-900 tracking-tight text-center">Voter Identity</h2>
+        <p class="text-slate-500 mb-12 text-center text-lg leading-relaxed">
+            Verify your credentials to access the secure CoSSA voting portal.
         </p>
 
-        <form method="POST" class="w-full space-y-6">
+        <form method="POST" class="w-full space-y-8">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <div class="space-y-2">
-                <label for="student_id" class="block text-sm font-bold uppercase tracking-widest text-slate-400">Student ID</label>
+            <div class="space-y-3">
+                <label for="student_id" class="block text-xs font-black uppercase tracking-widest text-blue-600 ml-1">Student ID Number</label>
                 <input type="text" name="student_id" id="student_id" required
-                       placeholder="e.g. 226IT01000166"
+                       placeholder="Enter your Student ID"
                        autocomplete="off" autocapitalize="off" spellcheck="false"
-                       class="w-full px-6 py-4 rounded-xl bg-slate-100 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all font-bold text-lg tracking-wider">
+                       class="w-full px-7 py-5 rounded-2xl bg-white border-2 border-slate-100 focus:border-blue-600 focus:outline-none transition-all font-bold text-xl placeholder:text-slate-300 shadow-sm">
             </div>
 
             {% if admin_mode %}
-            {# Password field only shows for admin login #}
-            <div class="space-y-2">
-                <label for="password" class="block text-sm font-bold uppercase tracking-widest text-slate-400">Password</label>
+            <div class="space-y-3">
+                <label for="password" class="block text-xs font-black uppercase tracking-widest text-blue-600 ml-1">Admin Access Code</label>
                 <input type="password" name="password" id="password" required
                        placeholder="••••••••"
-                       class="w-full px-6 py-4 rounded-xl bg-slate-100 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all font-bold text-lg">
+                       class="w-full px-7 py-5 rounded-2xl bg-white border-2 border-slate-100 focus:border-blue-600 focus:outline-none transition-all font-bold text-xl shadow-sm">
             </div>
             {% else %}
-            {# Phone Number field for students #}
-            <div class="space-y-2">
-                <label for="phone_number" class="block text-sm font-bold uppercase tracking-widest text-slate-400">Mobile Phone Number</label>
+            <div class="space-y-3">
+                <label for="phone_number" class="block text-xs font-black uppercase tracking-widest text-blue-600 ml-1">Mobile Contact</label>
                 <input type="text" name="phone_number" id="phone_number" required
-                       placeholder="e.g. 0540000000"
-                       class="w-full px-6 py-4 rounded-xl bg-slate-100 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all font-bold text-lg">
-                <p class="text-[10px] text-slate-400 font-medium px-1">We'll send a 6-digit verification code to this number.</p>
+                       placeholder="054 XXX XXXX"
+                       class="w-full px-7 py-5 rounded-2xl bg-white border-2 border-slate-100 focus:border-blue-600 focus:outline-none transition-all font-bold text-xl shadow-sm">
+                <div class="flex items-center gap-2 mt-3 ml-1">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <p class="text-xs text-slate-400 font-bold uppercase tracking-wide">6-digit SMS verification will be triggered</p>
+                </div>
             </div>
             <input type="hidden" name="password" value="">
             {% endif %}
 
-            <button type="submit" class="w-full bg-blue-600 py-4 rounded-xl text-white font-bold text-xl hover:bg-blue-700 shadow-xl transition-all hover:scale-[1.02] active:scale-95 mt-2">
-                Enter Voting Portal →
+            <button type="submit" class="w-full btn-vibrant py-5 rounded-2xl font-black text-xl shadow-blue-100 mt-4 group">
+                Enter Secure Portal 
+                <span class="inline-block group-hover:translate-x-1 transition-transform ml-2">→</span>
             </button>
         </form>
+        
+        <p class="mt-8 text-slate-400 text-sm font-medium">© 2026 CoSSA Governance Platform</p>
     </div>
 </div>
 {% endblock %}

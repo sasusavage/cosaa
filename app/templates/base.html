@@ -7,16 +7,55 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        :root {
+            --primary: #2563eb;
+            --primary-vibrant: #3b82f6;
+            --secondary: #6366f1;
+            --accent: #10b981;
+            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+        }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+        }
         h1, h2, h3, .brand { font-family: 'Outfit', sans-serif; }
         .glass-bg {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
+        .vibrant-card {
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+        }
+        .vibrant-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px rgba(37, 99, 235, 0.08);
+        }
+        .btn-vibrant {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+        }
+        .btn-vibrant:hover {
+            transform: scale(1.03);
+            box-shadow: 0 15px 25px rgba(37, 99, 235, 0.3);
+            filter: brightness(1.1);
+        }
+        @keyframes pulse-once {
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .animate-pulse-once { animation: pulse-once 1s ease-out; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen">
+<body class="text-slate-900 min-h-screen">
     <nav class="sticky top-0 z-50 glass-bg px-6 py-4 flex items-center justify-between shadow-sm">
         <div class="flex items-center space-x-3">
             <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">C</div>

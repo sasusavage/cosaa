@@ -59,6 +59,9 @@ class Vote(db.Model):
     candidate_id = db.Column(db.Integer, db.ForeignKey('candidates.id'), nullable=False)
     portfolio_id = db.Column(db.Integer, db.ForeignKey('portfolios.id'), nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    ip_address = db.Column(db.String(45))  # Supports IPv6
+    user_agent = db.Column(db.String(255))
+    
     # One vote per user per portfolio — enforced at DB level
     __table_args__ = (db.UniqueConstraint('user_id', 'portfolio_id', name='uq_user_portfolio_vote'),)
 

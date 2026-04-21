@@ -14,69 +14,77 @@
     </div>
 
     {# -- Search -- #}
-    <div class="bg-white p-6 rounded-[2rem] shadow-xl border border-slate-100 mb-10">
+    <div class="vibrant-card p-6 md:p-8 mb-10">
         <form method="GET" action="{{ url_for('admin.list_students') }}" class="flex flex-col md:flex-row gap-4">
-            <div class="flex-1 relative">
-                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            <div class="flex-1 relative group">
+                <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-blue-500 group-focus-within:text-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                 </div>
-                <input type="text" name="search" value="{{ search or '' }}" placeholder="Search by ID, Name, Surname..." class="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 font-medium transition-all text-lg">
+                <input type="text" name="search" value="{{ search or '' }}" placeholder="Search by ID, Name, or Program..." 
+                       class="w-full pl-14 pr-6 py-5 rounded-[1.5rem] bg-slate-50 border-2 border-transparent focus:bg-white focus:border-blue-600 focus:outline-none focus:ring-0 font-bold transition-all text-xl placeholder:text-slate-300">
             </div>
-            <button type="submit" class="bg-slate-900 text-white px-10 py-4 rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-lg text-lg">Search</button>
+            <button type="submit" class="btn-vibrant px-12 py-5 rounded-[1.5rem] font-black text-xl">Search Registry</button>
             {% if search %}
-                <a href="{{ url_for('admin.list_students') }}" class="flex items-center justify-center px-6 py-4 text-slate-500 hover:text-slate-700 font-bold">Clear</a>
+                <a href="{{ url_for('admin.list_students') }}" class="flex items-center justify-center px-4 text-slate-400 hover:text-rose-500 font-bold transition-colors">Clear</a>
             {% endif %}
         </form>
     </div>
 
     {# -- Table -- #}
-    <div class="bg-white rounded-[2.5rem] shadow-2xl border border-slate-50 overflow-hidden">
+    <div class="vibrant-card overflow-hidden !rounded-[3rem]">
         <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
+            <table class="w-full text-left">
                 <thead>
-                    <tr class="bg-slate-50 border-b border-slate-100">
-                        <th class="px-8 py-6 text-xs font-black uppercase tracking-widest text-slate-400">Student ID</th>
-                        <th class="px-8 py-6 text-xs font-black uppercase tracking-widest text-slate-400">Full Name</th>
-                        <th class="px-8 py-6 text-xs font-black uppercase tracking-widest text-slate-400">Phone Number</th>
-                        <th class="px-8 py-6 text-xs font-black uppercase tracking-widest text-slate-400">Program/Dept</th>
-                        <th class="px-8 py-6 text-xs font-black uppercase tracking-widest text-slate-400 text-center">Status</th>
-                        <th class="px-8 py-6 text-xs font-black uppercase tracking-widest text-slate-400 text-right">Actions</th>
+                    <tr class="bg-slate-50/50 border-b border-slate-100">
+                        <th class="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Student Identity</th>
+                        <th class="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Verified Contact</th>
+                        <th class="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Academic Program</th>
+                        <th class="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 text-center">Status</th>
+                        <th class="px-10 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
                     {% for student in pagination.items %}
-                    <tr class="hover:bg-slate-50/50 transition-colors">
-                        <td class="px-8 py-6 font-black text-slate-700">{{ student.student_id }}</td>
-                        <td class="px-8 py-6 font-bold text-slate-900">
-                            {{ student.full_name }}
+                    <tr class="hover:bg-blue-50/30 transition-colors group">
+                        <td class="px-10 py-6">
+                            <div class="font-black text-slate-900 text-lg">{{ student.full_name }}</div>
+                            <div class="text-blue-600 font-mono text-xs font-bold tracking-widest mt-1">{{ student.student_id }}</div>
                         </td>
-                        <td class="px-8 py-6">
+                        <td class="px-10 py-6">
                             {% if student.phone_number %}
-                            <span class="text-slate-700 font-medium">{{ student.phone_number }}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                <span class="text-slate-600 font-bold font-mono">{{ student.phone_number }}</span>
+                            </div>
                             {% else %}
-                            <span class="text-rose-400 text-xs font-bold italic">Missing - Cannot Vote</span>
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-slate-300"></span>
+                                <span class="text-slate-400 text-xs font-bold italic tracking-tight">Not Registered</span>
+                            </div>
                             {% endif %}
                         </td>
-                        <td class="px-8 py-6 text-slate-500 text-sm italic">
-                            {{ student.program or '' }}
-                            {% if student.department %} - {{ student.department }}{% endif %}
+                        <td class="px-10 py-6">
+                            <div class="text-slate-500 text-sm font-medium leading-tight">
+                                {{ student.program or 'Unspecified' }}
+                                {% if student.department %}<br><span class="text-[10px] uppercase font-bold text-slate-300">{{ student.department }}</span>{% endif %}
+                            </div>
                         </td>
-                        <td class="px-8 py-6">
+                        <td class="px-10 py-6">
                             <div class="flex justify-center">
                                 {% if student.has_voted %}
-                                <span class="bg-emerald-100 text-emerald-700 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter shadow-sm border border-emerald-200">Voted</span>
+                                <span class="bg-emerald-500 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg shadow-emerald-100">Ballot Cast</span>
                                 {% else %}
-                                <span class="bg-slate-100 text-slate-400 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter border border-slate-200">Pending</span>
+                                <span class="bg-slate-100 text-slate-400 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest">Pending</span>
                                 {% endif %}
                             </div>
                         </td>
-                        <td class="px-8 py-6 text-right">
-                            <div class="flex items-center justify-end gap-3">
-                                <a href="{{ url_for('admin.edit_student', user_id=student.id) }}" class="text-blue-600 hover:text-blue-800 font-bold text-sm bg-blue-50 px-4 py-2 rounded-xl border border-blue-100 transition-all">Edit</a>
+                        <td class="px-10 py-6 text-right">
+                            <div class="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <a href="{{ url_for('admin.edit_student', user_id=student.id) }}" class="text-blue-600 font-bold text-sm hover:underline">Edit Info</a>
                                 {% if student.has_voted %}
-                                <form method="POST" action="{{ url_for('admin.reset_student_vote', user_id=student.id) }}" onsubmit="return confirm('Reset voting status for this student?')" class="inline">
+                                <form method="POST" action="{{ url_for('admin.reset_student_vote', user_id=student.id) }}" onsubmit="return confirm('Full Reset: Clear voting status and registered phone number for this student?')" class="inline">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                                    <button type="submit" class="text-rose-600 hover:text-rose-800 font-bold text-sm bg-rose-50 px-4 py-2 rounded-xl border border-rose-100 transition-all">Reset Vote</button>
+                                    <button type="submit" class="text-rose-500 font-bold text-sm hover:underline">Reset Student</button>
                                 </form>
                                 {% endif %}
                             </div>
@@ -84,7 +92,10 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="5" class="px-8 py-20 text-center text-slate-400 italic">No students found.</td>
+                        <td colspan="5" class="px-10 py-32 text-center">
+                            <div class="text-slate-300 text-5xl mb-4">🔍</div>
+                            <p class="text-slate-400 text-xl font-black italic">No records match your query.</p>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -93,14 +104,14 @@
         
         {# -- Pagination -- #}
         {% if pagination.pages > 1 %}
-        <div class="bg-slate-50 px-8 py-6 flex items-center justify-between border-t border-slate-100">
-            <p class="text-sm text-slate-500 font-medium">Page {{ pagination.page }} of {{ pagination.pages }}</p>
-            <div class="flex gap-2">
+        <div class="bg-slate-50/50 px-10 py-8 flex flex-col md:flex-row items-center justify-between border-t border-slate-100 gap-6">
+            <p class="text-sm text-slate-400 font-bold uppercase tracking-widest">Page {{ pagination.page }} <span class="mx-2 text-slate-200">|</span> Total {{ pagination.pages }} Pages</p>
+            <div class="flex gap-4">
                 {% if pagination.has_prev %}
-                <a href="{{ url_for('admin.list_students', page=pagination.prev_num, search=search) }}" class="bg-white border border-slate-200 px-4 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition-all">Previous</a>
+                <a href="{{ url_for('admin.list_students', page=pagination.prev_num, search=search) }}" class="bg-white border-2 border-slate-100 px-8 py-3 rounded-2xl font-black text-slate-600 hover:border-blue-600 hover:text-blue-600 transition-all shadow-sm">Previous</a>
                 {% endif %}
                 {% if pagination.has_next %}
-                <a href="{{ url_for('admin.list_students', page=pagination.next_num, search=search) }}" class="bg-white border border-slate-200 px-4 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition-all">Next</a>
+                <a href="{{ url_for('admin.list_students', page=pagination.next_num, search=search) }}" class="bg-white border-2 border-slate-100 px-8 py-3 rounded-2xl font-black text-slate-600 hover:border-blue-600 hover:text-blue-600 transition-all shadow-sm">Next</a>
                 {% endif %}
             </div>
         </div>

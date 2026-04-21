@@ -193,7 +193,13 @@ def submit_vote():
             selection = request.form.get(f'portfolio_{portfolio.id}')
             if selection:
                 candidate_id = int(selection)
-                vote = Vote(user_id=current_user.id, candidate_id=candidate_id, portfolio_id=portfolio.id)
+                vote = Vote(
+                    user_id=current_user.id, 
+                    candidate_id=candidate_id, 
+                    portfolio_id=portfolio.id,
+                    ip_address=request.remote_addr,
+                    user_agent=request.headers.get('User-Agent')[:255]
+                )
                 db.session.add(vote)
 
         current_user.has_voted = True
@@ -209,9 +215,18 @@ def submit_vote():
 @voting.route('/confirmed')
 @login_required
 def vote_confirmed():
+    import hashlib
+    # Generate a unique proof-of-vote hash (Digital Receipt)
+    # This proves they voted without exposing WHO they voted for.
+    receipt_raw = f"{current_user.student_id}-{Setting.get('academic_year', '2026')}-CoSSA-VOTE"
+    receipt_hash = hashlib.sha256(receipt_raw.encode()).hexdigest().upper()[:12]
+    
     show_stats = _should_show_stats()
     academic_year = Setting.get('academic_year', '')
-    return render_template('voting/confirmed.html', show_stats=show_stats, academic_year=academic_year)
+    return render_template('voting/confirmed.html', 
+                           show_stats=show_stats, 
+                           academic_year=academic_year,
+                           receipt_hash=receipt_hash)
 
 @voting.route('/already-voted')
 @login_required

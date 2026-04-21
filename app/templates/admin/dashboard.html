@@ -139,6 +139,44 @@
         </form>
     </div>
 
+    {# ── Security Audit Log ────────────────────────────────────────────────────── #}
+    <div class="bg-white rounded-[2rem] shadow-xl border border-slate-50 px-8 py-6 mb-10 overflow-hidden">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-2xl font-black text-slate-800 tracking-tight">Security Audit Log</h2>
+                <p class="text-slate-400 text-sm mt-1">Live stream of recorded ballot activity and technical audit data.</p>
+            </div>
+            <div class="bg-blue-50 text-blue-600 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest">🛡️ Secured</div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="text-slate-400 text-[10px] uppercase font-black tracking-[0.2em] border-b border-slate-100">
+                        <th class="py-4 px-2">Timestamp</th>
+                        <th class="py-4">Voter (ID)</th>
+                        <th class="py-4">IP Address</th>
+                        <th class="py-4">Device/Agent</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm font-medium">
+                    {% for vote in recent_votes %}
+                    <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                        <td class="py-4 px-2 text-slate-400 font-mono text-xs">{{ vote.timestamp.strftime('%H:%M:%S') }}</td>
+                        <td class="py-4 text-slate-700">Student #{{ vote.user_id }}</td>
+                        <td class="py-4"><span class="bg-slate-100 text-slate-500 px-2 py-1 rounded text-xs px-2">{{ vote.ip_address }}</span></td>
+                        <td class="py-4 text-slate-400 truncate max-w-[200px]" title="{{ vote.user_agent }}">{{ vote.user_agent }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if not recent_votes %}
+                    <tr>
+                        <td colspan="4" class="py-10 text-center text-slate-400 italic">No voting activity recorded yet.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     {# ── Live Vote Statistics ──────────────────────────────────────────────────── #}
     <div class="bg-white rounded-[3rem] shadow-2xl border border-slate-50 relative overflow-hidden">
         <div class="px-10 py-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100">

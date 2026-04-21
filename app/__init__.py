@@ -78,13 +78,15 @@ def create_app(config_class=None):
 
         # votes.user_id
         if 'votes' in insp.get_table_names():
-            existing_cols = [c['name'] for c in insp.get_columns('votes')]
-            if 'user_id' not in existing_cols:
-                with db.engine.connect() as conn:
-                    conn.execute(text(
-                        'ALTER TABLE votes ADD COLUMN user_id INTEGER REFERENCES users(id)'
-                    ))
-                    conn.commit()
+            vote_cols = [c['name'] for c in insp.get_columns('votes')]
+            with db.engine.connect() as conn:
+                if 'user_id' not in vote_cols:
+                    conn.execute(text('ALTER TABLE votes ADD COLUMN user_id INTEGER REFERENCES users(id)'))
+                if 'ip_address' not in vote_cols:
+                    conn.execute(text('ALTER TABLE votes ADD COLUMN ip_address VARCHAR(45)'))
+                if 'user_agent' not in vote_cols:
+                    conn.execute(text('ALTER TABLE votes ADD COLUMN user_agent VARCHAR(255)'))
+                conn.commit()
 
         # New User columns (added when we extended the model)
         if 'users' in insp.get_table_names():

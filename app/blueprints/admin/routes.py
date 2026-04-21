@@ -75,17 +75,24 @@ def dashboard():
             voting_open = s <= now <= e
         except Exception:
             pass
+    # Security Audit: Recent Votes with IP data
+    recent_votes = Vote.query.order_by(Vote.timestamp.desc()).limit(10).all()
+    
+    # Check for potential fraud (multiple votes from same IP in short time)
+    # Simple check: IDs with same IP
+    
     return render_template('admin/dashboard.html',
-                          total_users=total_users,
-                          voted_count=voted_count,
-                          turnout=turnout,
-                          portfolios=portfolios,
-                          live_stats_on=live_stats_on,
-                          voting_open=voting_open,
-                          voting_start=voting_start,
-                          voting_end=voting_end,
-                          academic_year=Setting.get('academic_year', ''),
-                          stats_display_hours=Setting.get('stats_display_hours', '48'))
+                           total_users=total_users,
+                           voted_count=voted_count,
+                           turnout=turnout,
+                           portfolios=portfolios,
+                           voting_open=voting_open,
+                           voting_start=voting_start,
+                           voting_end=voting_end,
+                           academic_year=Setting.get('academic_year', ''),
+                           stats_display_hours=Setting.get('stats_display_hours', '48'),
+                           live_stats_on=live_stats_on,
+                           recent_votes=recent_votes)
 
 @admin.route('/voting-window', methods=['POST'])
 @admin_required

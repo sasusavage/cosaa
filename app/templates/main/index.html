@@ -3,35 +3,64 @@
 {% block content %}
 
 {# ── Hero ──────────────────────────────────────────────────────────────────── #}
-<section class="relative overflow-hidden bg-white border border-slate-100 rounded-[3rem] shadow-2xl mb-24 min-h-[500px] flex flex-col md:flex-row items-center">
+{# ── Hero ──────────────────────────────────────────────────────────────────── #}
+<section class="relative overflow-hidden bg-white border border-slate-100 rounded-[3rem] shadow-2xl mb-12 min-h-[500px] flex flex-col md:flex-row items-center group/hero">
     <div class="w-full md:w-1/2 p-10 md:p-20 z-10 text-center md:text-left">
-        <h1 class="text-5xl md:text-7xl font-extrabold mb-6 leading-tight text-slate-900 tracking-tight drop-shadow-sm">
+        <div class="inline-flex items-center gap-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest mb-8 animate-pulse-once">
+            <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+            Official 2026/2027 Election Portal
+        </div>
+        <h1 class="text-5xl md:text-7xl font-black mb-8 leading-[1.1] text-slate-900 tracking-tight">
             {{ hero_title }}
         </h1>
-        <p class="text-xl md:text-2xl mb-12 text-slate-500 leading-relaxed">
+        <p class="text-xl md:text-2xl mb-12 text-slate-500 leading-relaxed font-medium">
             {{ hero_subtitle }}
         </p>
-        <div class="flex flex-col sm:flex-row justify-center md:justify-start gap-4">
+        <div class="flex flex-col sm:flex-row justify-center md:justify-start gap-5">
             {% if voting_open %}
                 {% if current_user.is_authenticated and current_user.role != 'admin' %}
                     {% if current_user.has_voted %}
-                        <span class="bg-emerald-100 border border-emerald-300 text-emerald-800 px-10 py-5 rounded-2xl font-bold text-lg">✓ You have voted</span>
+                        <div class="vibrant-card !rounded-2xl px-10 py-5 flex items-center gap-3">
+                            <span class="w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center text-xs">✓</span>
+                            <span class="text-slate-800 font-bold text-lg">Ballot Submitted</span>
+                        </div>
                     {% else %}
-                        <a href="{{ url_for('voting.ballot') }}" class="bg-blue-600 px-10 py-5 rounded-2xl text-white font-bold text-lg hover:bg-blue-700 shadow-xl transition-all hover:scale-105 active:scale-95">Cast Your Vote Now →</a>
+                        <a href="{{ url_for('voting.ballot') }}" class="btn-vibrant px-12 py-5 rounded-2xl font-black text-xl">Cast Your Vote Now →</a>
                     {% endif %}
                 {% else %}
-                    <a href="#candidates" class="bg-blue-600 px-10 py-5 rounded-2xl text-white font-bold text-lg hover:bg-blue-700 shadow-xl transition-all hover:scale-105 active:scale-95">View Candidates →</a>
+                    <a href="{{ url_for('voting.login') }}" class="btn-vibrant px-12 py-5 rounded-2xl font-black text-xl">Get Started →</a>
                 {% endif %}
             {% endif %}
-            <a href="{{ url_for('main.about') }}" class="bg-slate-100 px-10 py-5 rounded-2xl text-slate-600 font-bold text-lg hover:bg-slate-200 transition-all border border-slate-200">Learn More</a>
+            <a href="{{ url_for('main.about') }}" class="bg-slate-100 px-10 py-5 rounded-2xl text-slate-600 font-bold text-xl hover:bg-slate-200 transition-all border border-slate-200">About CoSSA</a>
         </div>
     </div>
-    <div class="w-full md:w-1/2 h-[300px] md:h-full relative overflow-hidden">
-        <img src="{{ hero_image }}" class="w-full h-full object-cover rounded-b-[3rem] md:rounded-r-[3rem] md:rounded-bl-none" alt="CoSSA">
+    <div class="w-full md:w-1/2 h-[350px] md:h-full relative overflow-hidden">
+        <img src="{{ hero_image }}" class="w-full h-full object-cover rounded-b-[3rem] md:rounded-r-[3rem] md:rounded-bl-none group-hover/hero:scale-105 transition-transform duration-700" alt="CoSSA">
         <div class="absolute inset-0 bg-gradient-to-r from-white via-transparent to-transparent hidden md:block"></div>
         <div class="absolute inset-0 bg-gradient-to-b from-white via-transparent to-transparent md:hidden"></div>
     </div>
 </section>
+
+{# ── Live Turnout Strip ────────────────────────────────────────────────────── #}
+{% if voting_open %}
+<div class="max-w-7xl mx-auto mb-24 px-4">
+    <div class="vibrant-card p-8 md:p-10 flex flex-col md:flex-row items-center gap-10 border-blue-100">
+        <div class="flex-shrink-0 text-center md:text-left">
+            <p class="text-xs font-black uppercase tracking-[0.2em] text-blue-500 mb-2">Live Turnout</p>
+            <h2 class="text-4xl font-black text-slate-800">{{ voted_count }} <span class="text-slate-300 font-light">/ {{ total_users }}</span></h2>
+        </div>
+        <div class="flex-1 w-full">
+            <div class="flex justify-between items-end mb-3">
+                <span class="text-sm font-bold text-slate-400">Student Participation</span>
+                <span class="text-2xl font-black text-blue-600">{{ turnout|round(1) }}%</span>
+            </div>
+            <div class="w-full bg-slate-100 h-6 rounded-full p-1 border border-slate-200 overflow-hidden shadow-inner">
+                <div class="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full shadow-lg transition-all duration-1000" style="width: {{ turnout }}%"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 
 {# ── Candidates + Vote Now (only shown when voting window is open) ──────────── #}
 {% if voting_open and portfolios %}

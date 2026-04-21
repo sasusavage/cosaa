@@ -9,8 +9,21 @@
             </svg>
         </div>
         <h1 class="text-4xl font-black text-slate-900 mb-4 tracking-tight">Ballot Submitted!</h1>
-        <p class="text-xl text-slate-500 mb-10 leading-relaxed">Your vote has been securely recorded. Thank you for participating in the CoSSA{% if academic_year %} {{ academic_year }}{% endif %} elections.</p>
-        <a href="{{ url_for('main.index') }}" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 shadow-xl transition-all">Back to Home</a>
+        <p class="text-xl text-slate-500 mb-10 leading-relaxed">Your vote has been securely recorded for the CoSSA{% if academic_year %} {{ academic_year }}{% endif %} elections.</p>
+        
+        <div class="bg-slate-50 rounded-2xl p-6 border-2 border-dashed border-slate-200 mb-10 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+            </div>
+            <p class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Digital Ballot Receipt</p>
+            <p class="text-2xl font-mono font-black text-blue-600 tracking-[0.2em]">{{ receipt_hash }}</p>
+            <p class="text-[10px] text-slate-400 mt-2">This anonymous hash confirms your participation in the decentralized audit trial.</p>
+        </div>
+
+        <div class="flex flex-col space-y-4">
+            <a href="{{ url_for('main.index') }}" class="w-full bg-blue-600 text-white px-10 py-5 rounded-3xl font-bold text-xl hover:bg-blue-700 shadow-xl transition-all shadow-blue-200">Done & Log Out</a>
+            <p class="text-slate-400 text-sm">You have been securely logged out for your privacy.</p>
+        </div>
     </div>
 </div>
 
