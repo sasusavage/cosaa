@@ -81,6 +81,10 @@ def dashboard():
     # Check for potential fraud (multiple votes from same IP in short time)
     # Simple check: IDs with same IP
     
+    # Identity Disputes: Reported hijacks
+    from app.models import IdentityDispute
+    pending_disputes = IdentityDispute.query.filter_by(status='pending').order_by(IdentityDispute.created_at.desc()).all()
+    
     return render_template('admin/dashboard.html',
                            total_users=total_users,
                            voted_count=voted_count,
@@ -92,7 +96,8 @@ def dashboard():
                            academic_year=Setting.get('academic_year', ''),
                            stats_display_hours=Setting.get('stats_display_hours', '48'),
                            live_stats_on=live_stats_on,
-                           recent_votes=recent_votes)
+                           recent_votes=recent_votes,
+                           pending_disputes=pending_disputes)
 
 @admin.route('/voting-window', methods=['POST'])
 @admin_required
@@ -204,6 +209,38 @@ def reset_student_vote(user_id):
     db.session.commit()
     flash(f'Voting status and phone registration reset for {student.student_id}.', 'success')
     return redirect(url_for('admin.list_students'))
+
+@admin.route('/resolve-dispute/<int:dispute_id>', methods=['POST'])
+@admin_required
+def resolve_dispute(dispute_id):
+    from app.models import IdentityDispute
+    dispute = IdentityDispute.query.get_or_404(dispute_id)
+    action = request.form.get('action') # 'wipe' or 'dismiss'
+    
+    if action == 'wipe':
+        # 1. Find the User record and WIPE their verification
+        from app.models import User
+        user = User.query.filter_by(student_id=dispute.student_id).first()
+        if user:
+            user.phone_number = None
+            user.phone_verified = False
+            user.otp = None
+            user.device_token = None
+            user.current_session_id = None
+            # Note: We do NOT wipe votes here unless specifically asked. 
+            # Wiping verification allows the REAL user to verify their phone and vote.
+        
+        dispute.status = 'resolved'
+        from datetime import datetime
+        dispute.resolved_at = datetime.utcnow()
+        db.session.commit()
+        flash(f'Dispute resolved. Verification for {dispute.student_id} has been wiped. They can now re-verify.', 'success')
+    else:
+        dispute.status = 'dismissed'
+        db.session.commit()
+        flash('Dispute dismissed.', 'info')
+        
+    return redirect(url_for('admin.dashboard'))
 
 @admin.route('/toggle-live-stats', methods=['POST'])
 @admin_required

@@ -139,6 +139,59 @@
         </form>
     </div>
 
+    {# ── Identity Disputes (Reports) ─────────────────────────────────────────── #}
+    {% if pending_disputes %}
+    <div class="bg-rose-50 border border-rose-100 rounded-[2.5rem] p-10 mb-10 shadow-sm">
+        <div class="flex items-center gap-4 mb-6">
+            <div class="w-12 h-12 rounded-2xl bg-rose-500 flex items-center justify-center text-white shadow-xl animate-pulse text-2xl">
+                ⚠️
+            </div>
+            <div>
+                <h2 class="text-2xl font-black text-rose-900 tracking-tight">Identity Disputes</h2>
+                <p class="text-rose-600 font-medium">Students have reported account hijacking. Action required.</p>
+            </div>
+        </div>
+        
+        <div class="grid gap-4">
+            {% for dispute in pending_disputes %}
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-rose-100 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:shadow-md transition-all">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-3">
+                        <span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">Reported Hack</span>
+                        <span class="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">{{ dispute.created_at.strftime('%b %d, %H:%M') }}</span>
+                    </div>
+                    <div class="text-lg font-black text-slate-800">
+                        Student ID: <span class="bg-slate-100 px-2 rounded-lg text-slate-900">{{ dispute.student_id }}</span>
+                    </div>
+                    <p class="text-xs font-bold text-slate-500">
+                        <span class="text-slate-400">Reporter Phone:</span> {{ dispute.reporter_phone }} 
+                        <span class="mx-2 text-slate-200">|</span>
+                        <span class="text-rose-400 italic">Hacker Phone:</span> {{ dispute.hacker_phone }}
+                    </p>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    <form action="{{ url_for('admin.resolve_dispute', dispute_id=dispute.id) }}" method="POST" class="inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <input type="hidden" name="action" value="wipe">
+                        <button type="submit" class="bg-rose-500 text-white px-6 py-3 rounded-2xl font-black hover:bg-rose-600 shadow-lg shadow-rose-200 transition-all text-xs uppercase tracking-widest">
+                            Wipe & Re-verify
+                        </button>
+                    </form>
+                    <form action="{{ url_for('admin.resolve_dispute', dispute_id=dispute.id) }}" method="POST" class="inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <input type="hidden" name="action" value="dismiss">
+                        <button type="submit" class="bg-slate-100 text-slate-400 px-6 py-3 rounded-2xl font-black hover:bg-slate-200 transition-all text-xs uppercase tracking-widest">
+                            Dismiss
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
     {# ── Security Audit Log ────────────────────────────────────────────────────── #}
     <div class="bg-white rounded-[2rem] shadow-xl border border-slate-50 px-8 py-6 mb-10 overflow-hidden">
         <div class="flex items-center justify-between mb-6">

@@ -131,3 +131,15 @@ class Event(db.Model):
     date = db.Column(db.String(50), nullable=False)
     description = db.Column(db.Text)
     order = db.Column(db.Integer, default=0)
+
+class IdentityDispute(db.Model):
+    __tablename__ = 'identity_disputes'
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.String(30), nullable=False)
+    reporter_phone = db.Column(db.String(20))
+    hacker_phone = db.Column(db.String(20)) # The one currently in the DB
+    ip_address = db.Column(db.String(45))
+    user_agent = db.Column(db.String(255))
+    status = db.Column(db.String(20), default='pending') # pending, resolved, dismissed
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    resolved_at = db.Column(db.DateTime)

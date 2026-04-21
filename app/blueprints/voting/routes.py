@@ -92,7 +92,10 @@ def login():
                         pass 
                 else:
                     # Hijack attempt - ID requested but different phone entered
-                    flash('This Student ID is already linked to a different phone number. Verification required.', 'error')
+                    from markupsafe import Markup
+                    report_url = url_for('voting.report_hijack', student_id=user.student_id, phone=formatted_input)
+                    msg = Markup(f'This Student ID is already linked to a different phone number. Verification required. Not you? <a href="{report_url}" class="underline font-bold text-white">Report Identity Hijack</a>')
+                    flash(msg, 'error')
                     return redirect(url_for('voting.login'))
             
             # ── Phone Uniqueness Check ──
@@ -170,8 +173,31 @@ def verify_otp():
             flash('Your verification code has expired. Please request a new one.', 'error')
     else:
         flash('Invalid verification code. Please try again.', 'error')
-        
-    return render_template('voting/verify_otp.html', student_id=student_id)
+    
+    return redirect(url_for('voting.login'))
+
+@voting.route('/report-hijack')
+def report_hijack():
+    student_id = request.args.get('student_id')
+    reporter_phone = request.args.get('phone')
+    
+    user = User.query.filter_by(student_id=student_id).first()
+    if not user:
+        flash('Invalid request.', 'error')
+        return redirect(url_for('voting.login'))
+    
+    from app.models import IdentityDispute
+    dispute = IdentityDispute(
+        student_id=student_id,
+        reporter_phone=reporter_phone,
+        hacker_phone=user.phone_number,
+        ip_address=request.remote_addr,
+        user_agent=request.user_agent.string
+    )
+    db.session.add(dispute)
+    db.session.commit()
+    flash('Identity hijack reported! Our administrators have been notified. Please visit the CS Department office to finalize your verification.', 'success')
+    return redirect(url_for('voting.login'))
 
 @voting.route('/sms-callback', methods=['POST'])
 def sms_callback():
