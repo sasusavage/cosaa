@@ -1,6 +1,7 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from app.models import User, Portfolio, Vote, Setting, db
+from app.utils import send_sms, generate_otp
+from datetime import datetime, timedelta, timezone
 
 voting = Blueprint('voting', __name__)
 
@@ -30,27 +31,106 @@ def login():
         if current_user.role == 'admin':
             return redirect(url_for('admin.dashboard'))
         return redirect(url_for('voting.ballot'))
+    
     if request.method == 'POST':
         raw_id = (request.form.get('student_id') or '').strip().upper()
-        # Try password login first (admin), then ID-only for students
+        # Try password login first (admin)
         user = User.query.filter(
             db.func.upper(User.student_id) == raw_id
         ).first()
+        
         password = request.form.get('password', '').strip()
+        
         if user:
-            # Admin always needs a password; students can log in with ID alone
-            if user.role == 'admin' and not user.check_password(password):
-                flash('Invalid credentials.', 'error')
-                return render_template('voting/login.html', admin_mode=True)
-            login_user(user)
-            next_page = request.args.get('next')
-            if next_page:
-                return redirect(next_page)
+            # ── ADMIN LOGIC (Password) ────────────────────────────────────────
             if user.role == 'admin':
-                return redirect(url_for('admin.dashboard'))
-            return redirect(url_for('voting.ballot'))
+                if user.check_password(password):
+                    login_user(user)
+                    return redirect(url_for('admin.dashboard'))
+                else:
+                    flash('Invalid admin credentials.', 'error')
+                    return render_template('voting/login.html', admin_mode=True)
+            
+            # ── STUDENT LOGIC (SMS OTP) ───────────────────────────────────────
+            if not user.phone_number:
+                # Phone missing - send to registration step
+                return render_template('voting/provide_phone.html', user=user)
+            
+            # Phone exists - generate and send OTP
+            otp = generate_otp()
+            user.otp = otp
+            user.otp_expiry = datetime.now(timezone.utc) + timedelta(minutes=10)
+            db.session.commit()
+            
+            # Send SMS
+            message = f"Your CoSSA Voting Verification Code is: {otp}. This code expires in 10 minutes."
+            sms_sent = send_sms(user.phone_number, message)
+            
+            if sms_sent:
+                return render_template('voting/verify_otp.html', student_id=user.student_id)
+            else:
+                flash('OTP generated but failed to send SMS. Please try again.', 'error')
+                return redirect(url_for('voting.login'))
+                
         flash('Student ID not found. Please check and try again.', 'error')
     return render_template('voting/login.html')
+
+@voting.route('/verify-otp', methods=['POST'])
+def verify_otp():
+    student_id = request.form.get('student_id')
+    otp_input = request.form.get('otp')
+    
+    user = User.query.filter(
+        db.func.upper(User.student_id) == student_id.upper()
+    ).first()
+    
+    if user and user.otp == otp_input:
+        # Check expiry
+        if user.otp_expiry and user.otp_expiry > datetime.now(timezone.utc):
+            # Clear OTP and login
+            user.otp = None
+            user.otp_expiry = None
+            db.session.commit()
+            login_user(user)
+            flash(f'Welcome back, {user.username}!', 'success')
+            return redirect(url_for('voting.ballot'))
+        else:
+            flash('Your verification code has expired. Please request a new one.', 'error')
+    else:
+        flash('Invalid verification code. Please try again.', 'error')
+        
+    return render_template('voting/verify_otp.html', student_id=student_id)
+
+@voting.route('/register-phone', methods=['POST'])
+def register_phone():
+    student_id = request.form.get('student_id')
+    phone = request.form.get('phone_number').strip()
+    
+    if not phone:
+        flash('Phone number is required.', 'error')
+        return redirect(url_for('voting.login'))
+        
+    user = User.query.filter(
+        db.func.upper(User.student_id) == student_id.upper()
+    ).first()
+    
+    if user:
+        # Save phone number
+        user.phone_number = phone
+        
+        # Generate and send OTP immediately
+        otp = generate_otp()
+        user.otp = otp
+        user.otp_expiry = datetime.now(timezone.utc) + timedelta(minutes=10)
+        db.session.commit()
+        
+        message = f"Your CoSSA Voting Verification Code is: {otp}. This code expires in 10 minutes."
+        if send_sms(user.phone_number, message):
+            return render_template('voting/verify_otp.html', student_id=user.student_id)
+        else:
+            flash('Phone saved but failed to send verification SMS. Please try again.', 'error')
+            
+    return redirect(url_for('voting.login'))
 
 @voting.route('/logout')
 @login_required

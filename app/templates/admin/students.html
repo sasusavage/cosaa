@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block title %}Manage Students{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto py-12">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+        <div>
+            <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter">Student Registry</h1>
+            <p class="text-slate-500 font-medium mt-2">View and manage all registered students in the system.</p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+            <a href="{{ url_for('admin.import_excel') }}" class="bg-blue-600 text-white px-7 py-3 rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-xl">Import New Students</a>
+            <a href="{{ url_for('admin.dashboard') }}" class="bg-slate-100 text-slate-600 px-7 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all border border-slate-200 shadow-sm">Back to Dashboard</a>
+        </div>
+    </div>
+
+    {# -- Search -- #}
+    <div class="bg-white p-6 rounded-[2rem] shadow-xl border border-slate-100 mb-10">
+        <form method="GET" action="{{ url_for('admin.list_students') }}" class="flex flex-col md:flex-row gap-4">
+            <div class="flex-1 relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                </div>
+                <input type="text" name="search" value="{{ search or '' }}" placeholder="Search by ID, Name, Surname..." class="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 font-medium transition-all text-lg">
+            </div>
+            <button type="submit" class="bg-slate-900 text-white px-10 py-4 rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-lg text-lg">Search</button>
+            {% if search %}
+                <a href="{{ url_for('admin.list_students') }}" class="flex items-center justify-center px-6 py-4 text-slate-500 hover:text-slate-700 font-bold">Clear</a>
+            {% endif %}
+        </form>
+    </div>
+
+    {# -- Table -- #}
+    <div class="bg-white rounded-[2.5rem] shadow-2xl border border-slate-50 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-100">
+                        <th class="px-8 py-6 text-xs font-black uppercase tracking-widest text-slate-400">Student ID</th>
+                        <th class="px-8 py-6 text-xs font-black uppercase tracking-widest text-slate-400">Full Name</th>
+                        <th class="px-8 py-6 text-xs font-black uppercase tracking-widest text-slate-400">Phone Number</th>
+                        <th class="px-8 py-6 text-xs font-black uppercase tracking-widest text-slate-400">Program/Dept</th>
+                        <th class="px-8 py-6 text-xs font-black uppercase tracking-widest text-slate-400 text-center">Status</th>
+                        <th class="px-8 py-6 text-xs font-black uppercase tracking-widest text-slate-400 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    {% for student in pagination.items %}
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-8 py-6 font-black text-slate-700">{{ student.student_id }}</td>
+                        <td class="px-8 py-6 font-bold text-slate-900">
+                            {{ student.full_name }}
+                        </td>
+                        <td class="px-8 py-6">
+                            {% if student.phone_number %}
+                            <span class="text-slate-700 font-medium">{{ student.phone_number }}</span>
+                            {% else %}
+                            <span class="text-rose-400 text-xs font-bold italic">Missing - Cannot Vote</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-8 py-6 text-slate-500 text-sm italic">
+                            {{ student.program or '' }}
+                            {% if student.department %} - {{ student.department }}{% endif %}
+                        </td>
+                        <td class="px-8 py-6">
+                            <div class="flex justify-center">
+                                {% if student.has_voted %}
+                                <span class="bg-emerald-100 text-emerald-700 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter shadow-sm border border-emerald-200">Voted</span>
+                                {% else %}
+                                <span class="bg-slate-100 text-slate-400 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter border border-slate-200">Pending</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="px-8 py-6 text-right">
+                            <div class="flex items-center justify-end gap-3">
+                                <a href="{{ url_for('admin.edit_student', user_id=student.id) }}" class="text-blue-600 hover:text-blue-800 font-bold text-sm bg-blue-50 px-4 py-2 rounded-xl border border-blue-100 transition-all">Edit</a>
+                                {% if student.has_voted %}
+                                <form method="POST" action="{{ url_for('admin.reset_student_vote', user_id=student.id) }}" onsubmit="return confirm('Reset voting status for this student?')" class="inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <button type="submit" class="text-rose-600 hover:text-rose-800 font-bold text-sm bg-rose-50 px-4 py-2 rounded-xl border border-rose-100 transition-all">Reset Vote</button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="px-8 py-20 text-center text-slate-400 italic">No students found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {# -- Pagination -- #}
+        {% if pagination.pages > 1 %}
+        <div class="bg-slate-50 px-8 py-6 flex items-center justify-between border-t border-slate-100">
+            <p class="text-sm text-slate-500 font-medium">Page {{ pagination.page }} of {{ pagination.pages }}</p>
+            <div class="flex gap-2">
+                {% if pagination.has_prev %}
+                <a href="{{ url_for('admin.list_students', page=pagination.prev_num, search=search) }}" class="bg-white border border-slate-200 px-4 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition-all">Previous</a>
+                {% endif %}
+                {% if pagination.has_next %}
+                <a href="{{ url_for('admin.list_students', page=pagination.next_num, search=search) }}" class="bg-white border border-slate-200 px-4 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition-all">Next</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -96,6 +96,9 @@ def create_app(config_class=None):
                 'program':    'VARCHAR(200)',
                 'department': 'VARCHAR(200)',
                 'campus':     'VARCHAR(100)',
+                'phone_number': 'VARCHAR(20)',
+                'otp':         'VARCHAR(10)',
+                'otp_expiry':  'TIMESTAMP',
             }
             with db.engine.connect() as conn:
                 for col, col_type in new_user_cols.items():

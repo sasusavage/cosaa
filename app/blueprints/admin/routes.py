@@ -146,6 +146,54 @@ def import_excel():
         return redirect(url_for('admin.dashboard'))
     return render_template('admin/import_excel.html')
 
+@admin.route('/students')
+@admin_required
+def list_students():
+    page = request.args.get('page', 1, type=int)
+    search = request.args.get('search', '').strip()
+    query = User.query.filter_by(role='student')
+    if search:
+        query = query.filter(
+            db.or_(
+                User.student_id.ilike(f'%{search}%'),
+                User.username.ilike(f'%{search}%'),
+                User.surname.ilike(f'%{search}%'),
+                User.firstname.ilike(f'%{search}%')
+            )
+        )
+    pagination = query.order_by(User.id.desc()).paginate(page=page, per_page=50)
+    return render_template('admin/students.html', pagination=pagination, search=search)
+
+@admin.route('/students/<int:user_id>/edit', methods=['GET', 'POST'])
+@admin_required
+def edit_student(user_id):
+    student = User.query.get_or_404(user_id)
+    if request.method == 'POST':
+        student.student_id = request.form.get('student_id').strip().upper()
+        student.username = request.form.get('username').strip()
+        student.firstname = request.form.get('firstname').strip()
+        student.surname = request.form.get('surname').strip()
+        student.othernames = request.form.get('othernames').strip()
+        student.program = request.form.get('program').strip()
+        student.department = request.form.get('department').strip()
+        student.campus = request.form.get('campus').strip()
+        student.phone_number = request.form.get('phone_number').strip()
+        
+        db.session.commit()
+        flash(f'Student {student.student_id} updated successfully.', 'success')
+        return redirect(url_for('admin.list_students'))
+    return render_template('admin/edit_student.html', student=student)
+
+@admin.route('/students/<int:user_id>/reset-vote', methods=['POST'])
+@admin_required
+def reset_student_vote(user_id):
+    student = User.query.get_or_404(user_id)
+    Vote.query.filter_by(user_id=student.id).delete()
+    student.has_voted = False
+    db.session.commit()
+    flash(f'Voting status reset for {student.student_id}.', 'success')
+    return redirect(url_for('admin.list_students'))
+
 @admin.route('/toggle-live-stats', methods=['POST'])
 @admin_required
 def toggle_live_stats():

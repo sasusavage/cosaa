@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Verify Identity{% endblock %}
+{% block content %}
+<div class="min-h-[70vh] flex items-center justify-center px-6">
+    <div class="max-w-md w-full bg-white rounded-[3rem] shadow-2xl border border-slate-50 p-10 md:p-14 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-40 h-40 bg-emerald-50 rounded-full blur-3xl -mr-20 -mt-20"></div>
+        
+        <div class="text-center mb-10 relative">
+            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-1.173-1.804A15.033 15.033 0 0112 21a15.033 15.033 0 013.926-2.536m-1.173 1.804A15.033 15.033 0 0112 21c-2.77 0-5.36-.75-7.593-2.062M12 7V4m0 4c3.314 0 6 2.686 6 6s-2.686 6-6 6-6-2.686-6-6 2.686-6 6-6z" />
+                </svg>
+            </div>
+            <h1 class="text-3xl font-black text-slate-900 tracking-tighter">Enter Verification Code</h1>
+            <p class="text-slate-500 mt-2 font-medium">A 6-digit code was sent to your registered phone number for <span class="text-emerald-600 font-bold">{{ student_id }}</span></p>
+        </div>
+
+        <form method="POST" action="{{ url_for('voting.verify_otp') }}" class="space-y-8 relative">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <input type="hidden" name="student_id" value="{{ student_id }}"/>
+            
+            <div class="space-y-4">
+                <label class="block text-xs font-black uppercase tracking-widest text-slate-400 text-center">Verification OTP</label>
+                <div class="flex justify-center gap-2">
+                    <input type="text" name="otp" maxlength="6" required autofocus autocomplete="one-time-code"
+                           placeholder="······"
+                           class="w-full text-center tracking-[1em] text-4xl font-black px-6 py-6 rounded-3xl bg-slate-50 border-4 border-slate-100 focus:border-emerald-500 focus:bg-white focus:outline-none transition-all shadow-inner uppercase">
+                </div>
+                <p class="text-center text-sm text-slate-400 font-medium">Expires in 10 minutes</p>
+            </div>
+
+            <button type="submit" class="w-full bg-slate-900 text-white py-5 rounded-[2rem] font-black text-xl hover:bg-slate-800 transform active:scale-95 transition-all shadow-2xl">Verify & Proceed</button>
+            
+            <div class="text-center pt-4">
+                <a href="{{ url_for('voting.login') }}" class="text-slate-400 hover:text-slate-600 font-bold text-sm flex items-center justify-center gap-2 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                    Back to Login
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Styling for the tracking of characters in OTP */
+    input::placeholder {
+        letter-spacing: 0.5em;
+        font-weight: 400;
+        opacity: 0.3;
+    }
+</style>
+{% endblock %}

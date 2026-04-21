@@ -8,6 +8,7 @@
         <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter">Admin Dashboard</h1>
         <div class="flex flex-wrap gap-3">
             <a href="{{ url_for('admin.cms') }}" class="bg-blue-600 text-white px-7 py-3 rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-xl">✏️ Manage Content</a>
+            <a href="{{ url_for('admin.list_students') }}" class="bg-emerald-600 text-white px-7 py-3 rounded-2xl font-bold hover:bg-emerald-700 transition-all shadow-xl">👥 Student Registry</a>
             <a href="{{ url_for('admin.import_excel') }}" class="bg-slate-100 text-slate-600 px-7 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all border border-slate-200 shadow-sm">Import Students</a>
             <a href="{{ url_for('admin.results') }}" class="bg-indigo-600 text-white px-7 py-3 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-xl">Full Results</a>
         </div>

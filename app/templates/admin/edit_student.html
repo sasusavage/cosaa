@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Edit Student Details{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto py-12">
+    <div class="mb-10">
+        <a href="{{ url_for('admin.list_students') }}" class="text-slate-400 hover:text-slate-600 font-bold flex items-center gap-2 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Back to Registry
+        </a>
+        <h1 class="text-4xl font-black text-slate-900 tracking-tighter">Edit Student Profile</h1>
+        <p class="text-slate-500 font-medium mt-2">Update information for <span class="text-blue-600">{{ student.student_id }}</span></p>
+    </div>
+
+    <div class="bg-white rounded-[2.5rem] shadow-2xl border border-slate-50 p-10 md:p-14">
+        <form method="POST" class="space-y-8">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-2">
+                    <label class="block text-sm font-black uppercase tracking-widest text-slate-400">Student ID</label>
+                    <input type="text" name="student_id" value="{{ student.student_id }}" required
+                           class="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 font-bold text-lg transition-all">
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-sm font-black uppercase tracking-widest text-slate-400">Display Name / Username</label>
+                    <input type="text" name="username" value="{{ student.username }}" required
+                           class="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 font-bold text-lg transition-all">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="space-y-2">
+                    <label class="block text-sm font-black uppercase tracking-widest text-slate-400">First Name</label>
+                    <input type="text" name="firstname" value="{{ student.firstname or '' }}"
+                           class="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 font-medium text-lg transition-all">
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-sm font-black uppercase tracking-widest text-slate-400">Surname</label>
+                    <input type="text" name="surname" value="{{ student.surname or '' }}"
+                           class="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 font-medium text-lg transition-all">
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-sm font-black uppercase tracking-widest text-slate-400">Other Names</label>
+                    <input type="text" name="othernames" value="{{ student.othernames or '' }}"
+                           class="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 font-medium text-lg transition-all">
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-sm font-black uppercase tracking-widest text-slate-400">Program of Study</label>
+                <input type="text" name="program" value="{{ student.program or '' }}"
+                       class="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 font-medium text-lg transition-all">
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-2">
+                    <label class="block text-sm font-black uppercase tracking-widest text-slate-400">Department</label>
+                    <input type="text" name="department" value="{{ student.department or '' }}"
+                           class="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 font-medium text-lg transition-all">
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-sm font-black uppercase tracking-widest text-slate-400">Campus</label>
+                    <input type="text" name="campus" value="{{ student.campus or '' }}"
+                           class="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 font-medium text-lg transition-all">
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-sm font-black uppercase tracking-widest text-slate-400">Phone Number (for SMS OTP)</label>
+                <input type="text" name="phone_number" value="{{ student.phone_number or '' }}" placeholder="e.g. 0540000000"
+                       class="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-emerald-100 font-bold text-lg transition-all border-emerald-100 italic">
+                <p class="text-xs text-slate-400 font-medium tracking-tight">Ensure the number includes the country code if required by the gateway (usually optional for local numbers).</p>
+            </div>
+
+            <div class="pt-6">
+                <button type="submit" class="w-full bg-blue-600 text-white py-5 rounded-[2rem] font-black text-2xl hover:bg-blue-700 transform active:scale-95 transition-all shadow-2xl">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

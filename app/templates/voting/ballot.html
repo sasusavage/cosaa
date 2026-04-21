@@ -19,15 +19,31 @@
         <section class="bg-white p-10 md:p-14 rounded-[3rem] shadow-2xl border border-slate-50 relative overflow-hidden group">
             <div class="absolute top-0 right-0 w-48 h-48 bg-blue-50/50 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-blue-100/50 transition-colors"></div>
             
-            <h2 class="text-4xl font-extrabold mb-10 text-slate-800 tracking-tight flex items-center">
-                <span class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white mr-4 shadow-lg text-lg">{% if loop.index < 10 %}0{% endif %}{{ loop.index }}</span>
-                {{ portfolio.title }}
-            </h2>
+            <div class="flex items-center justify-between mb-10">
+                <h2 class="text-4xl font-extrabold text-slate-800 tracking-tight flex items-center">
+                    <span class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white mr-4 shadow-lg text-lg">{% if loop.index < 10 %}0{% endif %}{{ loop.index }}</span>
+                    {{ portfolio.title }}
+                </h2>
+                <button type="button" onclick="clearPortfolio('{{ portfolio.id }}')" class="text-sm font-bold text-slate-400 hover:text-rose-500 transition-colors flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    Clear Selection
+                </button>
+            </div>
             
+            {% if portfolio.candidates|length == 1 %}
+            {% set candidate = portfolio.candidates[0] %}
+            <div class="mb-8 p-6 bg-amber-50 border border-amber-100 rounded-2xl">
+                <p class="text-amber-800 font-bold flex items-center gap-2 italic">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Opponent check: This candidate is currently unopposed.
+                </p>
+            </div>
+            {% endif %}
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {% for candidate in portfolio.candidates %}
                 <label class="relative block group-candidate cursor-pointer">
-                    <input type="radio" name="portfolio_{{ portfolio.id }}" value="{{ candidate.id }}" required class="peer absolute opacity-0 invisible">
+                    <input type="radio" name="portfolio_{{ portfolio.id }}" value="{{ candidate.id }}" class="peer absolute opacity-0 invisible portfolio-radio-{{ portfolio.id }}">
                     <div class="p-8 rounded-[2rem] border-4 border-slate-200 peer-checked:border-blue-600 peer-checked:bg-blue-50/50 transition-all hover:border-slate-300 hover:bg-slate-50 group-hover:shadow-xl shadow-md">
                         <div class="flex items-start space-x-6">
                             <div class="w-24 h-24 rounded-2xl overflow-hidden shadow-lg flex-shrink-0 group-candidate-hover:scale-105 transition-transform">
@@ -47,6 +63,14 @@
                 </label>
                 {% endfor %}
             </div>
+            
+            {% if portfolio.candidates|length == 1 %}
+            <div class="mt-8 flex justify-center">
+                <div class="inline-flex items-center px-4 py-2 bg-slate-100 text-slate-500 text-xs font-bold rounded-lg uppercase tracking-widest border border-slate-200">
+                    Automatic entry for {{ portfolio.candidates[0].name }}
+                </div>
+            </div>
+            {% endif %}
         </section>
         {% endfor %}
 
@@ -97,6 +121,11 @@
             modal.classList.add('hidden');
             modal.classList.remove('flex');
         }, 300);
+    }
+    function clearPortfolio(id) {
+        document.querySelectorAll('.portfolio-radio-' + id).forEach(radio => {
+            radio.checked = false;
+        });
     }
 </script>
 

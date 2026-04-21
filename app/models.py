@@ -16,6 +16,9 @@ class User(db.Model, UserMixin):
     program = db.Column(db.String(200))
     department = db.Column(db.String(200))
     campus = db.Column(db.String(100))
+    phone_number = db.Column(db.String(20))
+    otp = db.Column(db.String(10))
+    otp_expiry = db.Column(db.DateTime)
     has_voted = db.Column(db.Boolean, default=False)
     role = db.Column(db.String(10), default='student')  # 'student' or 'admin'
     votes = db.relationship('Vote', backref='voter', lazy=True)
