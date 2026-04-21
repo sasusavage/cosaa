@@ -4,6 +4,15 @@ import random
 import string
 from datetime import datetime, timedelta
 
+def format_gh_number(number):
+    """Formats a Ghanaian number to the 233XXXXXXXXX format."""
+    num = ''.join(filter(str.isdigit, str(number)))
+    if num.startswith('0') and len(num) == 10:
+        return '233' + num[1:]
+    if len(num) == 9:
+        return '233' + num
+    return num
+
 def send_sms(recipients, message):
     """
     Sends an SMS using the Vynfy API.
@@ -19,22 +28,31 @@ def send_sms(recipients, message):
         "Content-Type": "application/json"
     }
     
-    # Ensure recipients is a list
+    # Ensure recipients is a list and formatted for Ghana (233)
     if isinstance(recipients, str):
         recipients = [recipients]
+    
+    formatted_recipients = [format_gh_number(r) for r in recipients]
         
     payload = {
         "message": message,
-        "recipients": recipients,
+        "recipients": formatted_recipients,
         "sender": sender
     }
     
     try:
+        print(f"Attempting to send SMS to {formatted_recipients} via Vynfy...")
         response = requests.post(url, json=payload, headers=headers)
-        response.raise_for_status()
-        return response.json()
+        res_data = response.json()
+        print(f"Vynfy Gateway Response: {res_data}")
+        
+        if res_data.get('success'):
+            return res_data
+        else:
+            print(f"Vynfy API Error: {res_data.get('message', 'Unknown error')}")
+            return None
     except Exception as e:
-        print(f"Error sending SMS: {e}")
+        print(f"Network/Internal Error sending SMS: {e}")
         return None
 
 def generate_otp(length=6):
