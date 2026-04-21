@@ -57,6 +57,29 @@ def create_app(config_class=None):
         from flask import render_template
         return render_template('errors/429.html'), 429
 
+    # ── Session Pinning (Device Lock) ──────────────────────────────────────────
+    @app.before_request
+    def check_session_lock():
+        from flask import session, redirect, url_for, flash, request
+        from flask_login import current_user, logout_user
+        
+        # Only check for authenticated students (admins might need multi-session)
+        if current_user.is_authenticated and current_user.role == 'student':
+            # 1. Check Session SID (Prevent concurrent devices)
+            stored_sid = current_user.current_session_id
+            active_sid = session.get('sid')
+            
+            if stored_sid and active_sid != stored_sid:
+                logout_user()
+                flash('Your account was logged in on another device. Please log in again for security.', 'info')
+                return redirect(url_for('voting.login'))
+            
+            # 2. Check IP (Strict binding)
+            if current_user.last_ip and request.remote_addr != current_user.last_ip:
+                logout_user()
+                flash('Your session location has changed. For security, please log in again.', 'warning')
+                return redirect(url_for('voting.login'))
+
     # Register Blueprints
     from .blueprints.main.routes import main as main_blueprint
     app.register_blueprint(main_blueprint)
@@ -120,8 +143,11 @@ def create_app(config_class=None):
                 'campus':     'VARCHAR(100)',
                 'phone_number': 'VARCHAR(20)',
                 'phone_verified': 'BOOLEAN DEFAULT FALSE',
+                'phone_verified': 'BOOLEAN DEFAULT FALSE', # Safety
                 'otp':         'VARCHAR(10)',
                 'otp_expiry':  'TIMESTAMP',
+                'last_ip':     'VARCHAR(45)',
+                'current_session_id': 'VARCHAR(100)',
             }
             with db.engine.connect() as conn:
                 for col, col_type in new_user_cols.items():

@@ -16,12 +16,17 @@ class User(db.Model, UserMixin):
     program = db.Column(db.String(200))
     department = db.Column(db.String(200))
     campus = db.Column(db.String(100))
-    phone_number = db.Column(db.String(20))
+    phone_number = db.Column(db.String(20), index=True) # Index for lookups
     phone_verified = db.Column(db.Boolean, default=False)
     otp = db.Column(db.String(10))
     otp_expiry = db.Column(db.DateTime)
     has_voted = db.Column(db.Boolean, default=False)
     role = db.Column(db.String(10), default='student')  # 'student' or 'admin'
+    
+    # 🕵️ Security Tracking
+    last_ip = db.Column(db.String(45))     # Support IPv6
+    current_session_id = db.Column(db.String(100)) # Prevent multiple concurrent sessions
+    
     votes = db.relationship('Vote', backref='voter', lazy=True)
 
     @property

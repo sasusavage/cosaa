@@ -70,6 +70,16 @@ def login():
                 
                 # RECURRING LOGIN: If ID and Phone match exactly, log in directly
                 if formatted_input == formatted_stored:
+                    # ── Session Hardening ──
+                    import uuid
+                    from flask import session
+                    sid = str(uuid.uuid4())
+                    user.current_session_id = sid
+                    user.last_ip = request.remote_addr
+                    db.session.commit()
+                    session['sid'] = sid
+                    # ───────────────────────
+                    
                     login_user(user)
                     flash(f'Welcome back, {user.username}!', 'success')
                     return redirect(url_for('voting.ballot'))
@@ -78,6 +88,14 @@ def login():
                     flash('This Student ID is already linked to a different phone number. Verification required.', 'error')
                     return redirect(url_for('voting.login'))
             
+            # ── Phone Uniqueness Check ──
+            # Prevent one phone number being used for multiple verified students
+            existing_verified = User.query.filter_by(phone_number=input_phone, phone_verified=True).first()
+            if existing_verified and existing_verified.id != user.id:
+                flash('This phone number is already registered to another student. Please use your own verified device.', 'error')
+                return redirect(url_for('voting.login'))
+            # ────────────────────────────
+
             # FIRST TIME OR UNVERIFIED: Send OTP
             user.phone_number = input_phone
             user.phone_verified = False # Reset flag until OTP succeeds
@@ -119,6 +137,16 @@ def verify_otp():
             user.otp = None
             user.otp_expiry = None
             user.phone_verified = True  # <--- SET VERIFICATION FLAG AS TRUE
+            
+            # ── Session Hardening ──
+            import uuid
+            from flask import session
+            sid = str(uuid.uuid4())
+            user.current_session_id = sid
+            user.last_ip = request.remote_addr
+            session['sid'] = sid
+            # ───────────────────────
+            
             db.session.commit()
             login_user(user)
             flash(f'Welcome back, {user.username}!', 'success')
