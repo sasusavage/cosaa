@@ -36,25 +36,23 @@
                             </thead>
                             <tbody class="divide-y divide-slate-50">
                                 {% for cand in p_data.results|sort(attribute='count', reverse=True) %}
-                                    <tr class="{% if loop.first and cand.count > 0 %}bg-blue-50/30{% endif %} hover:bg-slate-50 transition-colors">
+                                    <tr class="{% if loop.first and cand.count > 0 %}bg-blue-50/30{% endif %} hover:bg-slate-50 transition-colors" data-candidate-id="{{ cand.id }}">
                                         <td class="px-10 py-8">
                                             <div class="flex items-center space-x-4">
                                                 <div class="text-2xl font-black text-slate-800">{{ cand.name }}</div>
                                                 {% if loop.first and cand.count > 0 %}
-                                                    <span class="px-4 py-1 bg-blue-600 text-white rounded-full text-xs font-bold uppercase tracking-widest animate-bounce">Leading</span>
+                                                    <span class="leading-badge px-4 py-1 bg-blue-600 text-white rounded-full text-xs font-bold uppercase tracking-widest {% if loop.first %}animate-bounce{% else %}hidden{% endif %}">Leading</span>
                                                 {% endif %}
                                             </div>
                                         </td>
                                         <td class="px-10 py-8">
-                                            <div class="text-3xl font-black text-blue-600 tracking-tighter">{{ cand.count }}</div>
+                                            <div class="vote-count text-3xl font-black text-blue-600 tracking-tighter">{{ cand.count }}</div>
                                         </td>
                                         <td class="px-10 py-8">
-                                            {% if cand.count > 0 %}
+                                            {% if cand.count > 0 or True %} {# Always show bar for polling #}
                                                 <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden min-w-[200px]">
-                                                    <div class="h-full bg-blue-600 rounded-full" style="width: 100%"></div>
+                                                    <div class="progress-bar h-full bg-blue-600 rounded-full transition-all duration-1000" style="width: {{ cand.pct|default(0) }}%"></div>
                                                 </div>
-                                            {% else %}
-                                                <span class="text-slate-300 font-bold italic">No votes yet</span>
                                             {% endif %}
                                         </td>
                                     </tr>
@@ -72,4 +70,37 @@
         </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function refreshResults() {
+        try {
+            const res = await fetch("{{ url_for('voting.live_stats_json') }}");
+            const data = await res.json();
+            
+            data.portfolios.forEach(p => {
+                p.candidates.forEach(c => {
+                    const row = document.querySelector(`[data-candidate-id="${c.id}"]`);
+                    if (row) {
+                        const countEl = row.querySelector('.vote-count');
+                        const barEl = row.querySelector('.progress-bar');
+                        
+                        if (countEl && countEl.innerText != c.votes) {
+                            countEl.innerText = c.votes;
+                            countEl.classList.add('scale-125', 'text-indigo-600');
+                            setTimeout(() => countEl.classList.remove('scale-125', 'text-indigo-600'), 1000);
+                        }
+                        if (barEl) {
+                            barEl.style.width = c.pct + '%';
+                        }
+                    }
+                });
+            });
+        } catch (e) { console.error(e); }
+    }
+    
+    // Refresh every 15 seconds for Results page
+    setInterval(refreshResults, 15000);
+</script>
 {% endblock %}

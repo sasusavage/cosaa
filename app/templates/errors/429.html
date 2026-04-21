@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Too Many Requests{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto py-32 text-center">
+    <div class="mb-12 relative inline-block">
+        <div class="text-[12rem] font-black text-blue-50 animate-pulse">429</div>
+        <div class="absolute inset-0 flex items-center justify-center">
+            <span class="text-8xl">⏳</span>
+        </div>
+    </div>
+    <h1 class="text-5xl font-black text-slate-900 mb-6 tracking-tighter">Slow Down, Voter!</h1>
+    <p class="text-2xl text-slate-500 mb-12 max-w-xl mx-auto leading-relaxed">
+        We've detected too many login attempts or verification requests from your device. This is a security measure to protect our SMS gateway and student accounts.
+    </p>
+    <div class="vibrant-card !bg-blue-50 border-blue-200 mb-12 p-8 inline-block shadow-inner">
+        <p class="text-blue-900 font-black text-xl mb-2">Please wait 60 seconds.</p>
+        <p class="text-blue-600 font-medium">The system will automatically unlock your access once the cooldown is over.</p>
+    </div>
+</div>
+{% endblock %}

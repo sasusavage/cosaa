@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_user, logout_user, login_required, current_user
 from app.models import User, Portfolio, Vote, Setting, db
 from app.utils import send_sms, generate_otp
+from app import db, limiter
 from datetime import datetime, timedelta, timezone
 
 voting = Blueprint('voting', __name__)
@@ -27,6 +28,7 @@ def _voting_window():
         return False, start_s, end_s
 
 @voting.route('/login', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")
 def login():
     if current_user.is_authenticated:
         if current_user.role == 'admin':
@@ -100,6 +102,7 @@ def login():
     return render_template('voting/login.html')
 
 @voting.route('/verify-otp', methods=['POST'])
+@limiter.limit("5 per hour")
 def verify_otp():
     student_id = request.form.get('student_id')
     otp_input = request.form.get('otp')

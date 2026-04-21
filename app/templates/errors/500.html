@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Server Error{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto py-32 text-center">
+    <div class="mb-12 relative inline-block">
+        <div class="text-[12rem] font-black text-rose-50 animate-pulse">500</div>
+        <div class="absolute inset-0 flex items-center justify-center">
+            <span class="text-8xl">🛠️</span>
+        </div>
+    </div>
+    <h1 class="text-5xl font-black text-slate-900 mb-6 tracking-tighter">Something went wrong</h1>
+    <p class="text-2xl text-slate-500 mb-12 max-w-xl mx-auto leading-relaxed">
+        Our servers encountered an unexpected glitch. Our tech team (and the association) have been notified. Please try again in a few moments.
+    </p>
+    <div class="vibrant-card !bg-amber-50 border-amber-200 mb-12 p-6 inline-flex items-center gap-3">
+        <span class="text-amber-600 font-bold">Safe Tip:</span>
+        <span class="text-amber-800 font-medium">If you were in the middle of voting, don't worry—your ballot is only cast once you see the confirmation page.</span>
+    </div>
+    <div class="flex justify-center gap-6">
+        <a href="{{ url_for('main.index') }}" class="btn-vibrant px-10 py-5 rounded-2xl font-black text-xl">Restart App</a>
+    </div>
+</div>
+{% endblock %}

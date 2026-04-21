@@ -4,6 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_wtf import CSRFProtect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -13,6 +15,7 @@ login_manager = LoginManager()
 login_manager.login_view = 'voting.login'
 migrate = Migrate()
 csrf = CSRFProtect()
+limiter = Limiter(key_func=get_remote_address, default_limits=["200 per day", "50 per hour"])
 
 def create_app(config_class=None):
     app = Flask(__name__)
@@ -36,6 +39,23 @@ def create_app(config_class=None):
     login_manager.init_app(app)
     migrate.init_app(app, db)
     csrf.init_app(app)
+    limiter.init_app(app)
+
+    # ── Error Handlers ────────────────────────────────────────────────────────
+    @app.errorhandler(404)
+    def page_not_found(e):
+        from flask import render_template
+        return render_template('errors/404.html'), 404
+
+    @app.errorhandler(500)
+    def internal_server_error(e):
+        from flask import render_template
+        return render_template('errors/500.html'), 500
+
+    @app.errorhandler(429)
+    def ratelimit_handler(e):
+        from flask import render_template
+        return render_template('errors/429.html'), 429
 
     # Register Blueprints
     from .blueprints.main.routes import main as main_blueprint

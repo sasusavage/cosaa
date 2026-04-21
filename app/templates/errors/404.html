@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Page Not Found{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto py-32 text-center">
+    <div class="mb-12 relative inline-block">
+        <div class="text-[12rem] font-black text-slate-100 animate-pulse">404</div>
+        <div class="absolute inset-0 flex items-center justify-center">
+            <span class="text-8xl">🤔</span>
+        </div>
+    </div>
+    <h1 class="text-5xl font-black text-slate-900 mb-6 tracking-tighter">Lost in the System?</h1>
+    <p class="text-2xl text-slate-500 mb-12 max-w-xl mx-auto leading-relaxed">
+        We couldn't find the page you're looking for. It might have been moved, deleted, or perhaps it never existed in our code.
+    </p>
+    <div class="flex justify-center gap-6">
+        <a href="{{ url_for('main.index') }}" class="btn-vibrant px-10 py-5 rounded-2xl font-black text-xl">Back to Safety</a>
+        <a href="javascript:history.back()" class="bg-slate-100 text-slate-600 px-10 py-5 rounded-2xl font-bold text-xl hover:bg-slate-200 transition-all border border-slate-200">Go Back</a>
+    </div>
+</div>
+{% endblock %}
