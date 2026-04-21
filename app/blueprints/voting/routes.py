@@ -68,21 +68,28 @@ def login():
             if user.phone_verified:
                 formatted_stored = format_gh_number(user.phone_number)
                 
-                # RECURRING LOGIN: If ID and Phone match exactly, log in directly
+                # RECURRING LOGIN CHECK
                 if formatted_input == formatted_stored:
-                    # ── Session Hardening ──
-                    import uuid
-                    from flask import session
-                    sid = str(uuid.uuid4())
-                    user.current_session_id = sid
-                    user.last_ip = request.remote_addr
-                    db.session.commit()
-                    session['sid'] = sid
-                    # ───────────────────────
+                    # 🚀 TRUSTED DEVICE CHECK (The "Bank-Level" Lock)
+                    cookie_token = request.cookies.get('voter_device_token')
                     
-                    login_user(user)
-                    flash(f'Welcome back, {user.username}!', 'success')
-                    return redirect(url_for('voting.ballot'))
+                    if cookie_token and cookie_token == user.device_token:
+                        # Recognized Device -> Instant Login
+                        import uuid
+                        from flask import session
+                        sid = str(uuid.uuid4())
+                        user.current_session_id = sid
+                        user.last_ip = request.remote_addr
+                        db.session.commit()
+                        session['sid'] = sid
+                        
+                        login_user(user)
+                        flash(f'Welcome back, {user.username}!', 'success')
+                        return redirect(url_for('voting.ballot'))
+                    else:
+                        # Mismatch or New Device -> FORCE OTP for security
+                        # We don't flash an error, we just treat it as a verification step.
+                        pass 
                 else:
                     # Hijack attempt - ID requested but different phone entered
                     flash('This Student ID is already linked to a different phone number. Verification required.', 'error')
@@ -140,17 +147,25 @@ def verify_otp():
             
             # ── Session Hardening ──
             import uuid
-            from flask import session
+            from flask import session, make_response
             sid = str(uuid.uuid4())
             user.current_session_id = sid
             user.last_ip = request.remote_addr
             session['sid'] = sid
-            # ───────────────────────
+            
+            # ── Device Token Generation (The Lock) ──
+            new_device_token = str(uuid.uuid4())
+            user.device_token = new_device_token
+            # ────────────────────────────────────────
             
             db.session.commit()
             login_user(user)
-            flash(f'Welcome back, {user.username}!', 'success')
-            return redirect(url_for('voting.ballot'))
+            flash(f'Identity Verified. This device is now trusted.', 'success')
+            
+            # Set persistent cookie for 30 days (Election duration)
+            resp = make_response(redirect(url_for('voting.ballot')))
+            resp.set_cookie('voter_device_token', new_device_token, max_age=30*24*60*60, httponly=True, samesite='Lax')
+            return resp
         else:
             flash('Your verification code has expired. Please request a new one.', 'error')
     else:

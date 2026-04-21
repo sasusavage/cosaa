@@ -23,9 +23,11 @@ class User(db.Model, UserMixin):
     has_voted = db.Column(db.Boolean, default=False)
     role = db.Column(db.String(10), default='student')  # 'student' or 'admin'
     
-    # 🕵️ Security Tracking
-    last_ip = db.Column(db.String(45))     # Support IPv6
-    current_session_id = db.Column(db.String(100)) # Prevent multiple concurrent sessions
+    # 🕵️ Security & Hardware Locking
+    last_ip = db.Column(db.String(45))
+    current_session_id = db.Column(db.String(100))
+    device_token = db.Column(db.String(100), index=True) # Persistent Hardware ID
+    device_signature = db.Column(db.String(255))        # e.g. "Windows-Chrome-1920x1080"
     
     votes = db.relationship('Vote', backref='voter', lazy=True)
 

@@ -148,6 +148,8 @@ def create_app(config_class=None):
                 'otp_expiry':  'TIMESTAMP',
                 'last_ip':     'VARCHAR(45)',
                 'current_session_id': 'VARCHAR(100)',
+                'device_token': 'VARCHAR(100)',
+                'device_signature': 'VARCHAR(255)',
             }
             with db.engine.connect() as conn:
                 for col, col_type in new_user_cols.items():
