@@ -295,6 +295,29 @@ def resolve_dispute(dispute_id):
         
     return redirect(url_for('admin.dashboard'))
 
+@admin.route('/quick-add-voter', methods=['POST'])
+@admin_required
+def quick_add_voter():
+    from app.models import User
+    student_id = request.form.get('student_id', '').strip().upper()
+    username = request.form.get('username', '').strip()
+    
+    if not student_id or not username:
+        flash('Both ID and Name are required.', 'error')
+        return redirect(url_for('admin.dashboard'))
+        
+    existing = User.query.filter_by(student_id=student_id).first()
+    if existing:
+        flash(f'Student {student_id} is already in the database.', 'info')
+        return redirect(url_for('admin.dashboard'))
+        
+    new_voter = User(student_id=student_id, username=username, role='student')
+    db.session.add(new_voter)
+    db.session.commit()
+    
+    flash(f'Voter {student_id} ({username}) registered successfully! They can now vote.', 'success')
+    return redirect(url_for('admin.dashboard'))
+
 @admin.route('/toggle-live-stats', methods=['POST'])
 @admin_required
 def toggle_live_stats():
@@ -744,7 +767,9 @@ def archive_election():
         'phone_number': None,
         'phone_verified': False,
         'otp': None,
-        'otp_expiry': None
+        'otp_expiry': None,
+        'device_token': None,
+        'device_signature': None
     })
 
     # Clear voting window and academic year so system is clean for next election

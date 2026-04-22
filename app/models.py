@@ -58,7 +58,7 @@ class Candidate(db.Model):
     name = db.Column(db.String(100), nullable=False)
     manifesto_summary = db.Column(db.Text)
     image_url = db.Column(db.String(255))
-    votes_received = db.relationship('Vote', backref='candidate', lazy=True)
+    votes_received = db.relationship('Vote', backref='candidate', lazy=True, cascade="all, delete-orphan")
 
 class Vote(db.Model):
     __tablename__ = 'votes'
