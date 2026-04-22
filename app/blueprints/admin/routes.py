@@ -31,12 +31,14 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         # 1. 🛡️ CLOUDFLARE ZERO TRUST ENFORCEMENT
-        # This blocks everyone NOT behind your Cloudflare Zero Trust gateway.
         if current_app.config.get('ENFORCE_CLOUDFLARE_ACCESS'):
-            cloudflare_assertion = request.headers.get('Cf-Access-Jwt-Assertion')
-            if not cloudflare_assertion:
+            # Check for standard and proxy-prefixed headers
+            jwt = request.headers.get('Cf-Access-Jwt-Assertion') or \
+                  request.headers.get('X-Cf-Access-Jwt-Assertion')
+            
+            if not jwt:
                 from flask import abort
-                return abort(403, description="Access Denied: Connection must originate from the verified Cloudflare Zero Trust Gateway.")
+                return abort(403, description="Access Denied: Connection must originate from the verified Cloudflare Zero Trust Gateway. (Header Missing)")
         
         # 2. Flask Authentication
         if not current_user.is_authenticated:
