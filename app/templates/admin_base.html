@@ -15,16 +15,25 @@
         70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
         100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
+    
+    /* 📱 Mobile Menu Utilities */
+    @media (max-width: 1024px) {
+        .sidebar-mobile-hidden { transform: translateX(-100%); }
+        .sidebar-mobile-visible { transform: translateX(0); }
+    }
 </style>
 {% block admin_extra_style %}{% endblock %}
 {% endblock %}
 
 {% block content %}
-<div class="flex h-screen overflow-hidden text-slate-800">
+<div class="flex h-screen overflow-hidden text-slate-800 relative">
     
     {# ── SIDEBAR (Enterprise Rail) ────────────────────────────────────────── #}
-    <div class="w-72 bg-white border-r border-slate-200 flex flex-col h-full shrink-0">
-        <div class="p-8 border-b border-slate-100 mb-4">
+    <!-- Backdrop for mobile -->
+    <div id="sidebar-backdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[50] hidden lg:hidden"></div>
+
+    <div id="admin-sidebar" class="fixed lg:static inset-y-0 left-0 w-72 bg-white border-r border-slate-200 flex flex-col h-full shrink-0 z-[60] transition-transform duration-300 sidebar-mobile-hidden lg:translate-x-0">
+        <div class="p-8 border-b border-slate-100 mb-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-[#0051c3] rounded flex items-center justify-center text-white font-bold text-xl">C</div>
                 <div>
@@ -32,9 +41,13 @@
                     <p class="text-[0.65rem] font-black uppercase tracking-[0.2em] text-[#F6821F] mt-1">Enterprise Admin</p>
                 </div>
             </div>
+            <!-- Close for mobile -->
+            <button onclick="toggleSidebar()" class="lg:hidden p-2 text-slate-400 hover:text-slate-900">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
         </div>
 
-        <nav class="flex-1 space-y-1">
+        <nav class="flex-1 space-y-1 overflow-y-auto">
             <a href="{{ url_for('admin.dashboard') }}" class="sidebar-item {% if request.endpoint == 'admin.dashboard' %}sidebar-active{% endif %} flex items-center gap-3 px-8 py-4 font-bold text-sm text-slate-500 hover:text-[#0051c3]">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
                 Security Overview
@@ -74,29 +87,36 @@
 
     {# ── MAIN CONTENT ─────────────────────────────────────────────────────── #}
     <div class="flex-1 h-screen overflow-y-auto flex flex-col">
-        <header class="h-16 border-b border-slate-200 bg-white flex items-center justify-between px-10 shrink-0 sticky top-0 z-40">
+        <header class="h-16 border-b border-slate-200 bg-white flex items-center justify-between px-6 md:px-10 shrink-0 sticky top-0 z-40">
             <div class="flex items-center gap-4">
+                <!-- Hamburger for mobile -->
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 -ml-2 text-slate-500 hover:text-slate-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                </button>
                 <div class="flex items-center gap-2">
                     <div class="w-2 h-2 rounded-full bg-emerald-500 security-pulse"></div>
                     <span class="text-xs font-bold text-slate-600 uppercase tracking-widest">{% block admin_title %}System Node{% endblock %}</span>
                 </div>
             </div>
-            <div class="flex items-center gap-6">
-                <div class="text-right">
+            <div class="flex items-center gap-4 md:gap-6">
+                <div class="hidden sm:block text-right">
                     <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Active Portal</p>
                     <p class="text-xs font-black text-[#0051c3] uppercase">Production</p>
                 </div>
-                <div class="h-8 w-px bg-slate-100"></div>
+                <div class="hidden sm:block h-8 w-px bg-slate-100"></div>
                 {% block admin_actions %}{% endblock %}
-                <a href="{{ url_for('main.index') }}" class="text-xs font-bold text-slate-500 hover:text-blue-600 hover:underline">Exit to Site →</a>
+                <!-- Mobile Exit Icon -->
+                <a href="{{ url_for('main.index') }}" class="p-2 text-slate-500 hover:text-blue-600">
+                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                </a>
             </div>
         </header>
 
-        <main class="p-10">
+        <main class="p-4 md:p-10">
             {% with messages = get_flashed_messages(with_categories=true) %}
               {% if messages %}
                 {% for category, message in messages %}
-                  <div class="p-4 mb-8 rounded border {% if category == 'error' %}bg-red-50 border-red-200 text-red-700{% else %}bg-blue-50 border-blue-200 text-blue-700{% endif %} flex items-center gap-3 text-sm font-bold animate-pulse-once">
+                  <div class="p-4 mb-6 md:mb-8 rounded border {% if category == 'error' %}bg-red-50 border-red-200 text-red-700{% else %}bg-blue-50 border-blue-200 text-blue-700{% endif %} flex items-center gap-3 text-sm font-bold animate-pulse-once">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     {{ message }}
                   </div>
@@ -108,4 +128,21 @@
         </main>
     </div>
 </div>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('admin-sidebar');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        
+        if (sidebar.classList.contains('sidebar-mobile-hidden')) {
+            sidebar.classList.remove('sidebar-mobile-hidden');
+            sidebar.classList.add('sidebar-mobile-visible');
+            backdrop.classList.remove('hidden');
+        } else {
+            sidebar.classList.add('sidebar-mobile-hidden');
+            sidebar.classList.remove('sidebar-mobile-visible');
+            backdrop.classList.add('hidden');
+        }
+    }
+</script>
 {% endblock %}

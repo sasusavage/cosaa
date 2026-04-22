@@ -14,19 +14,21 @@
 {% block admin_content %}
 <div class="space-y-8">
     {# -- Search Filter -- #}
-    <div class="bg-white border border-slate-200 rounded-lg p-4 flex items-center gap-4">
-        <form method="GET" action="{{ url_for('admin.list_students') }}" class="flex-1 flex gap-4">
+    <div class="bg-white border border-slate-200 rounded-lg p-4">
+        <form method="GET" action="{{ url_for('admin.list_students') }}" class="flex flex-col md:flex-row gap-4">
             <div class="flex-1 relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                 </div>
                 <input type="text" name="search" value="{{ search or '' }}" placeholder="Filter by Name, ID, or Program..." 
-                       class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded text-sm focus:bg-white focus:border-blue-600 focus:outline-none transition-all placeholder:text-slate-400">
+                       class="w-full pl-10 pr-4 py-3 md:py-2 bg-slate-50 border border-slate-200 rounded text-sm focus:bg-white focus:border-blue-600 focus:outline-none transition-all placeholder:text-slate-400">
             </div>
-            <button type="submit" class="px-6 py-2 bg-slate-800 text-white text-xs font-black uppercase tracking-widest rounded hover:bg-slate-900 transition-all">Search</button>
-            {% if search %}
-                <a href="{{ url_for('admin.list_students') }}" class="px-2 flex items-center text-xs font-bold text-slate-400 hover:text-red-500 underline underline-offset-4">Clear</a>
-            {% endif %}
+            <div class="flex gap-2">
+                <button type="submit" class="flex-1 md:flex-none px-8 py-3 md:py-2 bg-slate-800 text-white text-xs font-black uppercase tracking-widest rounded hover:bg-slate-900 transition-all">Search</button>
+                {% if search %}
+                    <a href="{{ url_for('admin.list_students') }}" class="px-4 flex items-center text-xs font-bold text-slate-400 hover:text-red-500 underline underline-offset-4">Clear</a>
+                {% endif %}
+            </div>
         </form>
     </div>
 
@@ -36,48 +38,52 @@
             <table class="w-full enterprise-table">
                 <thead>
                     <tr>
-                        <th class="px-8 py-4 text-left">Internal ID</th>
+                        <th class="px-8 py-4 text-left hidden lg:table-cell">Internal ID</th>
                         <th class="px-8 py-4 text-left">Voter Identity</th>
-                        <th class="px-8 py-4 text-left">Contact Metadata</th>
-                        <th class="px-8 py-4 text-left">Academic Data</th>
-                        <th class="px-8 py-4 text-center">Protocol Status</th>
-                        <th class="px-8 py-4 text-right">Administrative</th>
+                        <th class="px-8 py-4 text-left hidden sm:table-cell">Contact Metadata</th>
+                        <th class="px-8 py-4 text-left hidden md:table-cell">Academic Data</th>
+                        <th class="px-8 py-4 text-center">Status</th>
+                        <th class="px-8 py-4 text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 italic text-[0.85rem]">
                     {% for student in pagination.items %}
                     <tr class="hover:bg-slate-50/80 transition-colors group">
-                        <td class="px-8 py-4 text-slate-400 font-mono text-[0.7rem]">{{ student.id }}</td>
+                        <td class="px-8 py-4 text-slate-400 font-mono text-[0.7rem] hidden lg:table-cell">{{ student.id }}</td>
                         <td class="px-8 py-4">
-                            <p class="font-bold text-slate-900">{{ student.full_name }}</p>
+                            <p class="font-bold text-slate-900 truncate max-w-[120px] md:max-w-none">{{ student.full_name }}</p>
                             <p class="text-[0.7rem] font-black text-[#F6821F] tracking-wider uppercase mt-0.5">{{ student.student_id }}</p>
                         </td>
-                        <td class="px-8 py-4">
+                        <td class="px-8 py-4 hidden sm:table-cell">
                             {% if student.phone_number %}
                             <p class="text-slate-600 font-bold font-mono">{{ student.phone_number }}</p>
                             <p class="text-[0.65rem] text-emerald-600 font-black uppercase tracking-widest">Verified SMS</p>
                             {% else %}
-                            <p class="text-slate-300 italic">No Device Linked</p>
+                            <p class="text-slate-300 italic">No Device</p>
                             {% endif %}
                         </td>
-                        <td class="px-8 py-4">
+                        <td class="px-8 py-4 hidden md:table-cell">
                             <p class="text-slate-500 font-medium truncate max-w-[150px]">{{ student.program or 'Unspecified' }}</p>
-                            <p class="text-[0.65rem] text-slate-400 uppercase font-bold">{{ student.department or 'N/A' }}</p>
+                            <p class="text-[0.65rem] text-slate-400 uppercase font-bold text-xs">{{ student.department or 'N/A' }}</p>
                         </td>
                         <td class="px-8 py-4 text-center">
                             {% if student.has_voted %}
-                            <span class="inline-block w-20 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 text-[0.65rem] font-black rounded uppercase tracking-widest shadow-sm shadow-emerald-50">Voted</span>
+                            <div class="flex items-center justify-center">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-200"></span>
+                            </div>
                             {% else %}
-                            <span class="inline-block w-20 py-1 bg-slate-50 text-slate-400 border border-slate-100 text-[0.65rem] font-black rounded uppercase tracking-widest">Pending</span>
+                            <div class="flex items-center justify-center">
+                                <span class="w-2.5 h-2.5 rounded-full bg-slate-200"></span>
+                            </div>
                             {% endif %}
                         </td>
                         <td class="px-8 py-4 text-right">
-                            <div class="flex items-center justify-end gap-3 opacity-30 group-hover:opacity-100 transition-opacity">
-                                <a href="{{ url_for('admin.edit_student', user_id=student.id) }}" class="text-[#0051c3] font-bold text-[0.7rem] hover:underline uppercase tracking-wider">Modify</a>
+                            <div class="flex items-center justify-end gap-4 md:opacity-30 md:group-hover:opacity-100 transition-opacity">
+                                <a href="{{ url_for('admin.edit_student', user_id=student.id) }}" class="p-2 text-[#0051c3] font-bold text-[0.7rem] border border-blue-100 rounded bg-blue-50/30 uppercase tracking-wider">Edit</a>
                                 {% if student.has_voted %}
-                                <form method="POST" action="{{ url_for('admin.reset_student_vote', user_id=student.id) }}" onsubmit="return confirm('Full Security Reset: Wipe voting status and phone binding for this student?')" class="inline">
+                                <form method="POST" action="{{ url_for('admin.reset_student_vote', user_id=student.id) }}" onsubmit="return confirm('Full Security Reset: Wipe voting status for this student?')" class="inline">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                                    <button type="submit" class="text-rose-600 font-bold text-[0.7rem] hover:underline uppercase tracking-wider">Wipe</button>
+                                    <button type="submit" class="p-2 text-rose-600 font-bold text-[0.7rem] border border-rose-100 rounded bg-rose-50/30 uppercase tracking-wider">Reset</button>
                                 </form>
                                 {% endif %}
                             </div>
