@@ -392,18 +392,15 @@ def finalize_vote():
         current_user.has_voted = True
         db.session.commit()
         
-        # 📲 Generate Receipt & Send SMS
+        # 🛡️ Generate Digital Receipt for On-Screen Verification
         import hashlib
         receipt_raw = f"{current_user.student_id}-{Setting.get('academic_year', '2026')}-CoSSA-VOTE"
         receipt_hash = hashlib.sha256(receipt_raw.encode()).hexdigest().upper()[:12]
         
-        message = f"CoSSA Election: Vote Confirmed! Your Digital Receipt is {receipt_hash}. Keep this to verify your entry. Thank you for voting!"
-        send_sms(current_user.phone_number, message)
-        
         # Clear sensitive session data
         session.pop('ballot_choices', None)
         
-        flash('Ballot submitted successfully! Your receipt has been sent via SMS.', 'success')
+        flash('Ballot submitted successfully! PLEASE SCREENSHOT YOUR RECEIPT BELOW.', 'success')
         return redirect(url_for('voting.vote_confirmed'))
     except Exception as e:
         db.session.rollback()

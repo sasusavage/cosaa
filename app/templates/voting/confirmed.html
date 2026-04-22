@@ -11,13 +11,16 @@
         <h1 class="text-4xl font-black text-slate-900 mb-4 tracking-tight">Ballot Submitted!</h1>
         <p class="text-xl text-slate-500 mb-10 leading-relaxed">Your vote has been securely recorded for the CoSSA{% if academic_year %} {{ academic_year }}{% endif %} elections.</p>
         
-        <div class="bg-slate-50 rounded-2xl p-6 border-2 border-dashed border-slate-200 mb-10 relative overflow-hidden group">
-            <div class="absolute top-0 right-0 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+        <div class="bg-slate-50 rounded-2xl p-6 border-2 border-dashed border-blue-200 mb-10 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 p-2 text-blue-500 opacity-20 group-hover:opacity-40 transition-opacity">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
             </div>
-            <p class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Digital Ballot Receipt</p>
-            <p class="text-2xl font-mono font-black text-blue-600 tracking-[0.2em]">{{ receipt_hash }}</p>
-            <p class="text-[10px] text-slate-400 mt-2 italic font-bold">Heads up! We've sent this receipt to your phone via SMS for safekeeping.</p>
+            <p class="text-xs font-black uppercase tracking-[0.2em] text-blue-500 mb-2">📸 PLEASE SCREENSHOT THIS NOW</p>
+            <p class="text-2xl font-mono font-black text-slate-900 tracking-[0.2em] border-y border-slate-200 py-3 my-2">{{ receipt_hash }}</p>
+            <p class="text-[10px] text-slate-500 mt-2 font-bold leading-tight">This is your ONLY digital record. You must have this code AND your Student ID to verify your choices later.</p>
         </div>
 
         <div class="flex flex-col space-y-4">

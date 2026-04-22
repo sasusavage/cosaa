@@ -13,7 +13,7 @@
                 </svg>
             </div>
             <h1 class="text-3xl font-black text-slate-900 tracking-tight mb-2">Verify Your Ballot</h1>
-            <p class="text-slate-500 font-medium">Use the Digital Receipt sent to your SMS to preview your vote.</p>
+            <p class="text-slate-500 font-medium">Use the Digital Receipt from your screenshot to preview your vote.</p>
         </div>
 
         {# 📝 Entry Form #}
@@ -32,10 +32,10 @@
                     <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Student ID</label>
                     <input type="text" name="student_id" required value="{{ student_id or '' }}"
                            class="w-full p-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-[#0051c3] outline-none transition-all font-bold text-slate-900 placeholder:text-slate-300"
-                           placeholder="Enter your ID (e.g. EC/BAS/22/...)">
+                           placeholder="Enter your Student ID">
                 </div>
                 <div>
-                    <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Digital Receipt Code (from SMS)</label>
+                    <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">12-Character Receipt Code</label>
                     <input type="text" name="receipt_code" required
                            class="w-full p-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-[#0051c3] outline-none transition-all font-bold text-slate-900 placeholder:text-slate-300 tracking-[0.2em]"
                            placeholder="EX: A1B2C3D4E5F6">
