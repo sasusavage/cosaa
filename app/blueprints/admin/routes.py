@@ -142,7 +142,7 @@ def dashboard():
                            stats_display_hours=Setting.get('stats_display_hours', '48'),
                            live_stats_on=live_stats_on,
                            recent_votes=recent_votes,
-                           pending_disputes=pending_disputes)
+                           disputes=pending_disputes)
 
 @admin.route('/voting-window', methods=['POST'])
 @admin_required
