@@ -48,6 +48,7 @@ class Portfolio(db.Model):
     __tablename__ = 'portfolios'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), unique=True, nullable=False)
+    order = db.Column(db.Integer, default=0) # Controls ballot sequence
     candidates = db.relationship('Candidate', backref='portfolio', lazy=True, cascade="all, delete-orphan")
     votes = db.relationship('Vote', backref='portfolio', lazy=True, cascade="all, delete-orphan")
 

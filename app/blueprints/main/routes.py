@@ -34,7 +34,7 @@ def index():
     show_results = Setting.get('display_live_results', '0') == '1'
     leaderboard_data = []
     if show_results:
-        portfolios = Portfolio.query.all()
+        portfolios = Portfolio.query.order_by(Portfolio.order).all()
         for p in portfolios:
             candidates = []
             for c in p.candidates:
@@ -52,7 +52,7 @@ def index():
         show_turnout=show_turnout,
         show_results=show_results,
         leaderboard_data=leaderboard_data,
-        portfolios=Portfolio.query.all() if voting_open else [],
+        portfolios=Portfolio.query.order_by(Portfolio.order).all() if voting_open else [],
         upcoming_events=Event.query.order_by(Event.order).all(),
         executives=Executive.query.order_by(Executive.order).limit(4).all(),
         hero_title=_s('hero_title', 'Empowering the Next Generation of African Innovators.'),

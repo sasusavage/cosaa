@@ -266,7 +266,7 @@ def ballot():
         show_stats = _should_show_stats()
         academic_year = Setting.get('academic_year', '')
         return render_template('voting/voting_closed.html', show_stats=show_stats, academic_year=academic_year)
-    portfolios = Portfolio.query.all()
+    portfolios = Portfolio.query.order_by(Portfolio.order).all()
     
     # Calculate turnout for the dashboard header
     voted_count = User.query.filter_by(has_voted=True).count()

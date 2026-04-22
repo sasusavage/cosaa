@@ -143,6 +143,7 @@ def dashboard():
                            live_stats_on=live_stats_on,
                            recent_votes=recent_votes,
                            disputes=pending_disputes,
+                           portfolios=Portfolio.query.order_by(Portfolio.order).all(),
                            display_live_results=Setting.get('display_live_results', '0'),
                            display_turnout_stats=Setting.get('display_turnout_stats', '1'))
 
@@ -342,7 +343,7 @@ def stats_json():
     from flask import jsonify
     total_users = User.query.count()
     voted_count = User.query.filter_by(has_voted=True).count()
-    portfolios = Portfolio.query.all()
+    portfolios = Portfolio.query.order_by(Portfolio.order).all()
     data = []
     for p in portfolios:
         candidates = []
@@ -358,7 +359,7 @@ def stats_json():
 @admin.route('/candidates/create', methods=['GET', 'POST'])
 @admin_required
 def create_candidate():
-    portfolios = Portfolio.query.all()
+    portfolios = Portfolio.query.order_by(Portfolio.order).all()
     if request.method == 'POST':
         name = request.form.get('name')
         summary = request.form.get('manifesto_summary')
@@ -394,15 +395,28 @@ def create_candidate():
 def create_portfolio():
     if request.method == 'POST':
         title = request.form.get('title')
+        order = request.form.get('order', 0, type=int)
         if Portfolio.query.filter_by(title=title).first():
             flash('Portfolio already exists.', 'error')
             return redirect(url_for('admin.create_portfolio'))
-        portfolio = Portfolio(title=title)
+        portfolio = Portfolio(title=title, order=order)
         db.session.add(portfolio)
         db.session.commit()
         flash('Portfolio created successfully.', 'success')
         return redirect(url_for('admin.dashboard'))
     return render_template('admin/create_portfolio.html')
+
+@admin.route('/portfolios/<int:port_id>/edit', methods=['GET', 'POST'])
+@admin_required
+def edit_portfolio(port_id):
+    portfolio = Portfolio.query.get_or_404(port_id)
+    if request.method == 'POST':
+        portfolio.title = request.form.get('title')
+        portfolio.order = request.form.get('order', 0, type=int)
+        db.session.commit()
+        flash('Portfolio updated successfully.', 'success')
+        return redirect(url_for('admin.dashboard'))
+    return render_template('admin/edit_portfolio.html', portfolio=portfolio)
 
 @admin.route('/credentials/upload', methods=['GET', 'POST'])
 @admin_required

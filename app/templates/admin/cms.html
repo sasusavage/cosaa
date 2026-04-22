@@ -86,12 +86,18 @@
                     <div class="flex items-center justify-between mb-4 border-b border-slate-50 pb-2">
                         <div class="flex items-center gap-4">
                             <span class="w-1 h-6 bg-[#0051c3]"></span>
-                            <h4 class="text-[0.7rem] font-black text-slate-900 uppercase tracking-[0.2em]">{{ portfolio.title }}</h4>
+                            <div class="flex items-center gap-2">
+                                <span class="bg-slate-100 text-slate-400 text-[0.6rem] font-black px-2 py-0.5 rounded tracking-tighter">#{{ portfolio.order }}</span>
+                                <h4 class="text-[0.7rem] font-black text-slate-900 uppercase tracking-[0.2em]">{{ portfolio.title }}</h4>
+                            </div>
                         </div>
-                        <form method="POST" action="{{ url_for('admin.delete_portfolio', port_id=portfolio.id) }}" onsubmit="return confirm('Hard Delete Portfolio? All candidates mapping to this portfolio will be nullified.')">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                            <button type="submit" class="text-[0.6rem] font-bold text-red-400 hover:text-red-600 uppercase tracking-widest">Delete Inventory</button>
-                        </form>
+                        <div class="flex items-center gap-4">
+                            <a href="{{ url_for('admin.edit_portfolio', port_id=portfolio.id) }}" class="text-[0.6rem] font-bold text-blue-500 hover:text-blue-700 uppercase tracking-widest">Edit Details</a>
+                            <form method="POST" action="{{ url_for('admin.delete_portfolio', port_id=portfolio.id) }}" onsubmit="return confirm('Hard Delete Portfolio? All candidates mapping to this portfolio will be nullified.')">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <button type="submit" class="text-[0.6rem] font-bold text-red-400 hover:text-red-600 uppercase tracking-widest">Delete Inventory</button>
+                            </form>
+                        </div>
                     </div>
                     {% if portfolio.candidates %}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
