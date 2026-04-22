@@ -38,29 +38,16 @@ def login():
     
     if request.method == 'POST':
         raw_id = (request.form.get('student_id') or '').strip().upper()
-        # Admin Password Check
-        user = User.query.filter(
-            db.func.upper(User.student_id) == raw_id
-        ).first()
-        
-        password = request.form.get('password', '').strip()
-        
-        if user and user.role == 'admin':
-            if user.check_password(password):
-                login_user(user)
-                return redirect(url_for('admin.dashboard'))
-            else:
-                flash('Invalid admin credentials.', 'error')
-                return render_template('voting/login.html', admin_mode=True, student_id=raw_id)
-        
-        # Student Login Logic
-        if not user:
-            flash('Student ID not found. Please check and try again.', 'error')
+        user = User.query.filter(db.func.upper(User.student_id) == raw_id).first()
+
+        # Access Denial Logic (Cloaks Admins & Invalid IDs)
+        if not user or user.role == 'admin':
+            flash('Invalid Student ID or Phone Number.', 'error')
             return redirect(url_for('voting.login'))
 
         input_phone = request.form.get('phone_number', '').strip()
         if not input_phone:
-            flash('Please provide your mobile phone number.', 'error')
+            flash('Invalid Student ID or Phone Number.', 'error')
             return redirect(url_for('voting.login'))
         
         from app.utils import format_gh_number
