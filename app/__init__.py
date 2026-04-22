@@ -15,7 +15,12 @@ login_manager = LoginManager()
 login_manager.login_view = 'voting.login'
 migrate = Migrate()
 csrf = CSRFProtect()
-limiter = Limiter(key_func=get_remote_address, default_limits=["200 per day", "50 per hour"])
+limiter = Limiter(
+    key_func=get_remote_address, 
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri=os.environ.get('RATELIMIT_STORAGE_URL', 'memory://'),
+    strategy="fixed-window"
+)
 
 def create_app(config_class=None):
     app = Flask(__name__)
