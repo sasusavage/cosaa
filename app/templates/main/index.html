@@ -55,7 +55,7 @@
                 <span class="text-2xl font-black text-blue-600">{{ turnout|round(1) }}%</span>
             </div>
             <div class="w-full bg-slate-100 h-6 rounded-full p-1 border border-slate-200 overflow-hidden shadow-inner">
-                <div class="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full shadow-lg transition-all duration-1000" style="width: {{ turnout|default(0) }}%;"></div>
+                <div class="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full shadow-lg transition-all duration-1000" style="{{ 'width: %s%%;'|format(turnout|default(0)) }}"></div>
             </div>
         </div>
     </div>
