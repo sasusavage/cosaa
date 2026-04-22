@@ -103,9 +103,14 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
                     Live Standings <span class="hidden sm:inline">— Portfolio Summary</span>
                 </h3>
+                {% if display_live_results == '1' %}
                 <span class="text-[0.6rem] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded uppercase tracking-widest animate-pulse">Monitoring Active</span>
+                {% else %}
+                <span class="text-[0.6rem] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded uppercase tracking-widest">Publicly Hidden</span>
+                {% endif %}
             </div>
             <div class="p-4 md:p-8 space-y-12">
+                {% if display_live_results == '1' %}
                 {% for p in portfolios %}
                 <div class="space-y-5">
                     <div class="flex items-center justify-between">
@@ -149,6 +154,17 @@
                     </div>
                 </div>
                 {% endfor %}
+                {% else %}
+                <div class="py-20 text-center space-y-4">
+                    <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto border border-slate-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7 1.274-4.057-5.064-7-9.542-7 1.274 4.057 5.064 7 9.542 7 1.274 4.057 5.064 7 9.542 7 1.273 4.057 5.064 7 9.542 7z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3l18 18" /></svg>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-black text-slate-900 uppercase tracking-widest text-[#0051c3]">Election Blind Mode Active</h4>
+                        <p class="text-[0.65rem] text-slate-400 font-bold uppercase mt-1 tracking-tighter italic">Live standings are currently decoupled from the monitoring interface.</p>
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>

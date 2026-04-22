@@ -120,18 +120,22 @@
         const closeBtn = document.getElementById('close-btn');
         const mobileMenu = document.getElementById('mobile-menu');
 
-        menuBtn.addEventListener('click', () => {
-            mobileMenu.classList.remove('hidden', 'translate-x-full');
-            mobileMenu.classList.add('flex', 'translate-x-0');
-        });
+        if (menuBtn && mobileMenu) {
+            menuBtn.addEventListener('click', () => {
+                mobileMenu.classList.remove('hidden', 'translate-x-full');
+                mobileMenu.classList.add('flex', 'translate-x-0');
+            });
+        }
 
-        closeBtn.addEventListener('click', () => {
-            mobileMenu.classList.add('translate-x-full');
-            setTimeout(() => {
-                mobileMenu.classList.add('hidden');
-                mobileMenu.classList.remove('flex');
-            }, 300);
-        });
+        if (closeBtn && mobileMenu) {
+            closeBtn.addEventListener('click', () => {
+                mobileMenu.classList.add('translate-x-full');
+                setTimeout(() => {
+                    mobileMenu.classList.add('hidden');
+                    mobileMenu.classList.remove('flex');
+                }, 300);
+            });
+        }
     </script>
 
     <main class="{% if not hide_layout %}container mx-auto px-6 py-8{% endif %}">
