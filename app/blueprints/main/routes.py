@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template
-from app.models import Portfolio, Setting, Executive, Resource, Event
+from app.models import User, Portfolio, Setting, Executive, Resource, Event
 from datetime import datetime, timezone
 
 main = Blueprint('main', __name__)
@@ -25,8 +25,15 @@ def _voting_open():
 @main.route('/')
 def index():
     voting_open = _voting_open()
+    total_users = User.query.count()
+    voted_count = User.query.filter_by(has_voted=True).count()
+    turnout = (voted_count / total_users * 100) if total_users > 0 else 0
+    
     return render_template('main/index.html',
         voting_open=voting_open,
+        turnout=turnout,
+        voted_count=voted_count,
+        total_users=total_users,
         portfolios=Portfolio.query.all() if voting_open else [],
         upcoming_events=Event.query.order_by(Event.order).all(),
         executives=Executive.query.order_by(Executive.order).limit(4).all(),
