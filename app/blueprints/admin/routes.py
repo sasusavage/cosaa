@@ -27,23 +27,28 @@ def delete_upload(image_url):
     except Exception:
         pass  # Never crash a delete because of a missing file
 
-def admin_required(f):
+def cloudflare_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        # 1. 🛡️ CLOUDFLARE ZERO TRUST ENFORCEMENT
+        # 🛡️ CLOUDFLARE ZERO TRUST ENFORCEMENT
+        # This is the "First Fence": It blocks everyone NOT behind your tunnel.
         if current_app.config.get('ENFORCE_CLOUDFLARE_ACCESS'):
-            # Check for standard header, proxy-passed header, OR the Cloudflare Authorization cookie
             jwt = request.headers.get('Cf-Access-Jwt-Assertion') or \
                   request.headers.get('X-Cf-Access-Jwt-Assertion') or \
                   request.cookies.get('CF_Authorization')
             
             if not jwt:
                 from flask import abort
-                return abort(403, description="Access Denied: Identity proof missing. Please ensure you are authenticated via Cloudflare Zero Trust.")
-        
-        # 2. Flask Authentication
+                return abort(403, description="Access Denied: Identity proof missing. You must pass through the Cloudflare Zero Trust Gateway first.")
+        return f(*args, **kwargs)
+    return decorated_function
+
+def admin_required(f):
+    @wraps(f)
+    @cloudflare_required
+    def decorated_function(*args, **kwargs):
+        # 2. Flask Authentication (The "Second Door")
         if not current_user.is_authenticated:
-            # Send them to the special admin login, NOT the student one
             flash('Admin Authentication Required', 'error')
             return redirect(url_for('admin.login'))
             
@@ -55,6 +60,7 @@ def admin_required(f):
     return decorated_function
 
 @admin.route('/login', methods=['GET', 'POST'])
+@cloudflare_required
 def login():
     if current_user.is_authenticated and current_user.role == 'admin':
         return redirect(url_for('admin.dashboard'))
