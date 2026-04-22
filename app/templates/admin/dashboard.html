@@ -138,13 +138,13 @@
                             {% set c_votes = c.votes_received|length %}
                             {% set pct = (c_votes / total_p_v * 100)|round(1) if total_p_v > 0 else 0 %}
                             {% set colors = ['bg-blue-600', 'bg-emerald-500', 'bg-amber-500', 'bg-purple-600', 'bg-rose-500'] %}
-                            <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
-                                <div class="w-3 h-3 rounded-full {{ colors[loop.index0 % colors|length] }} flex-shrink-0"></div>
-                                <div class="min-w-0">
-                                    <p class="text-[0.7rem] font-bold text-slate-800 truncate">{{ c.name }}</p>
-                                    <p class="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest">{{ pct }}% ({{ c_votes }} Votes)</p>
-                                </div>
-                            </div>
+                             <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+                                 <div class="w-3 h-3 rounded-full {{ colors[loop.index0 % colors|length] }} flex-shrink-0"></div>
+                                 <div class="min-w-0">
+                                     <p class="text-[0.7rem] font-bold text-slate-800 truncate">{{ c.name }}</p>
+                                     <p class="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest">Candidate</p>
+                                 </div>
+                             </div>
                         {% endfor %}
                     </div>
                 </div>
