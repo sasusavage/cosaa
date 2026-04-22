@@ -74,7 +74,7 @@
                 {% endif %}
                 <a href="{{ url_for('voting.ballot') }}" class="bg-blue-600 text-white px-5 py-2 rounded-full hover:bg-blue-700 shadow-md">Vote Now</a>
                 <a href="{{ url_for('voting.logout') }}" class="text-red-500 hover:text-red-700">Logout</a>
-            {% else %}
+            {% elif voting_open %}
                 <a href="{{ url_for('voting.login') }}" class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 shadow-md transition-all">Login</a>
             {% endif %}
         </div>

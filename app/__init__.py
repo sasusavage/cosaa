@@ -106,7 +106,9 @@ def create_app(config_class=None):
     @app.context_processor
     def inject_site_settings():
         from .models import Setting
+        from .blueprints.main.routes import _voting_open
         return {
+            'voting_open': _voting_open(),
             'site_footer_description': Setting.get('footer_description', 'The Computer Science Students Association is dedicated to building the future of African tech leaders through community and innovation.'),
             'site_footer_email':       Setting.get('footer_email', 'info@cossa.com'),
             'site_footer_address':     Setting.get('footer_address', 'CS Dept block, VVU'),
