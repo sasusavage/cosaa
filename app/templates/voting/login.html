@@ -42,6 +42,23 @@
                 <span class="inline-block group-hover:translate-x-1 transition-transform ml-2">→</span>
             </button>
         </form>
+
+        <div class="mt-10 w-full pt-8 border-t border-slate-100 flex flex-col items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-red-50 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M2.166 15.833L15 3.001V7a1 1 0 102 0V1a1 1 0 00-1-1h-6a1 1 0 100 2h3.999L1.166 14.833a1 1 0 001 1z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div>
+                    <h4 class="text-sm font-black text-slate-800">Security Issue?</h4>
+                    <p class="text-xs text-slate-400 font-medium">Someone else linked your ID?</p>
+                </div>
+            </div>
+            <a href="{{ url_for('voting.report_hijack') }}" class="text-sm font-black text-blue-600 hover:text-blue-700 transition-colors bg-blue-50/50 px-6 py-3 rounded-xl border border-blue-100/50">
+                Report Identity Hijack
+            </a>
+        </div>
         
         <p class="mt-8 text-slate-400 text-sm font-medium">© 2026 CoSSA Governance Platform</p>
     </div>
