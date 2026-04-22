@@ -4,6 +4,7 @@ from app.models import User, Portfolio, Vote, Setting, db
 from app.utils import send_sms, generate_otp
 from app import db, limiter
 from datetime import datetime, timedelta, timezone
+import uuid
 
 voting = Blueprint('voting', __name__)
 
@@ -37,25 +38,23 @@ def login():
     
     if request.method == 'POST':
         raw_id = (request.form.get('student_id') or '').strip().upper()
-        # Try password login first (admin)
+        # Admin Password Check
         user = User.query.filter(
             db.func.upper(User.student_id) == raw_id
         ).first()
         
         password = request.form.get('password', '').strip()
         
-        if user:
-            # ── ADMIN LOGIC (Password) ────────────────────────────────────────
-            if user.role == 'admin':
-                if user.check_password(password):
-                    login_user(user)
-                    return redirect(url_for('admin.dashboard'))
-                else:
-                    flash('Invalid admin credentials.', 'error')
-                    return render_template('voting/login.html', admin_mode=True)
-            
-            # ── STUDENT LOGIC (SMS OTP) ───────────────────────────────────────
-            input_phone = request.form.get('phone_number', '').strip()
+        if user and user.role == 'admin':
+            if user.check_password(password):
+                login_user(user)
+                return redirect(url_for('admin.dashboard'))
+            else:
+                flash('Invalid admin credentials.', 'error')
+                return render_template('voting/login.html', admin_mode=True, student_id=raw_id)
+        
+        # Student Login Logic
+        input_phone = request.form.get('phone_number', '').strip()
             
             if not input_phone:
                 flash('Please provide your mobile phone number.', 'error')

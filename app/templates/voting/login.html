@@ -14,27 +14,29 @@
             Verify your credentials to access the secure CoSSA voting portal.
         </p>
 
-        <form method="POST" class="w-full space-y-8">
+        <form id="login-form" method="POST" class="w-full space-y-8">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div class="space-y-3">
                 <label for="student_id" class="block text-xs font-black uppercase tracking-widest text-blue-600 ml-1">Student ID Number</label>
                 <input type="text" name="student_id" id="student_id" required
                        placeholder="Enter your Student ID"
+                       value="{{ student_id or request.args.get('student_id', '') }}"
                        autocomplete="off" autocapitalize="off" spellcheck="false"
                        class="w-full px-7 py-5 rounded-2xl bg-white border-2 border-slate-100 focus:border-blue-600 focus:outline-none transition-all font-bold text-xl placeholder:text-slate-300 shadow-sm">
             </div>
 
-            {% if admin_mode %}
-            <div class="space-y-3">
+            <!-- Admin Password Block -->
+            <div id="password-block" class="space-y-3 {% if not admin_mode %}hidden{% endif %}">
                 <label for="password" class="block text-xs font-black uppercase tracking-widest text-blue-600 ml-1">Admin Access Code</label>
-                <input type="password" name="password" id="password" required
+                <input type="password" name="password" id="password" 
                        placeholder="••••••••"
                        class="w-full px-7 py-5 rounded-2xl bg-white border-2 border-slate-100 focus:border-blue-600 focus:outline-none transition-all font-bold text-xl shadow-sm">
             </div>
-            {% else %}
-            <div class="space-y-3">
+
+            <!-- Student Phone Block -->
+            <div id="phone-block" class="space-y-3 {% if admin_mode %}hidden{% endif %}">
                 <label for="phone_number" class="block text-xs font-black uppercase tracking-widest text-blue-600 ml-1">Mobile Contact</label>
-                <input type="text" name="phone_number" id="phone_number" required
+                <input type="text" name="phone_number" id="phone_number" 
                        placeholder="054 XXX XXXX"
                        class="w-full px-7 py-5 rounded-2xl bg-white border-2 border-slate-100 focus:border-blue-600 focus:outline-none transition-all font-bold text-xl shadow-sm">
                 <div class="flex items-center gap-2 mt-3 ml-1">
@@ -42,8 +44,6 @@
                     <p class="text-xs text-slate-400 font-bold uppercase tracking-wide">6-digit SMS verification will be triggered</p>
                 </div>
             </div>
-            <input type="hidden" name="password" value="">
-            {% endif %}
 
             <button type="submit" class="w-full btn-vibrant py-5 rounded-2xl font-black text-xl shadow-blue-100 mt-4 group">
                 Enter Secure Portal 
@@ -54,4 +54,30 @@
         <p class="mt-8 text-slate-400 text-sm font-medium">© 2026 CoSSA Governance Platform</p>
     </div>
 </div>
+
+<script>
+    const sidInput = document.getElementById('student_id');
+    const passBlock = document.getElementById('password-block');
+    const phoneBlock = document.getElementById('phone-block');
+    const passInput = document.getElementById('password');
+    const phoneInput = document.getElementById('phone_number');
+
+    sidInput.addEventListener('input', (e) => {
+        const val = e.target.value.trim().toLowerCase();
+        if (val === 'admin') {
+            passBlock.classList.remove('hidden');
+            phoneBlock.classList.add('hidden');
+            passInput.setAttribute('required', '');
+            phoneInput.removeAttribute('required');
+        } else {
+            // Only switch back if we aren't in forced server-side admin_mode
+            {% if not admin_mode %}
+            passBlock.classList.add('hidden');
+            phoneBlock.classList.remove('hidden');
+            passInput.removeAttribute('required');
+            phoneInput.setAttribute('required', '');
+            {% endif %}
+        }
+    });
+</script>
 {% endblock %}

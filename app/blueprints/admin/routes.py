@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
-from app.models import User, Portfolio, Candidate, Vote, Setting, Executive, Resource, Event, ElectionRecord, db
+from app.models import User, Portfolio, Candidate, Vote, Setting, Executive, Resource, Event, ElectionRecord, IdentityDispute, db
 from functools import wraps
 from werkzeug.utils import secure_filename
 import csv
