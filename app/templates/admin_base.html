@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% set hide_layout = True %}
+
+{% block extra_head %}
+<style>
+    body { background: #fdfdfd !important; }
+    .sidebar-active { background: #f3f8ff; border-right: 4px solid #0051c3; color: #0051c3 !important; }
+    .sidebar-item { transition: all 0.2s ease; border-right: 4px solid transparent; }
+    .sidebar-item:hover { background: #f9fafb; border-right: 4px solid #e5e7eb; }
+    .stat-card { border: 1px solid #edf2f7; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .enterprise-table th { background: #f9fafb; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #718096; border-bottom: 1px solid #edf2f7; }
+    .security-pulse { animation: pulse 2s infinite; }
+    @keyframes pulse { 
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    {% block admin_extra_style %}{% endblock %}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flex h-screen overflow-hidden text-slate-800">
+    
+    {# ── SIDEBAR (Enterprise Rail) ────────────────────────────────────────── #}
+    <div class="w-72 bg-white border-r border-slate-200 flex flex-col h-full shrink-0">
+        <div class="p-8 border-b border-slate-100 mb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-[#0051c3] rounded flex items-center justify-center text-white font-bold text-xl">C</div>
+                <div>
+                    <h1 class="brand text-xl font-bold tracking-tight text-slate-900 leading-none">CoSSA</h1>
+                    <p class="text-[0.65rem] font-black uppercase tracking-[0.2em] text-[#F6821F] mt-1">Enterprise Admin</p>
+                </div>
+            </div>
+        </div>
+
+        <nav class="flex-1 space-y-1">
+            <a href="{{ url_for('admin.dashboard') }}" class="sidebar-item {% if request.endpoint == 'admin.dashboard' %}sidebar-active{% endif %} flex items-center gap-3 px-8 py-4 font-bold text-sm text-slate-500 hover:text-[#0051c3]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                Security Overview
+            </a>
+            <a href="{{ url_for('admin.cms') }}" class="sidebar-item {% if 'cms' in request.endpoint or 'create' in request.endpoint or 'edit' in request.endpoint %}sidebar-active{% endif %} flex items-center gap-3 px-8 py-4 font-bold text-sm text-slate-500 hover:text-[#0051c3]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 00-2 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                Content Management
+            </a>
+            <a href="{{ url_for('admin.list_students') }}" class="sidebar-item {% if request.endpoint == 'admin.list_students' %}sidebar-active{% endif %} flex items-center gap-3 px-8 py-4 font-bold text-sm text-slate-500 hover:text-[#0051c3]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                Voter Directory
+            </a>
+            <a href="{{ url_for('admin.results') }}" class="sidebar-item {% if request.endpoint == 'admin.results' %}sidebar-active{% endif %} flex items-center gap-3 px-8 py-4 font-bold text-sm text-slate-500 hover:text-[#0051c3]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                Results Audit
+            </a>
+            <div class="px-8 mt-10 mb-2">
+                <p class="text-[0.65rem] font-black uppercase tracking-[0.15em] text-slate-400">Systems</p>
+            </div>
+            <a href="{{ url_for('admin.import_excel') }}" class="sidebar-item {% if request.endpoint == 'admin.import_excel' %}sidebar-active{% endif %} flex items-center gap-3 px-8 py-4 font-bold text-sm text-slate-500 hover:text-[#0051c3]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                Bulk Import
+            </a>
+        </nav>
+
+        <div class="p-6 bg-slate-50 border-t border-slate-100">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-xs">AD</div>
+                <div class="flex-1 overflow-hidden">
+                    <p class="text-xs font-bold text-slate-900 truncate">Administrator</p>
+                    <p class="text-[0.6rem] text-slate-400 truncate">EC Command Center</p>
+                </div>
+            </div>
+            <a href="{{ url_for('voting.logout') }}" class="block w-full text-center py-2 px-4 border border-red-200 text-red-600 rounded-lg text-xs font-bold hover:bg-red-50 transition-all">Terminate Session</a>
+        </div>
+    </div>
+
+    {# ── MAIN CONTENT ─────────────────────────────────────────────────────── #}
+    <div class="flex-1 h-screen overflow-y-auto flex flex-col">
+        <header class="h-16 border-b border-slate-200 bg-white flex items-center justify-between px-10 shrink-0 sticky top-0 z-40">
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-emerald-500 security-pulse"></div>
+                    <span class="text-xs font-bold text-slate-600 uppercase tracking-widest">{% block admin_title %}System Node{% endblock %}</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="text-right">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Active Portal</p>
+                    <p class="text-xs font-black text-[#0051c3] uppercase">Production</p>
+                </div>
+                <div class="h-8 w-px bg-slate-100"></div>
+                {% block admin_actions %}{% endblock %}
+                <a href="{{ url_for('main.index') }}" class="text-xs font-bold text-slate-500 hover:text-blue-600 hover:underline">Exit to Site →</a>
+            </div>
+        </header>
+
+        <main class="p-10">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="p-4 mb-8 rounded border {% if category == 'error' %}bg-red-50 border-red-200 text-red-700{% else %}bg-blue-50 border-blue-200 text-blue-700{% endif %} flex items-center gap-3 text-sm font-bold animate-pulse-once">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            {% block admin_content %}{% endblock %}
+        </main>
+    </div>
+</div>
+{% endblock %}

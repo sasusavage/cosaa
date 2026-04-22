@@ -1,27 +1,46 @@
-{% extends 'base.html' %}
-{% block title %}Import Students from Excel{% endblock %}
-{% block content %}
-<div class="max-w-2xl mx-auto py-12">
-    <div class="glass-bg p-12 rounded-[3.5rem] shadow-2xl border border-slate-50">
-        <h1 class="text-4xl font-black mb-4 text-slate-800 tracking-tighter">Import Students</h1>
-        <p class="text-lg text-slate-500 font-medium mb-4 italic border-b border-slate-100 pb-6 leading-relaxed">
-            Upload the department Excel file. The system expects these columns in order:<br>
-            <span class="font-bold text-slate-600 not-italic">ID · SURNAME · FIRSTNAME · OTHERNAMES · PROGRAM · CAMPUS · NATIONALITY · MODE · DEPARTMENT</span>
-        </p>
-        <p class="text-sm text-slate-400 mb-8">Existing student IDs are skipped — safe to re-upload without creating duplicates.</p>
+{% extends 'admin_base.html' %}
 
-        <form method="POST" enctype="multipart/form-data" class="space-y-6">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <div class="space-y-2">
-                <label class="block text-sm font-bold uppercase tracking-widest text-slate-400">Excel File (.xlsx)</label>
-                <input type="file" name="excel_file" accept=".xlsx,.xls" required
-                       class="w-full px-6 py-4 rounded-2xl bg-slate-100 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all font-medium">
+{% block title %}Voter Ingress - CoSSA Enterprise{% endblock %}
+
+{% block admin_title %}Data Ingress Protocol{% endblock %}
+
+{% block admin_content %}
+<div class="max-w-2xl mx-auto space-y-8">
+    
+    <div class="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+        <div class="px-8 py-5 border-b border-slate-100 bg-slate-50/50">
+            <h3 class="text-sm font-black text-slate-800 uppercase tracking-widest">Excel Import Module</h3>
+        </div>
+        <div class="p-10 space-y-8">
+            <div class="p-6 bg-slate-50 border-l-4 border-blue-600 rounded">
+                <p class="text-[0.65rem] font-black uppercase tracking-[0.2em] text-blue-600 mb-2">Column Mapping Requirements</p>
+                <p class="text-xs text-slate-600 font-medium leading-relaxed font-mono">
+                    ID | SURNAME | FIRSTNAME | OTHERNAMES | PROGRAM | CAMPUS | NATIONALITY | MODE | DEPARTMENT
+                </p>
             </div>
-            <div class="flex gap-4 pt-2">
-                <button type="submit" class="flex-1 bg-blue-600 py-4 rounded-2xl text-white font-black text-xl hover:bg-blue-700 shadow-xl transition-all">Import Students</button>
-                <a href="{{ url_for('admin.dashboard') }}" class="px-8 py-4 bg-slate-100 rounded-2xl text-slate-400 font-bold hover:bg-slate-200 transition-all">Cancel</a>
-            </div>
-        </form>
+
+            <p class="text-xs text-slate-400 font-medium italic border-b border-slate-50 pb-6">
+                System Logic: Existing student IDs are automatically skipped during processing. You can safely re-upload to append new records.
+            </p>
+
+            <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div class="space-y-2">
+                    <label class="block text-[0.65rem] font-black uppercase tracking-widest text-slate-400">Target Source (.xlsx)</label>
+                    <input type="file" name="excel_file" accept=".xlsx,.xls" required
+                           class="w-full px-4 py-3 rounded bg-white border border-slate-200 focus:outline-none focus:border-blue-600 transition-all font-mono text-xs">
+                </div>
+                <div class="flex gap-4 pt-4">
+                    <button type="submit" class="flex-1 bg-[#0051c3] py-3 rounded text-white font-black text-xs uppercase tracking-[0.2em] hover:brightness-110 shadow-lg shadow-blue-100 transition-all">Execute Import</button>
+                    <a href="{{ url_for('admin.list_students') }}" class="px-8 py-3 bg-white border border-slate-200 rounded text-slate-400 font-black text-xs uppercase tracking-[0.2em] hover:bg-slate-50 transition-all">Abort</a>
+                </div>
+            </form>
+        </div>
     </div>
+
+    <div class="text-center">
+        <p class="text-[0.6rem] text-slate-300 font-bold uppercase tracking-[0.3em]">SECURE DATA UPLOAD PROTOCOL ACTIVE</p>
+    </div>
+
 </div>
 {% endblock %}

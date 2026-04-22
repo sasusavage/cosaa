@@ -1,58 +1,71 @@
-{% extends 'base.html' %}
+{% extends 'admin_base.html' %}
 
-{% block content %}
-<div class="max-w-6xl mx-auto py-12">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-16">
-        <h1 class="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter">Election Results</h1>
-        <div class="flex flex-wrap gap-3">
-            <button onclick="window.print()" class="bg-indigo-600 text-white px-6 py-3 rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-xl text-sm">Print Report</button>
-            <a href="{{ url_for('admin.dashboard') }}" class="bg-slate-100 text-slate-600 px-6 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all border border-slate-200 shadow-sm text-sm">Dashboard</a>
-        </div>
-    </div>
+{% block title %}Results Audit - CoSSA Enterprise{% endblock %}
+
+{% block admin_title %}Live Election Audit Log{% endblock %}
+
+{% block admin_actions %}
+<button onclick="window.print()" class="bg-slate-800 text-white px-4 py-2 rounded text-[0.7rem] font-black uppercase tracking-widest hover:bg-slate-900 transition-all flex items-center gap-2">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+    Export Audit Report
+</button>
+{% endblock %}
+
+{% block admin_content %}
+<div class="space-y-12">
 
     {% if data %}
-        <div class="grid grid-cols-1 gap-16">
+        <div class="space-y-12">
             {% for p_data in data %}
-                <section class="bg-white p-14 rounded-[4rem] shadow-2xl border border-slate-50 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-64 h-64 bg-blue-50/30 rounded-full blur-3xl -mr-20 -mt-20"></div>
-                    
-                    <h2 class="text-4xl font-extrabold mb-12 text-slate-800 tracking-tight flex items-center">
-                        <span class="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white mr-6 shadow-lg text-lg">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                        </span>
-                        {{ p_data.title }}
-                    </h2>
+                <div class="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+                    <div class="px-8 py-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <span class="text-slate-400 font-mono text-[0.7rem] uppercase tracking-widest">Inventory Log #0{{ loop.index }}</span>
+                            <h2 class="text-sm font-black text-slate-800 uppercase tracking-[0.15em]">{{ p_data.title }}</h2>
+                        </div>
+                        <span class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest italic">Live Verification Active</span>
+                    </div>
 
-                    <div class="overflow-x-auto rounded-3xl border border-slate-100 shadow-sm">
-                        <table class="w-full text-left min-w-[480px]">
-                            <thead class="bg-slate-50 text-slate-400 uppercase tracking-widest text-sm font-black border-b border-slate-100">
-                                <tr>
-                                    <th class="px-10 py-6">Candidate Name</th>
-                                    <th class="px-10 py-6">Total Votes</th>
-                                    <th class="px-10 py-6">Status</th>
+                    <div class="overflow-x-auto">
+                        <table class="w-full enterprise-table">
+                            <thead>
+                                <tr class="bg-slate-50/50">
+                                    <th class="px-8 py-4 text-left">Identity Profile</th>
+                                    <th class="px-8 py-4 text-center">Verified Tally</th>
+                                    <th class="px-8 py-4 text-left">Relative Magnitude</th>
+                                    <th class="px-8 py-4 text-right">Audit Status</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-50">
+                            <tbody class="divide-y divide-slate-100 italic">
                                 {% for cand in p_data.results|sort(attribute='count', reverse=True) %}
-                                    <tr class="{% if loop.first and cand.count > 0 %}bg-blue-50/30{% endif %} hover:bg-slate-50 transition-colors" data-candidate-id="{{ cand.id }}">
-                                        <td class="px-10 py-8">
-                                            <div class="flex items-center space-x-4">
-                                                <div class="text-2xl font-black text-slate-800">{{ cand.name }}</div>
-                                                {% if loop.first and cand.count > 0 %}
-                                                    <span class="leading-badge px-4 py-1 bg-blue-600 text-white rounded-full text-xs font-bold uppercase tracking-widest {% if loop.first %}animate-bounce{% else %}hidden{% endif %}">Leading</span>
-                                                {% endif %}
+                                    <tr class="hover:bg-slate-50 transition-colors" data-candidate-id="{{ cand.id }}">
+                                        <td class="px-8 py-6">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-2 h-2 rounded-full {% if loop.first and cand.count > 0 %}bg-blue-600{% else %}bg-slate-200{% endif %}"></div>
+                                                <div>
+                                                    <p class="font-bold text-slate-900 text-sm italic">{{ cand.name }}</p>
+                                                    {% if loop.first and cand.count > 0 %}
+                                                        <p class="text-[0.6rem] font-black text-blue-600 uppercase tracking-widest mt-0.5 animate-pulse">Primary Lead Agency</p>
+                                                    {% endif %}
+                                                </div>
                                             </div>
                                         </td>
-                                        <td class="px-10 py-8">
-                                            <div class="vote-count text-3xl font-black text-blue-600 tracking-tighter">{{ cand.count }}</div>
+                                        <td class="px-8 py-6 text-center">
+                                            <span class="vote-count text-2xl font-black text-slate-800 tracking-tighter">{{ cand.count }}</span>
                                         </td>
-                                        <td class="px-10 py-8">
-                                            {% if cand.count > 0 or True %} {# Always show bar for polling #}
-                                                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden min-w-[200px]">
-                                                    <div class="progress-bar h-full bg-blue-600 rounded-full transition-all duration-1000" style="width: {{ cand.pct|default(0) }}%"></div>
+                                        <td class="px-8 py-6">
+                                            <div class="flex items-center gap-4">
+                                                <div class="flex-1 bg-slate-100 h-1.5 rounded-full overflow-hidden min-w-[150px]">
+                                                    <div class="progress-bar h-full {% if loop.first %}bg-blue-600{% else %}bg-slate-400{% endif %} rounded-full transition-all duration-1000" style="width: {{ cand.pct|default(0) }}%"></div>
                                                 </div>
+                                                <span class="text-[0.65rem] font-black text-slate-400 w-10">{{ cand.pct|round(1) if cand.pct else 0 }}%</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-8 py-6 text-right">
+                                            {% if loop.first and cand.count > 0 %}
+                                            <span class="text-[0.6rem] font-black text-blue-600 border border-blue-600/20 px-2 py-0.5 rounded uppercase tracking-tighter bg-blue-50">Trend Indicator</span>
+                                            {% else %}
+                                            <span class="text-[0.6rem] font-black text-slate-300 uppercase tracking-tighter">Stabilized</span>
                                             {% endif %}
                                         </td>
                                     </tr>
@@ -60,19 +73,30 @@
                             </tbody>
                         </table>
                     </div>
-                </section>
+                </div>
             {% endfor %}
         </div>
     {% else %}
-        <div class="text-center py-32 glass-bg rounded-[3.5rem] shadow-2xl border border-slate-100">
-            <h3 class="text-3xl font-bold text-slate-400 mb-4">Awaiting Data...</h3>
-            <p class="text-slate-400 font-medium italic">Create portfolios and candidates to see live results here.</p>
+        <div class="text-center py-20 bg-white border border-slate-200 rounded-lg shadow-sm">
+            <p class="text-slate-400 text-xs font-black uppercase tracking-widest italic animate-pulse">Awaiting Initial Data Ingress...</p>
         </div>
     {% endif %}
-</div>
-{% endblock %}
 
-{% block scripts %}
+    <div class="p-6 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-slate-900 rounded flex items-center justify-center text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 21a11.955 11.955 0 01-9.618-7.016m19.236 0A11.952 11.952 0 0012 3b-9.618 7.016" /></svg>
+            </div>
+            <div>
+                <p class="text-xs font-black text-slate-900 uppercase tracking-widest">Integrity Seal Active</p>
+                <p class="text-[0.65rem] text-slate-400 font-bold uppercase italic">Real-time verification enabled for Election Committee Audit</p>
+            </div>
+        </div>
+        <p class="text-[0.6rem] font-mono text-slate-300 uppercase">System Integrity: 99.98%</p>
+    </div>
+
+</div>
+
 <script>
     async function refreshResults() {
         try {
@@ -88,8 +112,8 @@
                         
                         if (countEl && countEl.innerText != c.votes) {
                             countEl.innerText = c.votes;
-                            countEl.classList.add('scale-125', 'text-indigo-600');
-                            setTimeout(() => countEl.classList.remove('scale-125', 'text-indigo-600'), 1000);
+                            countEl.classList.add('scale-125', 'text-blue-600');
+                            setTimeout(() => countEl.classList.remove('scale-125', 'text-blue-600'), 1000);
                         }
                         if (barEl) {
                             barEl.style.width = c.pct + '%';

@@ -56,29 +56,32 @@
 </div>
 
 <script>
-    const sidInput = document.getElementById('student_id');
-    const passBlock = document.getElementById('password-block');
-    const phoneBlock = document.getElementById('phone-block');
-    const passInput = document.getElementById('password');
-    const phoneInput = document.getElementById('phone_number');
-    const isForcedAdmin = {{ 'true' if admin_mode else 'false' }};
+    (function() {
+        const sidInput = document.getElementById('student_id');
+        const passBlock = document.getElementById('password-block');
+        const phoneBlock = document.getElementById('phone-block');
+        const passInput = document.getElementById('password');
+        const phoneInput = document.getElementById('phone_number');
+        
+        // Use a safer way to get the boolean from server
+        const isForcedAdmin = "{{ 'true' if admin_mode else 'false' }}" === "true";
 
-    sidInput.addEventListener('input', (e) => {
-        const val = e.target.value.trim().toLowerCase();
-        if (val === 'admin') {
-            passBlock.classList.remove('hidden');
-            phoneBlock.classList.add('hidden');
-            passInput.setAttribute('required', '');
-            phoneInput.removeAttribute('required');
-        } else {
-            // Only switch back if we aren't in forced server-side admin_mode
-            if (!isForcedAdmin) {
-                passBlock.classList.add('hidden');
-                phoneBlock.classList.remove('hidden');
-                passInput.removeAttribute('required');
-                phoneInput.setAttribute('required', '');
+        sidInput.addEventListener('input', (e) => {
+            const val = e.target.value.trim().toLowerCase();
+            if (val === 'admin') {
+                passBlock.classList.remove('hidden');
+                phoneBlock.classList.add('hidden');
+                passInput.setAttribute('required', '');
+                phoneInput.removeAttribute('required');
+            } else {
+                if (!isForcedAdmin) {
+                    passBlock.classList.add('hidden');
+                    phoneBlock.classList.remove('hidden');
+                    passInput.removeAttribute('required');
+                    phoneInput.setAttribute('required', '');
+                }
             }
-        }
-    });
+        });
+    })();
 </script>
 {% endblock %}
