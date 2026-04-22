@@ -258,28 +258,36 @@ def reset_student_vote(user_id):
 @admin.route('/resolve-dispute/<int:dispute_id>', methods=['POST'])
 @admin_required
 def resolve_dispute(dispute_id):
-    from app.models import IdentityDispute
+    from app.models import IdentityDispute, Vote, User
     dispute = IdentityDispute.query.get_or_404(dispute_id)
-    action = request.form.get('action') # 'wipe' or 'dismiss'
     
-    if action == 'wipe':
+    # Check both form and query args for the action
+    action = request.form.get('action') or request.args.get('action')
+    
+    if action in ['wipe', 'resolve']:
         # 1. Find the User record and WIPE their verification
-        from app.models import User
         user = User.query.filter_by(student_id=dispute.student_id).first()
         if user:
+            # 🛡️ THE JUSTICE PROTOCOL:
+            # A. Wipe all votes cast by the hijacker
+            Vote.query.filter_by(user_id=user.id).delete()
+            
+            # B. Clear the 'voted' flag so the real student can vote
+            user.has_voted = False
+            
+            # C. Wipe all previous authentication data
             user.phone_number = None
             user.phone_verified = False
             user.otp = None
             user.device_token = None
             user.current_session_id = None
-            # Note: We do NOT wipe votes here unless specifically asked. 
-            # Wiping verification allows the REAL user to verify their phone and vote.
+            db.session.commit()
         
         dispute.status = 'resolved'
         from datetime import datetime
         dispute.resolved_at = datetime.utcnow()
         db.session.commit()
-        flash(f'Dispute resolved. Verification for {dispute.student_id} has been wiped. They can now re-verify.', 'success')
+        flash(f'Identity Restored. Fraudulent votes for {dispute.student_id} have been purged. They can now verify correctly.', 'success')
     else:
         dispute.status = 'dismissed'
         db.session.commit()
