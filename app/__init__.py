@@ -30,6 +30,7 @@ def create_app(config_class=None):
     upload_folder = os.environ.get('UPLOAD_FOLDER') or os.path.join(os.path.abspath(os.path.dirname(__file__)), 'static', 'uploads')
     app.config['UPLOAD_FOLDER'] = upload_folder
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB
+    app.config['ENFORCE_CLOUDFLARE_ACCESS'] = os.environ.get('ENFORCE_CLOUDFLARE_ACCESS', 'False').lower() == 'true'
     os.makedirs(upload_folder, exist_ok=True)
 
     if config_class:

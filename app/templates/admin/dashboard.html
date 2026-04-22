@@ -1,352 +1,261 @@
 {% extends 'base.html' %}
-{% block title %}Admin Dashboard{% endblock %}
+{% set hide_layout = True %}
+
+{% block title %}Enterprise Security Dashboard - CoSSA{% endblock %}
+
+{% block extra_head %}
+<style>
+    body { background: #fdfdfd !important; }
+    .sidebar-active { background: #f3f8ff; border-right: 4px solid #0051c3; color: #0051c3 !important; }
+    .sidebar-item { transition: all 0.2s ease; border-right: 4px solid transparent; }
+    .sidebar-item:hover { background: #f9fafb; border-right: 4px solid #e5e7eb; }
+    .stat-card { border: 1px solid #edf2f7; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .enterprise-table th { background: #f9fafb; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #718096; }
+    .security-pulse { animation: pulse 2s infinite; }
+    @keyframes pulse { 
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="max-w-7xl mx-auto py-12">
-
-    {# ── Header ──────────────────────────────────────────────────────────────── #}
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-        <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter">Admin Dashboard</h1>
-        <div class="flex flex-wrap gap-3">
-            <a href="{{ url_for('admin.cms') }}" class="bg-blue-600 text-white px-7 py-3 rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-xl">✏️ Manage Content</a>
-            <a href="{{ url_for('admin.list_students') }}" class="bg-emerald-600 text-white px-7 py-3 rounded-2xl font-bold hover:bg-emerald-700 transition-all shadow-xl">👥 Student Registry</a>
-            <a href="{{ url_for('admin.import_excel') }}" class="bg-slate-100 text-slate-600 px-7 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all border border-slate-200 shadow-sm">Import Students</a>
-            <a href="{{ url_for('admin.results') }}" class="bg-indigo-600 text-white px-7 py-3 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-xl">Full Results</a>
-        </div>
-    </div>
-
-    {# ── Preview strip ────────────────────────────────────────────────────────── #}
-    <div class="bg-slate-800 rounded-[2rem] px-8 py-5 mb-10 flex flex-col md:flex-row md:items-center gap-4">
-        <p class="text-slate-400 text-sm font-bold flex-1">Preview as visitor →</p>
-        <div class="flex flex-wrap gap-2">
-            <a href="{{ url_for('main.index') }}" target="_blank" class="bg-white/10 text-white px-4 py-2 rounded-xl font-bold text-xs hover:bg-white/20 transition-all">🏠 Home</a>
-            <a href="{{ url_for('main.about') }}" target="_blank" class="bg-white/10 text-white px-4 py-2 rounded-xl font-bold text-xs hover:bg-white/20 transition-all">About</a>
-            <a href="{{ url_for('main.executives') }}" target="_blank" class="bg-white/10 text-white px-4 py-2 rounded-xl font-bold text-xs hover:bg-white/20 transition-all">Executives</a>
-            <a href="{{ url_for('main.resources') }}" target="_blank" class="bg-white/10 text-white px-4 py-2 rounded-xl font-bold text-xs hover:bg-white/20 transition-all">Resources</a>
-            <a href="{{ url_for('admin.preview_ballot') }}" class="bg-blue-500/80 text-white px-4 py-2 rounded-xl font-bold text-xs hover:bg-blue-500 transition-all">🗳 Ballot</a>
-        </div>
-    </div>
-
-    {# ── Summary cards ────────────────────────────────────────────────────────── #}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
-        <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl border border-slate-50 flex flex-col items-center">
-            <div class="w-16 h-16 bg-blue-100/50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-            </div>
-            <div id="stat-total" class="text-5xl font-black text-slate-800 mb-2 tracking-tighter">{{ total_users }}</div>
-            <div class="text-slate-400 font-bold uppercase tracking-widest text-sm">Total Students</div>
-        </div>
-        <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl border border-slate-50 flex flex-col items-center">
-            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            </div>
-            <div id="stat-voted" class="text-5xl font-black text-slate-800 mb-2 tracking-tighter">{{ voted_count }}</div>
-            <div class="text-slate-400 font-bold uppercase tracking-widest text-sm">Ballots Cast</div>
-        </div>
-        <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl border border-slate-50 flex flex-col items-center">
-            <div class="w-16 h-16 bg-indigo-100/50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /></svg>
-            </div>
-            <div id="stat-turnout" class="text-5xl font-black text-slate-800 mb-2 tracking-tighter">{{ turnout|round(1) }}%</div>
-            <div class="text-slate-400 font-bold uppercase tracking-widest text-sm">Voter Turnout</div>
-        </div>
-    </div>
-
-    {# ── Voting Window ────────────────────────────────────────────────────────── #}
-    <div class="bg-white rounded-[2rem] shadow-xl border border-slate-50 px-8 py-6 mb-8">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-            <div>
-                <p class="font-black text-slate-800 text-lg flex items-center gap-3">
-                    Voting Window
-                    {% if voting_open %}
-                    <span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">● Open</span>
-                    {% else %}
-                    <span class="bg-red-100 text-red-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">● Closed</span>
-                    {% endif %}
-                </p>
-                <p class="text-slate-400 text-sm mt-1">Set the start and end date/time. Outside this window nobody can vote.</p>
-            </div>
-        </div>
-        <form method="POST" action="{{ url_for('admin.set_voting_window') }}" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <div class="space-y-1">
-                <label class="block text-xs font-bold uppercase tracking-widest text-slate-400">Voting Opens</label>
-                <input type="datetime-local" name="voting_start"
-                       value="{{ voting_start[:16] if voting_start else '' }}"
-                       class="w-full px-4 py-3 rounded-xl bg-slate-100 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 font-bold text-base transition-all">
-            </div>
-            <div class="space-y-1">
-                <label class="block text-xs font-bold uppercase tracking-widest text-slate-400">Voting Closes</label>
-                <input type="datetime-local" name="voting_end"
-                       value="{{ voting_end[:16] if voting_end else '' }}"
-                       class="w-full px-4 py-3 rounded-xl bg-slate-100 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 font-bold text-base transition-all">
-            </div>
-            <div class="space-y-1">
-                <label class="block text-xs font-bold uppercase tracking-widest text-slate-400">Academic Year</label>
-                <input type="text" name="academic_year" placeholder="e.g. 2025/2026"
-                       value="{{ academic_year }}"
-                       class="w-full px-4 py-3 rounded-xl bg-slate-100 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 font-bold text-base transition-all">
-            </div>
-            <div class="space-y-1">
-                <label class="block text-xs font-bold uppercase tracking-widest text-slate-400">Show Live Stats After Close (hours)</label>
-                <input type="number" name="stats_display_hours" min="0" placeholder="e.g. 48"
-                       value="{{ stats_display_hours }}"
-                       class="w-full px-4 py-3 rounded-xl bg-slate-100 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-blue-100 font-bold text-base transition-all">
-            </div>
-            <div class="md:col-span-2">
-                <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold hover:bg-blue-700 shadow-lg transition-all text-sm">Save Voting Window</button>
-            </div>
-        </form>
-    </div>
-
-    {# -- Archive & Reset -- #}
-    <div class="bg-white rounded-[2rem] shadow-xl border border-slate-50 px-8 py-6 mb-8">
-        <div class="mb-4">
-            <p class="font-black text-slate-800 text-lg">Archive &amp; Reset Election</p>
-            <p class="text-slate-400 text-sm mt-1">Saves a permanent record of all results, then clears all votes so the system is ready for the next election. <strong class="text-slate-600">This cannot be undone.</strong></p>
-        </div>
-        <form method="POST" action="{{ url_for('admin.archive_election') }}"
-              onsubmit="return confirm('Archive this election and reset all votes? This cannot be undone.')">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <div class="flex flex-col md:flex-row gap-3 items-end">
-                <div class="flex-1 space-y-1">
-                    <label class="block text-xs font-bold uppercase tracking-widest text-slate-400">Academic Year (required)</label>
-                    <input type="text" name="academic_year" placeholder="e.g. 2025/2026"
-                           value="{{ academic_year }}" required
-                           class="w-full px-4 py-3 rounded-xl bg-slate-100 border border-slate-200 focus:outline-none focus:ring-4 focus:ring-rose-100 font-bold text-base transition-all">
-                </div>
-                <div class="flex gap-3 flex-shrink-0">
-                    <a href="{{ url_for('admin.election_history') }}" class="bg-slate-100 text-slate-600 px-6 py-3 rounded-2xl font-bold hover:bg-slate-200 border border-slate-200 text-sm transition-all">View History</a>
-                    <button type="submit" class="bg-rose-600 text-white px-6 py-3 rounded-2xl font-bold hover:bg-rose-700 shadow-lg transition-all text-sm">Archive &amp; Reset</button>
-                </div>
-            </div>
-        </form>
-    </div>
-
-    {# ── Live stats toggle ────────────────────────────────────────────────────── #}
-    <div class="bg-white rounded-[2rem] shadow-xl border border-slate-50 px-8 py-6 mb-10 flex flex-col md:flex-row md:items-center gap-4">
-        <div class="flex-1">
-            <p class="font-black text-slate-800 text-lg">Show live results to voters</p>
-            <p class="text-slate-400 text-sm mt-1">When ON, logged-in students see live vote tallies after casting their ballot.</p>
-        </div>
-        <form method="POST" action="{{ url_for('admin.toggle_live_stats') }}" class="flex-shrink-0">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <button type="submit"
-                class="relative inline-flex items-center gap-3 px-6 py-3 rounded-2xl font-black text-base transition-all shadow-lg
-                {% if live_stats_on %}bg-emerald-500 hover:bg-emerald-600 text-white{% else %}bg-slate-200 hover:bg-slate-300 text-slate-600{% endif %}">
-                <span class="w-5 h-5 rounded-full border-2 {% if live_stats_on %}bg-white border-white{% else %}bg-slate-400 border-slate-400{% endif %}"></span>
-                {% if live_stats_on %}Live Stats: ON{% else %}Live Stats: OFF{% endif %}
-            </button>
-        </form>
-    </div>
-
-    {# ── Identity Disputes (Reports) ─────────────────────────────────────────── #}
-    {% if pending_disputes %}
-    <div class="bg-rose-50 border border-rose-100 rounded-[2.5rem] p-10 mb-10 shadow-sm">
-        <div class="flex items-center gap-4 mb-6">
-            <div class="w-12 h-12 rounded-2xl bg-rose-500 flex items-center justify-center text-white shadow-xl animate-pulse text-2xl">
-                ⚠️
-            </div>
-            <div>
-                <h2 class="text-2xl font-black text-rose-900 tracking-tight">Identity Disputes</h2>
-                <p class="text-rose-600 font-medium">Students have reported account hijacking. Action required.</p>
-            </div>
-        </div>
-        
-        <div class="grid gap-4">
-            {% for dispute in pending_disputes %}
-            <div class="bg-white rounded-3xl p-6 shadow-sm border border-rose-100 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:shadow-md transition-all">
-                <div class="space-y-1 flex-1">
-                    <div class="flex items-center gap-3">
-                        <span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">Reported Hack</span>
-                        <span class="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">{{ dispute.created_at.strftime('%b %d, %H:%M') }}</span>
-                    </div>
-                    <div class="text-lg font-black text-slate-800">
-                        Student ID: <span class="bg-slate-100 px-2 rounded-lg text-slate-900">{{ dispute.student_id }}</span>
-                    </div>
-                    <p class="text-xs font-bold text-slate-500">
-                        <span class="text-slate-400">Reporter:</span> {{ dispute.reporter_phone }} 
-                        <span class="mx-2 text-slate-200">|</span>
-                        <span class="text-rose-400 italic">Suspected Hacker:</span> {{ dispute.hacker_phone }}
-                    </p>
-                </div>
-
-                <!-- Selfie Evidence -->
-                {% if dispute.selfie_image %}
-                <div class="flex-shrink-0">
-                    <img src="{{ dispute.selfie_image }}" 
-                         alt="Reporter Selfie" 
-                         onclick="window.open(this.src)"
-                         class="w-24 h-24 rounded-2xl object-cover border-4 border-white shadow-xl cursor-zoom-in hover:scale-105 transition-all">
-                    <p class="text-[8px] font-bold text-slate-400 mt-2 text-center uppercase tracking-widest">Selfie Proof</p>
-                </div>
-                {% endif %}
-                
-                <div class="flex items-center gap-3">
-                    <form action="{{ url_for('admin.resolve_dispute', dispute_id=dispute.id) }}" method="POST" class="inline">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <input type="hidden" name="action" value="wipe">
-                        <button type="submit" class="bg-rose-500 text-white px-6 py-3 rounded-2xl font-black hover:bg-rose-600 shadow-lg shadow-rose-200 transition-all text-xs uppercase tracking-widest">
-                            Wipe & Re-verify
-                        </button>
-                    </form>
-                    <form action="{{ url_for('admin.resolve_dispute', dispute_id=dispute.id) }}" method="POST" class="inline">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <input type="hidden" name="action" value="dismiss">
-                        <button type="submit" class="bg-slate-100 text-slate-400 px-6 py-3 rounded-2xl font-black hover:bg-slate-200 transition-all text-xs uppercase tracking-widest">
-                            Dismiss
-                        </button>
-                    </form>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
-
-    {# ── Security Audit Log ────────────────────────────────────────────────────── #}
-    <div class="bg-white rounded-[2rem] shadow-xl border border-slate-50 px-8 py-6 mb-10 overflow-hidden">
-        <div class="flex items-center justify-between mb-6">
-            <div>
-                <h2 class="text-2xl font-black text-slate-800 tracking-tight">Security Audit Log</h2>
-                <p class="text-slate-400 text-sm mt-1">Live stream of recorded ballot activity and technical audit data.</p>
-            </div>
-            <div class="bg-blue-50 text-blue-600 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest">🛡️ Secured</div>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left">
-                <thead>
-                    <tr class="text-slate-400 text-[10px] uppercase font-black tracking-[0.2em] border-b border-slate-100">
-                        <th class="py-4 px-2">Timestamp</th>
-                        <th class="py-4">Voter (ID)</th>
-                        <th class="py-4">IP Address</th>
-                        <th class="py-4">Device/Agent</th>
-                    </tr>
-                </thead>
-                <tbody class="text-sm font-medium">
-                    {% for vote in recent_votes %}
-                    <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                        <td class="py-4 px-2 text-slate-400 font-mono text-xs">{{ vote.timestamp.strftime('%H:%M:%S') }}</td>
-                        <td class="py-4 text-slate-700">Student #{{ vote.user_id }}</td>
-                        <td class="py-4"><span class="bg-slate-100 text-slate-500 px-2 py-1 rounded text-xs px-2">{{ vote.ip_address }}</span></td>
-                        <td class="py-4 text-slate-400 truncate max-w-[200px]" title="{{ vote.user_agent }}">{{ vote.user_agent }}</td>
-                    </tr>
-                    {% endfor %}
-                    {% if not recent_votes %}
-                    <tr>
-                        <td colspan="4" class="py-10 text-center text-slate-400 italic">No voting activity recorded yet.</td>
-                    </tr>
-                    {% endif %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    {# ── Live Vote Statistics ──────────────────────────────────────────────────── #}
-    <div class="bg-white rounded-[3rem] shadow-2xl border border-slate-50 relative overflow-hidden">
-        <div class="px-10 py-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100">
-            <div class="flex items-center gap-4">
+<div class="flex h-screen overflow-hidden text-slate-800">
+    
+    {# ── SIDEBAR (Enterprise Rail) ────────────────────────────────────────── #}
+    <div class="w-72 bg-white border-r border-slate-200 flex flex-col h-full shrink-0">
+        <div class="p-8 border-b border-slate-100 mb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-[#0051c3] rounded flex items-center justify-center text-white font-bold text-xl">C</div>
                 <div>
-                    <h2 class="text-3xl font-black text-slate-800 tracking-tight">Live Vote Statistics</h2>
-                    <p class="text-slate-400 font-medium italic text-sm mt-1">Auto-updates every 5 seconds — no refresh needed.</p>
+                    <h1 class="brand text-xl font-bold tracking-tight text-slate-900 leading-none">CoSSA</h1>
+                    <p class="text-[0.65rem] font-black uppercase tracking-[0.2em] text-[#F6821F] mt-1">Enterprise Admin</p>
                 </div>
-                <span id="live-dot" class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse flex-shrink-0"></span>
             </div>
-            <a href="{{ url_for('admin.results') }}" class="text-blue-600 font-bold hover:underline text-sm flex-shrink-0">Full Detailed View →</a>
         </div>
 
-        <div id="stats-container" class="p-10">
-            {% if portfolios %}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-                {% for portfolio in portfolios %}
-                <div class="space-y-5" data-portfolio-id="{{ portfolio.id }}">
-                    <h3 class="text-xl font-bold text-slate-700 uppercase tracking-widest border-l-4 border-indigo-500 pl-4">{{ portfolio.title }}</h3>
-                    <div class="space-y-4">
-                        {% if portfolio.candidates %}
-                            {% for candidate in portfolio.candidates %}
-                                {% set count = candidate.votes_received|length %}
-                                {% set pct = (count / voted_count * 100)|round(1) if voted_count > 0 else 0 %}
-                                <div class="flex items-center gap-4" data-candidate-id="{{ candidate.id }}">
-                                    <img src="{{ candidate.image_url or 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop' }}"
-                                         alt="{{ candidate.name }}"
-                                         class="w-12 h-12 rounded-xl object-cover flex-shrink-0 shadow-md">
-                                    <div class="flex-1 min-w-0">
-                                        <div class="flex justify-between font-bold text-slate-800 mb-1">
-                                            <span class="truncate candidate-name">{{ candidate.name }}</span>
-                                            <span class="flex-shrink-0 ml-3 text-slate-500 text-sm candidate-stat">{{ count }} votes ({{ pct }}%)</span>
-                                        </div>
-                                        <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden shadow-inner">
-                                            <div class="progress-bar h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full transition-all duration-700 ease-out"
-                                                 style="width: 0%"
-                                                 data-width="{{ pct }}%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        {% else %}
-                            <p class="text-slate-400 italic text-sm">No candidates registered.</p>
-                        {% endif %}
+        <nav class="flex-1 space-y-1">
+            <a href="{{ url_for('admin.dashboard') }}" class="sidebar-item sidebar-active flex items-center gap-3 px-8 py-4 font-bold text-sm text-slate-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                Security Overview
+            </a>
+            <a href="{{ url_for('admin.cms') }}" class="sidebar-item flex items-center gap-3 px-8 py-4 font-bold text-sm text-slate-500 hover:text-[#0051c3]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 00-2 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                Content Management
+            </a>
+            <a href="{{ url_for('admin.list_students') }}" class="sidebar-item flex items-center gap-3 px-8 py-4 font-bold text-sm text-slate-500 hover:text-[#0051c3]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                Voter Directory
+            </a>
+            <a href="{{ url_for('admin.results') }}" class="sidebar-item flex items-center gap-3 px-8 py-4 font-bold text-sm text-slate-500 hover:text-[#0051c3]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                Results Audit
+            </a>
+            <div class="px-8 mt-10 mb-2">
+                <p class="text-[0.65rem] font-black uppercase tracking-[0.15em] text-slate-400">Systems</p>
+            </div>
+            <a href="{{ url_for('admin.import_excel') }}" class="sidebar-item flex items-center gap-3 px-8 py-4 font-bold text-sm text-slate-500 hover:text-[#0051c3]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                Bulk Import
+            </a>
+        </nav>
+
+        <div class="p-6 bg-slate-50 border-t border-slate-100">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-xs">AD</div>
+                <div class="flex-1 overflow-hidden">
+                    <p class="text-xs font-bold text-slate-900 truncate">Administrator</p>
+                    <p class="text-[0.6rem] text-slate-400 truncate">CoSSA Election Committee</p>
+                </div>
+            </div>
+            <a href="{{ url_for('voting.logout') }}" class="block w-full text-center py-2 px-4 border border-red-200 text-red-600 rounded-lg text-xs font-bold hover:bg-red-50 transition-all">Terminate Session</a>
+        </div>
+    </div>
+
+    {# ── MAIN CONTENT ─────────────────────────────────────────────────────── #}
+    <div class="flex-1 h-screen overflow-y-auto flex flex-col">
+        
+        {# 🏁 Top Command Bar 🏁 #}
+        <header class="h-16 border-b border-slate-200 bg-white flex items-center justify-between px-10 shrink-0 sticky top-0 z-40">
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-emerald-500 security-pulse"></div>
+                    <span class="text-xs font-bold text-slate-600 uppercase tracking-widest">Network Operational</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="text-right">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Election Status</p>
+                    {% if voting_open %}
+                    <p class="text-xs font-black text-emerald-600 uppercase">Live Polling Active</p>
+                    {% else %}
+                    <p class="text-xs font-black text-red-500 uppercase">Polling Suspended</p>
+                    {% endif %}
+                </div>
+                <div class="h-8 w-px bg-slate-100"></div>
+                <a href="{{ url_for('main.index') }}" class="text-xs font-bold text-[#0051c3] hover:underline">View Public Portal →</a>
+            </div>
+        </header>
+
+        <main class="p-10 space-y-10">
+            
+            {# 🔍 Flash Messages (Toast Style) #}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="p-4 rounded border {% if category == 'error' %}bg-red-50 border-red-200 text-red-700{% else %}bg-blue-50 border-blue-200 text-blue-700{% endif %} flex items-center gap-3 text-sm font-medium animate-pulse-once">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            {# 🏎 Activity Metrics #}
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="bg-white stat-card p-6 rounded-lg relative overflow-hidden">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Authenticated Voters</p>
+                    <h3 class="text-3xl font-bold text-slate-900 tracking-tight">{{ total_users }}</h3>
+                    <div class="absolute top-0 right-0 p-4 opacity-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                     </div>
                 </div>
-                {% endfor %}
+                <div class="bg-white stat-card p-6 rounded-lg relative overflow-hidden">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Verified Ballots</p>
+                    <h3 class="text-3xl font-bold text-emerald-600 tracking-tight">{{ voted_count }}</h3>
+                    <div class="absolute top-0 right-0 p-4 opacity-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                </div>
+                <div class="bg-white stat-card p-6 rounded-lg relative overflow-hidden">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Voter Participation</p>
+                    <h3 class="text-3xl font-bold text-slate-900 tracking-tight">{{ turnout|round(1) }}%</h3>
+                    <div class="absolute top-0 right-0 p-4 opacity-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /></svg>
+                    </div>
+                </div>
+                <div class="bg-[#0051c3] p-6 rounded-lg shadow-lg shadow-blue-200">
+                    <p class="text-xs font-bold text-white/50 uppercase tracking-widest mb-1">Identity Disputes</p>
+                    <h3 class="text-3xl font-bold text-white tracking-tight">{{ disputes|length if disputes else 0 }}</h3>
+                    <p class="text-[0.65rem] text-white/70 font-bold mt-1 uppercase tracking-wider">Action Required Early</p>
+                </div>
             </div>
-            {% else %}
-            <div class="text-center py-20">
-                <p class="text-slate-400 text-xl font-medium italic">No portfolios yet.</p>
-                <a href="{{ url_for('admin.cms') }}" class="mt-4 inline-block bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold hover:bg-blue-700 shadow-xl transition-all text-sm">Go to Content Manager →</a>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                
+                {# 🛡 Identity Dispute Center (Cloudflare Style log) #}
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                            <h3 class="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                Urgent Identity Disputes
+                            </h3>
+                            <span class="text-xs font-bold text-slate-400">Biometric Verification Log</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full enterprise-table">
+                                <thead>
+                                    <tr>
+                                        <th class="px-6 py-4 text-left">Timestamp</th>
+                                        <th class="px-6 py-4 text-left">Identity</th>
+                                        <th class="px-6 py-4 text-left">Source (IP)</th>
+                                        <th class="px-6 py-4 text-left">Biometric</th>
+                                        <th class="px-6 py-4 text-right">Protection</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 italic text-[0.8rem]">
+                                    {% for d in disputes %}
+                                    <tr class="hover:bg-slate-50 transition-colors">
+                                        <td class="px-6 py-4 font-medium text-slate-400">{{ d.created_at.strftime('%H:%M:%S') }}</td>
+                                        <td class="px-6 py-4">
+                                            <p class="font-bold text-slate-900">{{ d.student_id }}</p>
+                                            <p class="text-[0.65rem] text-slate-400">{{ d.reporter_phone }}</p>
+                                        </td>
+                                        <td class="px-6 py-4 text-slate-500">{{ d.ip_address }}</td>
+                                        <td class="px-6 py-4">
+                                            {% if d.selfie_image %}
+                                            <button onclick="showSelfie('{{ d.selfie_image }}')" class="text-blue-600 font-bold hover:underline">View Capture</button>
+                                            {% else %}
+                                            <span class="text-slate-300">No Image</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="px-6 py-4 text-right">
+                                            <div class="flex items-center justify-end gap-2">
+                                                <form action="{{ url_for('admin.resolve_dispute', dispute_id=d.id, action='resolve') }}" method="POST">
+                                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                                    <button type="submit" class="bg-emerald-600 text-white px-3 py-1 rounded text-[0.7rem] font-bold hover:bg-emerald-700">Restore</button>
+                                                </form>
+                                                <form action="{{ url_for('admin.resolve_dispute', dispute_id=d.id, action='dismiss') }}" method="POST">
+                                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                                    <button type="submit" class="bg-slate-100 text-slate-600 px-3 py-1 rounded text-[0.7rem] font-bold hover:bg-slate-200">Dismiss</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="5" class="px-6 py-10 text-center text-slate-400 font-bold tracking-widest text-xs uppercase">No active security threats detected</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                {# ⚙ System Control Center #}
+                <div class="space-y-6">
+                    <div class="bg-white border border-slate-200 rounded-lg p-6">
+                        <h3 class="text-[0.7rem] font-black text-slate-400 uppercase tracking-widest mb-6">Voting Control</h3>
+                        <form method="POST" action="{{ url_for('admin.set_voting_window') }}" class="space-y-5">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <div class="space-y-1">
+                                <label class="text-[0.65rem] font-bold text-slate-500 uppercase tracking-wider">Start Time (UTC)</label>
+                                <input type="datetime-local" name="voting_start" value="{{ voting_start[:16] if voting_start else '' }}" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm focus:border-blue-600 outline-none">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[0.65rem] font-bold text-slate-500 uppercase tracking-wider">End Time (UTC)</label>
+                                <input type="datetime-local" name="voting_end" value="{{ voting_end[:16] if voting_end else '' }}" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm focus:border-blue-600 outline-none">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[0.65rem] font-bold text-slate-500 uppercase tracking-wider">Auto-Close Delay (Hrs)</label>
+                                <input type="number" name="stats_display_hours" value="{{ stats_display_hours }}" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm focus:border-blue-600 outline-none">
+                            </div>
+                            <button type="submit" class="w-full py-3 bg-[#0051c3] text-white text-xs font-black uppercase tracking-widest rounded shadow-lg shadow-blue-100 hover:brightness-110 transition-all">Update Security Policy</button>
+                        </form>
+                    </div>
+
+                    <div class="bg-slate-900 border border-slate-800 rounded-lg p-6 text-white">
+                        <h3 class="text-[0.7rem] font-black text-slate-500 uppercase tracking-widest mb-4">Ballot Preview</h3>
+                        <p class="text-xs text-slate-400 mb-6 font-medium">Verify the student experience before live production.</p>
+                        <a href="{{ url_for('admin.preview_ballot') }}" target="_blank" class="block w-full text-center py-3 bg-white/5 border border-white/10 rounded text-xs font-bold hover:bg-white/10 transition-all">Launch Test Environment →</a>
+                    </div>
+                </div>
+
             </div>
-            {% endif %}
-        </div>
+
+        </main>
     </div>
 
 </div>
 
+{# 🖼 Selfie Modal 🖼 #}
+<div id="selfie-modal" class="fixed inset-0 z-[100] hidden bg-slate-900/90 backdrop-blur-md items-center justify-center p-10">
+    <div class="max-w-md w-full bg-white rounded-2xl p-6 shadow-2xl relative">
+        <button onclick="document.getElementById('selfie-modal').classList.add('hidden')" class="absolute -top-3 -right-3 w-10 h-10 bg-white rounded-full shadow-lg text-slate-500 flex items-center justify-center font-bold">✕</button>
+        <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Biometric Identity Evidence</p>
+        <img id="modal-img" src="" class="w-full rounded-lg border border-slate-100 shadow-inner" alt="Student Selfie">
+    </div>
+</div>
+
 <script>
-const STATS_URL = "{{ url_for('voting.live_stats_json') }}";
-
-// Animate bars on first load
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(animateBars, 150);
-});
-
-function animateBars() {
-    document.querySelectorAll('.progress-bar[data-width]').forEach(bar => {
-        bar.style.width = bar.getAttribute('data-width');
-    });
-}
-
-function updateDashboard(data) {
-    // Update summary cards
-    const elTotal = document.getElementById('stat-total');
-    const elVoted = document.getElementById('stat-voted');
-    const elTurnout = document.getElementById('stat-turnout');
-    if (elTotal) elTotal.textContent = data.total_users;
-    if (elVoted) elVoted.textContent = data.voted_count;
-    if (elTurnout) elTurnout.textContent = data.turnout + '%';
-
-    // Update each candidate row
-    data.portfolios.forEach(portfolio => {
-        portfolio.candidates.forEach(c => {
-            const row = document.querySelector(`[data-candidate-id="${c.id}"]`);
-            if (!row) return;
-            const stat = row.querySelector('.candidate-stat');
-            const bar = row.querySelector('.progress-bar');
-            if (stat) stat.textContent = `${c.votes} votes (${c.pct}%)`;
-            if (bar) bar.style.width = c.pct + '%';
-        });
-    });
-}
-
-// Poll every 5 seconds
-setInterval(() => {
-    fetch(STATS_URL)
-        .then(r => r.json())
-        .then(data => {
-            updateDashboard(data);
-            // Flash the live dot green briefly
-            const dot = document.getElementById('live-dot');
-            if (dot) { dot.classList.add('bg-blue-400'); setTimeout(() => dot.classList.remove('bg-blue-400'), 600); }
-        })
-        .catch(() => {}); // silent fail — don't break the UI
-}, 5000);
+    function showSelfie(base64) {
+        document.getElementById('modal-img').src = base64;
+        document.getElementById('selfie-modal').classList.remove('hidden');
+        document.getElementById('selfie-modal').classList.add('flex');
+    }
 </script>
+
 {% endblock %}

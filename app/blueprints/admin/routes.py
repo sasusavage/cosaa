@@ -31,6 +31,15 @@ def admin_required(f):
     @wraps(f)
     @login_required
     def decorated_function(*args, **kwargs):
+        # 🛡️ CLOUDFLARE ZERO TRUST ENFORCEMENT
+        # If your domain is on Cloudflare Access, this header is mandatory.
+        # To enable, set ENFORCE_CLOUDFLARE_ACCESS=True in your .env
+        if current_app.config.get('ENFORCE_CLOUDFLARE_ACCESS'):
+            cloudflare_assertion = request.headers.get('Cf-Access-Jwt-Assertion')
+            if not cloudflare_assertion:
+                from flask import abort
+                return abort(403, description="Access Denied: You must be behind the Cloudflare Zero Trust Gateway to access this resource.")
+        
         if current_user.role != 'admin':
             flash('Access denied!', 'error')
             return redirect(url_for('main.index'))

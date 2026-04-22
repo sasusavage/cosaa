@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}CoSSA Portal{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    {% block extra_head %}{% endblock %}
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -56,6 +57,7 @@
     </style>
 </head>
 <body class="text-slate-900 min-h-screen">
+    {% if not hide_layout %}
     <nav class="sticky top-0 z-50 glass-bg px-6 py-4 flex items-center justify-between shadow-sm">
         <div class="flex items-center space-x-3">
             <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">C</div>
@@ -111,6 +113,7 @@
             <a href="{{ url_for('voting.login') }}" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold text-xl shadow-xl">Login to Portal</a>
         {% endif %}
     </div>
+    {% endif %}
 
     <script>
         const menuBtn = document.getElementById('menu-btn');
@@ -131,7 +134,7 @@
         });
     </script>
 
-    <main class="container mx-auto px-6 py-8">
+    <main class="{% if not hide_layout %}container mx-auto px-6 py-8{% endif %}">
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
             {% for category, message in messages %}
