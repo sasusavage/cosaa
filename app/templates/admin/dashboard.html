@@ -99,6 +99,7 @@
     <div class="space-y-6">
         <div class="bg-white border border-slate-200 rounded-lg p-6">
             <h3 class="text-[0.7rem] font-black text-slate-400 uppercase tracking-widest mb-6 border-b border-slate-50 pb-2">Election Policy</h3>
+            {% if current_user.role == 'admin' %}
             <form method="POST" action="{{ url_for('admin.set_voting_window') }}" class="space-y-5">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="space-y-1">
@@ -109,8 +110,17 @@
                     <label class="text-[0.65rem] font-bold text-slate-500 uppercase tracking-wider">Polls Close</label>
                     <input type="datetime-local" name="voting_end" value="{{ voting_end[:16] if voting_end else '' }}" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm focus:border-blue-600 outline-none">
                 </div>
+                <div class="space-y-1">
+                    <label class="text-[0.65rem] font-bold text-slate-500 uppercase tracking-wider">Academic Year</label>
+                    <input type="text" name="academic_year" value="{{ academic_year }}" class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm focus:border-blue-600 outline-none" placeholder="e.g. 2025/2026">
+                </div>
                 <button type="submit" class="w-full py-3 bg-[#0051c3] text-white text-xs font-black uppercase tracking-widest rounded shadow-lg shadow-blue-100 hover:brightness-110 transition-all">Update Policy</button>
             </form>
+            {% else %}
+            <div class="p-4 bg-slate-50 rounded border border-slate-100 italic text-[0.65rem] text-slate-400 font-bold uppercase tracking-widest text-center">
+                Access Restricted to Administrators
+            </div>
+            {% endif %}
         </div>
 
         <div class="bg-white border border-slate-200 rounded-lg p-6">
@@ -170,11 +180,46 @@
             </div>
         </div>
 
-        <div class="bg-slate-900 border border-slate-800 rounded-lg p-6 text-white">
-            <h3 class="text-[0.7rem] font-black text-slate-500 uppercase tracking-widest mb-4">Environment Test</h3>
-            <p class="text-xs text-slate-400 mb-6 font-medium italic">Execute a live simulation of the student voting flow.</p>
-            <a href="{{ url_for('admin.preview_ballot') }}" target="_blank" class="block w-full text-center py-3 bg-white/5 border border-white/10 rounded text-xs font-bold hover:bg-white/10 transition-all">Preview Ballot →</a>
+        {% if current_user.role == 'admin' %}
+        <div class="bg-white border border-slate-200 rounded-lg p-6">
+            <h3 class="text-[0.7rem] font-black text-slate-400 uppercase tracking-widest mb-6 border-b border-slate-50 pb-2 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                Deploy Polling Agent
+            </h3>
+            <form method="POST" action="{{ url_for('admin.create_polling_agent') }}" class="space-y-4">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div class="space-y-1">
+                    <label class="text-[0.65rem] font-bold text-slate-500 uppercase tracking-wider">Agent Username</label>
+                    <input type="text" name="username" placeholder="e.g. EC-Agent-01" required class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm focus:border-blue-600 outline-none">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[0.65rem] font-bold text-slate-500 uppercase tracking-wider">Identifier (Student ID)</label>
+                    <input type="text" name="student_id" placeholder="AGENT001" required class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm focus:border-blue-600 outline-none uppercase">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[0.65rem] font-bold text-slate-500 uppercase tracking-wider">Initial Password</label>
+                    <input type="password" name="password" required class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm focus:border-blue-600 outline-none">
+                </div>
+                <button type="submit" class="w-full py-3 bg-indigo-600 text-white text-xs font-black uppercase tracking-widest rounded shadow-lg shadow-indigo-100 hover:brightness-110 transition-all">Authorize Agent</button>
+            </form>
         </div>
+
+        <div class="border-2 border-dashed border-red-200 bg-red-50/50 rounded-lg p-6">
+            <div class="flex items-center gap-2 mb-4">
+                <div class="w-2 h-2 rounded-full bg-red-600 animate-pulse"></div>
+                <h3 class="text-[0.7rem] font-black text-red-600 uppercase tracking-widest">Master Reset Protocol</h3>
+            </div>
+            <p class="text-[0.65rem] text-red-400 font-bold mb-6 italic uppercase tracking-wider">Permanent destructive actions. Use only at conclusion of polls.</p>
+            
+            <form method="POST" action="{{ url_for('admin.archive_election') }}" onsubmit="return confirm('CRITICAL: This will snapshot all final votes to an immutable record, clear all current ballots, and reset the platform for the next cycle. Continue?')">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <input type="hidden" name="academic_year" value="{{ academic_year }}"/>
+                <button type="submit" class="w-full py-3 bg-red-600 text-white text-xs font-black uppercase tracking-widest rounded shadow-lg shadow-red-900/50 hover:bg-black transition-all">
+                    Archive & Reset Election
+                </button>
+            </form>
+        </div>
+        {% endif %}
     </div>
 </div>
 

@@ -48,15 +48,19 @@ def admin_required(f):
     @wraps(f)
     @cloudflare_required
     def decorated_function(*args, **kwargs):
-        # 2. Flask Authentication (The "Second Door")
-        if not current_user.is_authenticated:
-            flash('Admin Authentication Required', 'error')
+        if not current_user.is_authenticated or current_user.role != 'admin':
+            flash('Admin access required', 'error')
             return redirect(url_for('admin.login'))
-            
-        if current_user.role != 'admin':
-            flash('Insufficient Privileges', 'error')
-            return redirect(url_for('main.index'))
-            
+        return f(*args, **kwargs)
+    return decorated_function
+
+def staff_required(f):
+    @wraps(f)
+    @cloudflare_required
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.role not in ['admin', 'agent']:
+            flash('Staff access required', 'error')
+            return redirect(url_for('admin.login'))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -72,13 +76,13 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         
-        user = User.query.filter_by(student_id=username, role='admin').first()
+        user = User.query.filter(User.student_id == username, User.role.in_(['admin', 'agent'])).first()
         if user and user.check_password(password):
             login_user(user)
-            flash('Administrative Session Established', 'success')
+            flash(f'{user.role.capitalize()} Session Established', 'success')
             return redirect(url_for('admin.dashboard'))
         else:
-            flash('Invalid Operator Credentials', 'error')
+            flash('Invalid Staff Credentials', 'error')
             
     return render_template('admin/login.html')
 
@@ -99,7 +103,7 @@ def root_redirect():
     return redirect(url_for('admin.dashboard'))
 
 @admin.route('/dashboard')
-@admin_required
+@staff_required
 def dashboard():
     total_users = User.query.count()
     voted_count = User.query.filter_by(has_voted=True).count()
@@ -841,3 +845,21 @@ def results():
             'results': portfolio_results
         })
     return render_template('admin/results.html', data=data)
+
+@admin.route('/agents/create', methods=['POST'])
+@admin_required
+def create_polling_agent():
+    username = request.form.get('username')
+    student_id = request.form.get('student_id').upper() # Force uppercase for consistency
+    password = request.form.get('password')
+    
+    if User.query.filter_by(student_id=student_id).first():
+        flash('Agent identifier (Student ID) already exists.', 'error')
+        return redirect(url_for('admin.dashboard'))
+    
+    agent = User(username=username, student_id=student_id, role='agent')
+    agent.set_password(password)
+    db.session.add(agent)
+    db.session.commit()
+    flash('Polling Agent registered successfully.', 'success')
+    return redirect(url_for('admin.dashboard'))
