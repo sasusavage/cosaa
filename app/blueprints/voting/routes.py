@@ -54,78 +54,78 @@ def login():
                 return render_template('voting/login.html', admin_mode=True, student_id=raw_id)
         
         # Student Login Logic
-        input_phone = request.form.get('phone_number', '').strip()
-            
-            if not input_phone:
-                flash('Please provide your mobile phone number.', 'error')
-                return redirect(url_for('voting.login'))
-            
-            from app.utils import format_gh_number
-            formatted_input = format_gh_number(input_phone)
-            
-            # Check if this student has ALREADY verified a number
-            if user.phone_verified:
-                formatted_stored = format_gh_number(user.phone_number)
-                
-                # RECURRING LOGIN CHECK
-                if formatted_input == formatted_stored:
-                    # 🚀 TRUSTED DEVICE CHECK (The "Bank-Level" Lock)
-                    cookie_token = request.cookies.get('voter_device_token')
-                    
-                    if cookie_token and cookie_token == user.device_token:
-                        # Recognized Device -> Instant Login
-                        import uuid
-                        from flask import session
-                        sid = str(uuid.uuid4())
-                        user.current_session_id = sid
-                        user.last_ip = request.remote_addr
-                        db.session.commit()
-                        session['sid'] = sid
-                        
-                        login_user(user)
-                        flash(f'Welcome back, {user.username}!', 'success')
-                        return redirect(url_for('voting.ballot'))
-                    else:
-                        # Mismatch or New Device -> FORCE OTP for security
-                        # We don't flash an error, we just treat it as a verification step.
-                        pass 
-                else:
-                    # Hijack attempt - ID requested but different phone entered
-                    from markupsafe import Markup
-                    report_url = url_for('voting.report_hijack', student_id=user.student_id, phone=formatted_input)
-                    msg = Markup(f'This Student ID is already linked to a different phone number. Verification required. Not you? <a href="{report_url}" class="underline font-bold text-white">Report Identity Hijack</a>')
-                    flash(msg, 'error')
-                    return redirect(url_for('voting.login'))
-            
-            # ── Phone Uniqueness Check ──
-            # Prevent one phone number being used for multiple verified students
-            existing_verified = User.query.filter_by(phone_number=input_phone, phone_verified=True).first()
-            if existing_verified and existing_verified.id != user.id:
-                flash('This phone number is already registered to another student. Please use your own verified device.', 'error')
-                return redirect(url_for('voting.login'))
-            # ────────────────────────────
+        if not user:
+            flash('Student ID not found. Please check and try again.', 'error')
+            return redirect(url_for('voting.login'))
 
-            # FIRST TIME OR UNVERIFIED: Send OTP
-            user.phone_number = input_phone
-            user.phone_verified = False # Reset flag until OTP succeeds
+        input_phone = request.form.get('phone_number', '').strip()
+        if not input_phone:
+            flash('Please provide your mobile phone number.', 'error')
+            return redirect(url_for('voting.login'))
+        
+        from app.utils import format_gh_number
+        formatted_input = format_gh_number(input_phone)
+        
+        # Check if this student has ALREADY verified a number
+        if user.phone_verified:
+            formatted_stored = format_gh_number(user.phone_number)
             
-            # Request ID + Phone doesn't have a verified session yet, send OTP
-            otp = generate_otp()
-            user.otp = otp
-            user.otp_expiry = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(minutes=10)
-            db.session.commit()
-            
-            # Send SMS
-            message = f"Your CoSSA Voting Verification Code is: {otp}. This code expires in 10 minutes."
-            sms_sent = send_sms(user.phone_number, message)
-            
-            if sms_sent:
-                return render_template('voting/verify_otp.html', student_id=user.student_id)
-            else:
-                flash('OTP generated but failed to send SMS. Please try again.', 'error')
-                return redirect(url_for('voting.login'))
+            # RECURRING LOGIN CHECK
+            if formatted_input == formatted_stored:
+                # 🚀 TRUSTED DEVICE CHECK (The "Bank-Level" Lock)
+                cookie_token = request.cookies.get('voter_device_token')
                 
-        flash('Student ID not found. Please check and try again.', 'error')
+                if cookie_token and cookie_token == user.device_token:
+                    # Recognized Device -> Instant Login
+                    import uuid
+                    from flask import session
+                    sid = str(uuid.uuid4())
+                    user.current_session_id = sid
+                    user.last_ip = request.remote_addr
+                    db.session.commit()
+                    session['sid'] = sid
+                    
+                    login_user(user)
+                    flash(f'Welcome back, {user.username}!', 'success')
+                    return redirect(url_for('voting.ballot'))
+                else:
+                    # Mismatch or New Device -> FORCE OTP for security
+                    pass 
+            else:
+                # Hijack attempt - ID requested but different phone entered
+                from markupsafe import Markup
+                report_url = url_for('voting.report_hijack', student_id=user.student_id, phone=formatted_input)
+                msg = Markup(f'This Student ID is already linked to a different phone number. Verification required. Not you? <a href="{report_url}" class="underline font-bold text-white">Report Identity Hijack</a>')
+                flash(msg, 'error')
+                return redirect(url_for('voting.login'))
+        
+        # ── Phone Uniqueness Check ──
+        # Prevent one phone number being used for multiple verified students
+        existing_verified = User.query.filter_by(phone_number=input_phone, phone_verified=True).first()
+        if existing_verified and existing_verified.id != user.id:
+            flash('This phone number is already registered to another student. Please use your own verified device.', 'error')
+            return redirect(url_for('voting.login'))
+
+        # FIRST TIME OR UNVERIFIED: Send OTP
+        user.phone_number = input_phone
+        user.phone_verified = False # Reset flag until OTP succeeds
+        
+        # Request ID + Phone doesn't have a verified session yet, send OTP
+        otp = generate_otp()
+        user.otp = otp
+        user.otp_expiry = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(minutes=10)
+        db.session.commit()
+        
+        # Send SMS
+        message = f"Your CoSSA Voting Verification Code is: {otp}. This code expires in 10 minutes."
+        sms_sent = send_sms(user.phone_number, message)
+        
+        if sms_sent:
+            return render_template('voting/verify_otp.html', student_id=user.student_id)
+        else:
+            flash('OTP generated but failed to send SMS. Please try again.', 'error')
+            return redirect(url_for('voting.login'))
+            
     return render_template('voting/login.html')
 
 @voting.route('/verify-otp', methods=['POST'])
