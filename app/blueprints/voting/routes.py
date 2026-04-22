@@ -234,7 +234,7 @@ def logout():
 
 def _should_show_stats():
     """Show live stats if admin toggled on AND (voting still open OR within display-hours window after close)."""
-    if Setting.get('live_stats_public', '0') != '1':
+    if Setting.get('display_live_results', '0') != '1':
         return False
     from datetime import datetime, timezone
     end_s = Setting.get('voting_end')
@@ -376,10 +376,10 @@ def finalize_vote():
             db.session.commit()
             return redirect(url_for('voting.already_voted'))
 
+        # Record the votes
         for p_id_str, c_id in choices.items():
             if c_id == 'REJECT':
-                continue # We don't record a vote record for a rejection in the current schema
-                
+                continue
             vote = Vote(
                 user_id=current_user.id, 
                 candidate_id=int(c_id), 
@@ -392,10 +392,18 @@ def finalize_vote():
         current_user.has_voted = True
         db.session.commit()
         
+        # 📲 Generate Receipt & Send SMS
+        import hashlib
+        receipt_raw = f"{current_user.student_id}-{Setting.get('academic_year', '2026')}-CoSSA-VOTE"
+        receipt_hash = hashlib.sha256(receipt_raw.encode()).hexdigest().upper()[:12]
+        
+        message = f"CoSSA Election: Vote Confirmed! Your Digital Receipt is {receipt_hash}. Keep this to verify your entry. Thank you for voting!"
+        send_sms(current_user.phone_number, message)
+        
         # Clear sensitive session data
         session.pop('ballot_choices', None)
         
-        flash('Ballot submitted successfully! Your voice has been heard.', 'success')
+        flash('Ballot submitted successfully! Your receipt has been sent via SMS.', 'success')
         return redirect(url_for('voting.vote_confirmed'))
     except Exception as e:
         db.session.rollback()
@@ -426,9 +434,37 @@ def already_voted():
     academic_year = Setting.get('academic_year', '')
     return render_template('voting/already_voted.html', show_stats=show_stats, academic_year=academic_year)
 
+@voting.route('/verify-ballot', methods=['GET', 'POST'])
+def verify_ballot():
+    results = None
+    student_id = None
+    error = None
+    
+    if request.method == 'POST':
+        student_id = request.form.get('student_id', '').strip().upper()
+        receipt_input = request.form.get('receipt_code', '').strip().upper()
+        
+        import hashlib
+        expected_raw = f"{student_id}-{Setting.get('academic_year', '2026')}-CoSSA-VOTE"
+        expected_hash = hashlib.sha256(expected_raw.encode()).hexdigest().upper()[:12]
+        
+        if receipt_input == expected_hash:
+            user = User.query.filter_by(student_id=student_id).first()
+            if user:
+                results = user.votes
+            else:
+                error = "No voting record found for this Student ID."
+        else:
+            error = "Invalid Receipt Code. Please check the code sent to your SMS."
+            
+    return render_template('voting/verify_ballot.html', results=results, student_id=student_id, error=error)
+
 @voting.route('/live-stats.json')
-@login_required
 def live_stats_json():
+    # Only expose JSON data if settings allow it
+    if not _should_show_stats():
+        return jsonify(error="Access Denied: Statistical Blind Mode active."), 403
+        
     voted_count = User.query.filter_by(has_voted=True).count()
     total_users = User.query.count()
     portfolios = Portfolio.query.all()

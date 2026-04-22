@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify My Ballot - CoSSA Election Portal{% endblock %}
+
+{% block content %}
+<main class="min-h-screen py-16 px-4 flex flex-col items-center justify-center bg-slate-50">
+    <div class="max-w-xl w-full">
+        {# 🛡️ Verification Header #}
+        <div class="text-center mb-10">
+            <div class="bg-[#0051c3] w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-blue-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+            </div>
+            <h1 class="text-3xl font-black text-slate-900 tracking-tight mb-2">Verify Your Ballot</h1>
+            <p class="text-slate-500 font-medium">Use the Digital Receipt sent to your SMS to preview your vote.</p>
+        </div>
+
+        {# 📝 Entry Form #}
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 mb-8">
+            {% if error %}
+            <div class="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3 animate-shake">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+                <p class="text-sm font-bold text-red-800">{{ error }}</p>
+            </div>
+            {% endif %}
+
+            <form method="POST" class="space-y-6">
+                <div>
+                    <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Student ID</label>
+                    <input type="text" name="student_id" required value="{{ student_id or '' }}"
+                           class="w-full p-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-[#0051c3] outline-none transition-all font-bold text-slate-900 placeholder:text-slate-300"
+                           placeholder="Enter your ID (e.g. EC/BAS/22/...)">
+                </div>
+                <div>
+                    <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Digital Receipt Code (from SMS)</label>
+                    <input type="text" name="receipt_code" required
+                           class="w-full p-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-[#0051c3] outline-none transition-all font-bold text-slate-900 placeholder:text-slate-300 tracking-[0.2em]"
+                           placeholder="EX: A1B2C3D4E5F6">
+                </div>
+                <button type="submit" class="w-full py-4 bg-[#0051c3] text-white rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-blue-500/20 hover:bg-black hover:shadow-none transition-all">
+                    Unlock Verification
+                </button>
+            </form>
+        </div>
+
+        {# 📊 Results Display #}
+        {% if results %}
+        <div class="bg-emerald-600 p-8 rounded-[2.5rem] shadow-2xl shadow-emerald-200 border border-emerald-500">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="bg-white/20 p-2 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                </div>
+                <h2 class="text-xl font-bold text-white">Your Ballot Breakdown</h2>
+            </div>
+            
+            <div class="space-y-4">
+                {% for vote in results %}
+                <div class="flex items-center justify-between p-4 bg-white/10 rounded-2xl border border-white/10">
+                    <div class="min-w-0">
+                        <p class="text-[0.6rem] font-bold text-emerald-100 uppercase tracking-widest">{{ vote.portfolio.title }}</p>
+                        <p class="text-sm font-black text-white truncate">{{ vote.candidate.name }}</p>
+                    </div>
+                    <div class="flex-shrink-0 bg-emerald-400/30 px-3 py-1 rounded-lg">
+                        <p class="text-[0.55rem] font-black text-white uppercase tracking-tighter italic">Secured</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-white/10 text-center">
+                <p class="text-[0.6rem] font-bold text-emerald-100 uppercase tracking-widest opacity-60">Verified On: {{ results[0].timestamp.strftime('%Y-%m-%d %H:%M') if results else 'N/A' }} UTC</p>
+                <a href="{{ url_for('main.index') }}" class="mt-4 inline-block text-xs font-black text-white uppercase tracking-widest hover:underline">Return to Hub</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="text-center mt-8">
+            <a href="{{ url_for('main.index') }}" class="text-sm font-bold text-slate-400 hover:text-[#0051c3] transition-colors">← Back to Homepage</a>
+        </div>
+    </div>
+</main>
+{% endblock %}

@@ -17,12 +17,13 @@
             </div>
             <p class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Digital Ballot Receipt</p>
             <p class="text-2xl font-mono font-black text-blue-600 tracking-[0.2em]">{{ receipt_hash }}</p>
-            <p class="text-[10px] text-slate-400 mt-2">This anonymous hash confirms your participation in the decentralized audit trial.</p>
+            <p class="text-[10px] text-slate-400 mt-2 italic font-bold">Heads up! We've sent this receipt to your phone via SMS for safekeeping.</p>
         </div>
 
         <div class="flex flex-col space-y-4">
-            <a href="{{ url_for('main.index') }}" class="w-full bg-blue-600 text-white px-10 py-5 rounded-3xl font-bold text-xl hover:bg-blue-700 shadow-xl transition-all shadow-blue-200">Done & Log Out</a>
-            <p class="text-slate-400 text-sm">You have been securely logged out for your privacy.</p>
+            <a href="{{ url_for('voting.verify_ballot') }}" class="w-full bg-slate-900 text-white px-10 py-5 rounded-3xl font-bold text-lg hover:bg-black shadow-xl transition-all shadow-slate-200">Verify My Choices</a>
+            <a href="{{ url_for('main.index') }}" class="w-full bg-[#0051c3] text-white px-10 py-4 rounded-3xl font-bold text-lg hover:bg-blue-700 shadow-xl transition-all shadow-blue-200">Return to Hub</a>
+            <p class="text-slate-400 text-xs">You have been securely logged out. Thank you for your participation!</p>
         </div>
     </div>
 </div>

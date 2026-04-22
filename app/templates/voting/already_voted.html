@@ -10,7 +10,11 @@
         </div>
         <h1 class="text-4xl font-black text-slate-900 mb-4 tracking-tight">Already Voted</h1>
         <p class="text-xl text-slate-500 mb-10 leading-relaxed">You have already cast your ballot{% if academic_year %} for the {{ academic_year }} election{% endif %}. Each student may only vote once.</p>
-        <a href="{{ url_for('main.index') }}" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 shadow-xl transition-all">Back to Home</a>
+        
+        <div class="flex flex-col space-y-4">
+            <a href="{{ url_for('voting.verify_ballot') }}" class="w-full bg-slate-900 text-white px-10 py-5 rounded-3xl font-bold text-lg hover:bg-black shadow-xl transition-all shadow-slate-200">Verify My Ballot</a>
+            <a href="{{ url_for('main.index') }}" class="w-full border-2 border-slate-200 text-slate-500 px-10 py-4 rounded-3xl font-bold text-lg hover:bg-slate-50 transition-all">Back to Home</a>
+        </div>
     </div>
 </div>
 
