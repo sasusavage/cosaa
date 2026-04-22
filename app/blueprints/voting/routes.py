@@ -29,7 +29,7 @@ def _voting_window():
         return False, start_s, end_s
 
 @voting.route('/login', methods=['GET', 'POST'])
-@limiter.limit("5 per minute")
+@limiter.limit("2 per minute")
 def login():
     if current_user.is_authenticated:
         if current_user.role == 'admin':
@@ -116,7 +116,7 @@ def login():
     return render_template('voting/login.html')
 
 @voting.route('/verify-otp', methods=['POST'])
-@limiter.limit("5 per hour")
+@limiter.limit("2 per minute")
 def verify_otp():
     student_id = request.form.get('student_id')
     otp_input = request.form.get('otp')

@@ -61,6 +61,7 @@ def admin_required(f):
 
 @admin.route('/login', methods=['GET', 'POST'])
 @cloudflare_required
+@limiter.limit("2 per minute")
 def login():
     if current_user.is_authenticated and current_user.role == 'admin':
         return redirect(url_for('admin.dashboard'))
