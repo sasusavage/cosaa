@@ -279,48 +279,128 @@ def ballot():
                            total_users=total_users,
                            turnout=turnout)
 
-@voting.route('/submit-vote', methods=['POST'])
+@voting.route('/review-ballot', methods=['POST'])
 @login_required
-def submit_vote():
+def review_ballot():
     if current_user.role == 'admin':
         return redirect(url_for('admin.dashboard'))
     is_open, _, _ = _voting_window()
     if not is_open:
         return redirect(url_for('voting.ballot'))
-    # Double-check both the flag and the DB to prevent any race condition
     if current_user.has_voted:
-        flash('You have already cast your ballot.', 'info')
         return redirect(url_for('voting.already_voted'))
-
-    existing = Vote.query.filter_by(user_id=current_user.id).first()
-    if existing:
-        current_user.has_voted = True
-        db.session.commit()
-        return redirect(url_for('voting.already_voted'))
-
+    
+    from flask import session
+    choices = {}
     portfolios = Portfolio.query.all()
+    for portfolio in portfolios:
+        # Check for regular candidate selection
+        selection = request.form.get(f'portfolio_{portfolio.id}')
+        # Check for 'Reject' selection (used in unopposed portfolios)
+        reject = request.form.get(f'portfolio_{portfolio.id}_reject')
+        
+        if selection:
+            choices[str(portfolio.id)] = int(selection)
+        elif reject == 'REJECT':
+            choices[str(portfolio.id)] = 'REJECT'
+    
+    session['ballot_choices'] = choices
+    return redirect(url_for('voting.review'))
+
+@voting.route('/review')
+@login_required
+def review():
+    if current_user.has_voted:
+        return redirect(url_for('voting.already_voted'))
+    
+    from flask import session
+    choices = session.get('ballot_choices', {})
+    if not choices:
+        return redirect(url_for('voting.ballot'))
+    
+    from app.models import Candidate
+    summary = []
+    # Make sure we show ALL portfolios, even if they skipped some
+    portfolios = Portfolio.query.order_by(Portfolio.order).all()
+    for p in portfolios:
+        c_id = choices.get(str(p.id))
+        
+        if c_id == 'REJECT':
+            summary.append({
+                'portfolio': p.title,
+                'candidate_name': 'REJECTED / NO VOTE',
+                'candidate_image': None,
+                'is_reject': True
+            })
+        elif c_id:
+            candidate = Candidate.query.get(int(c_id))
+            if candidate:
+                summary.append({
+                    'portfolio': p.title,
+                    'candidate_name': candidate.name,
+                    'candidate_image': candidate.image_url,
+                    'is_reject': False
+                })
+        else:
+            summary.append({
+                'portfolio': p.title,
+                'candidate_name': 'SKIPPED / NO SELECTION',
+                'candidate_image': None,
+                'is_reject': True
+            })
+    
+    return render_template('voting/review.html', summary=summary)
+
+@voting.route('/finalize-vote', methods=['POST'])
+@login_required
+@limiter.limit("1 per minute")
+def finalize_vote():
+    if current_user.role == 'admin' or current_user.has_voted:
+        return redirect(url_for('voting.ballot'))
+    
+    is_open, _, _ = _voting_window()
+    if not is_open:
+        return redirect(url_for('voting.ballot'))
+
+    from flask import session
+    choices = session.get('ballot_choices', {})
+    if not choices:
+        flash('Session expired or no choices made. Please try again.', 'error')
+        return redirect(url_for('voting.ballot'))
+
     try:
-        for portfolio in portfolios:
-            selection = request.form.get(f'portfolio_{portfolio.id}')
-            if selection:
-                candidate_id = int(selection)
-                vote = Vote(
-                    user_id=current_user.id, 
-                    candidate_id=candidate_id, 
-                    portfolio_id=portfolio.id,
-                    ip_address=request.remote_addr,
-                    user_agent=request.headers.get('User-Agent')[:255]
-                )
-                db.session.add(vote)
+        # Final double-check of DB status
+        voted_check = Vote.query.filter_by(user_id=current_user.id).first()
+        if voted_check:
+            current_user.has_voted = True
+            db.session.commit()
+            return redirect(url_for('voting.already_voted'))
+
+        for p_id_str, c_id in choices.items():
+            if c_id == 'REJECT':
+                continue # We don't record a vote record for a rejection in the current schema
+                
+            vote = Vote(
+                user_id=current_user.id, 
+                candidate_id=int(c_id), 
+                portfolio_id=int(p_id_str),
+                ip_address=request.remote_addr,
+                user_agent=request.headers.get('User-Agent')[:255]
+            )
+            db.session.add(vote)
 
         current_user.has_voted = True
         db.session.commit()
+        
+        # Clear sensitive session data
+        session.pop('ballot_choices', None)
+        
         flash('Ballot submitted successfully! Your voice has been heard.', 'success')
         return redirect(url_for('voting.vote_confirmed'))
     except Exception as e:
         db.session.rollback()
         flash('An error occurred during submission. Please try again.', 'error')
-        print(f"Error submitting vote: {e}")
+        print(f"Error finalizing vote: {e}")
         return redirect(url_for('voting.ballot'))
 
 @voting.route('/confirmed')

@@ -41,7 +41,7 @@
         </div>
     </div>
 
-    <form action="{{ url_for('voting.submit_vote') }}" method="POST" id="ballot-form" class="space-y-16">
+    <form action="{{ url_for('voting.review_ballot') }}" method="POST" id="ballot-form" class="space-y-16">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         
         {% for portfolio in portfolios %}
@@ -71,9 +71,11 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {% for candidate in portfolio.candidates %}
+                {% set selected_choice = session.get('ballot_choices', {}).get(portfolio.id|string)|int %}
                 <label class="relative block group-candidate cursor-pointer">
                     <input type="radio" name="portfolio_{{ portfolio.id }}" value="{{ candidate.id }}" 
                            class="peer absolute opacity-0 invisible portfolio-radio-{{ portfolio.id }}"
+                           {% if selected_choice == candidate.id %}checked{% endif %}
                            onclick="handleRadioClick(this, '{{ portfolio.id }}')">
                     <div class="p-8 rounded-[2rem] border-4 border-slate-200 peer-checked:border-blue-600 peer-checked:bg-blue-50/50 transition-all hover:border-slate-300 hover:bg-slate-50 group-hover:shadow-xl shadow-md">
                         <div class="flex items-start space-x-6">
@@ -96,9 +98,11 @@
 
                 {# Add "Reject / No Vote" option for unopposed portfolios #}
                 {% if portfolio.candidates|length == 1 %}
+                {% set is_rejected = session.get('ballot_choices', {}).get(portfolio.id|string) == 'REJECT' %}
                 <label class="relative block group-candidate cursor-pointer">
                     <input type="radio" name="portfolio_{{ portfolio.id }}_reject" value="REJECT" 
                            class="peer absolute opacity-0 invisible portfolio-radio-{{ portfolio.id }}"
+                           {% if is_rejected %}checked{% endif %}
                            onclick="handleRejectClick(this, '{{ portfolio.id }}')">
                     <div class="p-8 rounded-[2rem] border-4 border-slate-200 peer-checked:border-rose-500 peer-checked:bg-rose-50/50 transition-all hover:border-slate-300 hover:bg-slate-50 group-hover:shadow-xl shadow-md">
                         <div class="flex items-start space-x-6">
@@ -126,36 +130,26 @@
         <div class="bg-blue-900 p-12 rounded-[3.5rem] shadow-2xl mt-20 text-center relative overflow-hidden">
             <div class="absolute -top-10 -right-10 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl"></div>
             <div class="absolute -bottom-10 -left-10 w-64 h-64 bg-blue-400/20 rounded-full blur-3xl"></div>
-            <h3 class="text-4xl font-bold text-white mb-6 tracking-tight">Ready to cast your ballot?</h3>
-            <p class="text-indigo-100 text-xl mb-12 max-w-2xl mx-auto leading-relaxed">Please review your selections carefully. Once submitted, your vote is final and cannot be changed.</p>
-            <button type="button" onclick="showConfirm()" class="bg-white text-blue-900 px-16 py-5 rounded-[2rem] font-black text-2xl hover:bg-slate-100 transform active:scale-95 transition-all shadow-2xl">Confirm Selection</button>
+            <h3 class="text-4xl font-bold text-white mb-6 tracking-tight">Review Selections</h3>
+            <p class="text-indigo-100 text-xl mb-12 max-w-2xl mx-auto leading-relaxed">You'll have a chance to review every choice on the next page before final submission.</p>
+            <button type="submit" class="bg-white text-blue-900 px-16 py-5 rounded-[2rem] font-black text-2xl hover:bg-slate-100 transform active:scale-95 transition-all shadow-2xl">Next: Review Selections →</button>
         </div>
     </form>
 </div>
 
-<!-- Custom Confirmation Modal -->
-<div id="confirmModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-blue-900/40 backdrop-blur-md p-6">
-    <div class="bg-white max-w-md w-full rounded-[2.5rem] shadow-2xl p-10 transform scale-90 opacity-0 transition-all duration-300 transform-origin-center">
-        <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-3xl flex items-center justify-center mb-8 mx-auto shadow-xl">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-        </div>
-        <h3 class="text-3xl font-black mb-4 text-center text-slate-800">Review Ballot</h3>
-        <p class="text-slate-500 text-center mb-10 text-lg leading-relaxed">
-            You are about to cast your vote. Please remember that you can only vote for <strong>one candidate</strong> in each section.<br><br>
-            Are you ready to submit your final ballot and exit the portal?
-        </p>
-        <div class="flex flex-col space-y-4">
-            <button onclick="document.getElementById('ballot-form').submit()" class="bg-blue-600 py-4 rounded-2xl text-white font-black text-xl hover:bg-blue-700 shadow-xl transition-all">Yes, Submit & Exit</button>
-            <button onclick="hideConfirm()" class="bg-slate-100 py-4 rounded-2xl text-slate-500 font-bold text-lg hover:bg-slate-200 transition-all">Back to Ballot</button>
-        </div>
-    </div>
-</div>
-
 <script>
-    // Track previous selection states to enable "Toggle" (Click to Deselect)
+    // Initialize selectedStates from any already checked inputs (e.g. from session)
     let selectedStates = {};
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
+            const portfolioId = radio.name.replace('portfolio_', '').replace('_reject', '');
+            if (radio.name.includes('reject')) {
+                selectedStates[portfolioId + '_reject'] = 'REJECT';
+            } else {
+                selectedStates[portfolioId] = radio.value;
+            }
+        });
+    });
 
     function handleRadioClick(radio, portfolioId) {
         if (selectedStates[portfolioId] === radio.value) {
