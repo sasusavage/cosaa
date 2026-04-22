@@ -30,7 +30,7 @@
                         <span class="text-xl font-black text-blue-600">{{ turnout|round(1) }}%</span>
                     </div>
                     <div class="w-full bg-slate-100 h-4 rounded-full p-1 border border-slate-200 overflow-hidden">
-                        <div class="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full shadow-md transition-all duration-1000" style="width: {{ turnout }}%"></div>
+                        <div id="voter-turnout-bar" class="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full shadow-md transition-all duration-1000" style="width: 0%"></div>
                     </div>
                 </div>
                 <div class="text-right hidden md:block">
@@ -204,6 +204,16 @@
         selectedStates[id] = null;
         selectedStates[id + '_reject'] = null;
     }
+
+    // Participation Animation
+    document.addEventListener('DOMContentLoaded', () => {
+        const bar = document.getElementById('voter-turnout-bar');
+        if (bar) {
+            setTimeout(() => {
+                bar.style.width = "{{ turnout or 0 }}%";
+            }, 100);
+        }
+    });
 </script>
 
 <style>

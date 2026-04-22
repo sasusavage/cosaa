@@ -56,7 +56,7 @@
                                         <td class="px-8 py-6">
                                             <div class="flex items-center gap-4">
                                                 <div class="flex-1 bg-slate-100 h-1.5 rounded-full overflow-hidden min-w-[150px]">
-                                                    <div class="progress-bar h-full {% if loop.first %}bg-blue-600{% else %}bg-slate-400{% endif %} rounded-full transition-all duration-1000" style="width: {{ cand.pct|default(0) }}%"></div>
+                                                    <div class="progress-bar h-full {% if loop.first %}bg-blue-600{% else %}bg-slate-400{% endif %} rounded-full transition-all duration-1000" style="width: 0%" data-pct="{{ cand.pct or 0 }}"></div>
                                                 </div>
                                                 <span class="text-[0.65rem] font-black text-slate-400 w-10">{{ cand.pct|round(1) if cand.pct else 0 }}%</span>
                                             </div>
@@ -126,5 +126,15 @@
     
     // Refresh every 15 seconds for Results page
     setInterval(refreshResults, 15000);
+
+    // Initial Animation
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.progress-bar').forEach(bar => {
+            const pct = bar.getAttribute('data-pct');
+            setTimeout(() => {
+                bar.style.width = pct + '%';
+            }, 100);
+        });
+    });
 </script>
 {% endblock %}

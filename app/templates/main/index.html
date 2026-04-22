@@ -82,70 +82,70 @@
                 <span class="text-sm font-bold text-slate-400">Student Participation</span>
                 <span class="text-2xl font-black text-blue-600">{{ turnout|round(1) }}%</span>
             </div>
-            <div class="w-full bg-slate-100 h-6 rounded-full p-1 border border-slate-200 overflow-hidden shadow-inner">
-                <div id="turnout-bar-fill" class="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full shadow-lg transition-all duration-1000" style="width: 0%;"></div>
+            <div class="w-full bg-slate-100 h-4 rounded-full p-1 border border-slate-200 overflow-hidden">
+                <div id="turnout-bar-fill" class="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full shadow-md transition-all duration-1000" style="width: 0%"></div>
             </div>
-            <script>
+
     {% if voting_start and voting_end %}
-    const startStr = "{{ voting_start }}";
-    const endStr = "{{ voting_end }}";
-    
-    function updateCountdown() {
-        const now = new Date();
-        const start = new Date(startStr);
-        const end = new Date(endStr);
-        const timerWrap = document.getElementById('election-countdown');
-        const label = document.getElementById('countdown-label');
+    <script>
+    (function() {
+        const start = new Date("{{ voting_start }}").getTime();
+        const end = new Date("{{ voting_end }}").getTime();
         
-        let target = null;
-        if (now < start) {
-            target = start;
-            label.innerText = "Election Starts In";
-            timerWrap.classList.remove('hidden');
-        } else if (now < end) {
-            target = end;
-            label.innerText = "Polls Close In";
-            label.classList.add('text-blue-600');
-            timerWrap.classList.remove('hidden');
-        } else {
-            timerWrap.classList.add('hidden');
-            return;
+        function updateTimerUI() {
+            const now = new Date().getTime();
+            if (isNaN(start) || isNaN(end)) return;
+            
+            const timerWrap = document.getElementById('election-countdown');
+            const label = document.getElementById('countdown-label');
+            if (!timerWrap || !label) return;
+            
+            let target = null;
+            if (now < start) {
+                target = start;
+                label.innerText = "Election Starts In";
+                timerWrap.classList.remove('hidden');
+            } else if (now < end) {
+                target = end;
+                label.innerText = "Polls Close In";
+                label.classList.add('text-blue-600');
+                timerWrap.classList.remove('hidden');
+            } else {
+                timerWrap.classList.add('hidden');
+                return;
+            }
+
+            const diff = target - now;
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+            if(document.getElementById('days')) document.getElementById('days').innerText = d.toString().padStart(2, '0');
+            if(document.getElementById('hours')) document.getElementById('hours').innerText = h.toString().padStart(2, '0');
+            if(document.getElementById('minutes')) document.getElementById('minutes').innerText = m.toString().padStart(2, '0');
+            if(document.getElementById('seconds')) document.getElementById('seconds').innerText = s.toString().padStart(2, '0');
         }
 
-        const diff = target - now;
-        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const s = Math.floor((diff % (1000 * 60)) / 1000);
-
-        document.getElementById('days').innerText = d.toString().padStart(2, '0');
-        document.getElementById('hours').innerText = h.toString().padStart(2, '0');
-        document.getElementById('minutes').innerText = m.toString().padStart(2, '0');
-        document.getElementById('seconds').innerText = s.toString().padStart(2, '0');
-    }
-
-    setInterval(updateCountdown, 1000);
-    updateCountdown();
+        setInterval(updateTimerUI, 1000);
+        updateTimerUI();
+    })();
+    </script>
     {% endif %}
 
-    // 🏎 Turnout Animation
-    document.addEventListener('DOMContentLoaded', () => {
-        const turnoutBar = document.getElementById('turnout-bar-fill');
-        if (turnoutBar) {
-            setTimeout(() => {
-                turnoutBar.style.width = "{{ turnout|default(0) }}%";
-            }, 300);
-        }
-    });
-
-    {% if show_results %}
-    function toggleLeaderboard(id) {
-        const el = document.getElementById(id);
-        el.classList.toggle('hidden');
-        el.classList.toggle('flex');
-    }
-    {% endif %}
-</script>
+    <script>
+    (function() {
+        // Turnout Animation
+        document.addEventListener('DOMContentLoaded', () => {
+            const bar = document.getElementById('turnout-bar-fill');
+            if (bar) {
+                setTimeout(() => {
+                    bar.style.width = "{{ turnout or 0 }}%";
+                }, 100);
+            }
+        });
+    })();
+    </script>
         </div>
     </div>
 </div>
