@@ -98,31 +98,35 @@
 
         {# 📊 Statistical Leaderboard (Agents & Admins) #}
         <div class="bg-white border border-slate-200 rounded-lg overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
                 <h3 class="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-                    Live Election Standings — Monitoring Mode
+                    Live Election Standings <span class="hidden sm:inline">— Monitoring Mode</span>
                 </h3>
+                <span class="text-[0.6rem] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded uppercase tracking-widest animate-pulse">Live</span>
             </div>
-            <div class="p-6 space-y-8">
+            <div class="p-4 md:p-6 space-y-8">
                 {% for p in portfolios %}
                 <div class="space-y-4">
-                    <div class="flex items-center justify-between">
+                    <div class="flex items-center justify-between border-b border-slate-50 pb-2">
                         <h4 class="text-xs font-black text-slate-900 uppercase tracking-widest">{{ p.title }}</h4>
                         {% set total_p_votes = p.votes|length %}
-                        <span class="text-[0.65rem] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded uppercase tracking-tighter">{{ total_p_votes }} Ballots Cast</span>
+                        <span class="text-[0.6rem] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded uppercase tracking-tighter">{{ total_p_votes }} Ballots</span>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                         {% for c in p.candidates %}
                         {% set c_votes = c.votes_received|length %}
                         {% set pct = (c_votes / total_p_votes * 100)|round(1) if total_p_votes > 0 else 0 %}
-                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                        <div class="p-3 md:p-4 bg-slate-50/50 rounded-xl border border-slate-100 hover:border-blue-200 transition-colors">
                             <div class="flex items-center justify-between mb-2">
-                                <span class="text-[0.7rem] font-bold text-slate-700">{{ c.name }}</span>
-                                <span class="text-[0.7rem] font-black {{ 'text-emerald-600' if loops_max_votes == c_votes and c_votes > 0 else 'text-slate-400' }}">{{ pct }}%</span>
+                                <span class="text-[0.7rem] font-bold text-slate-700 truncate mr-2">{{ c.name }}</span>
+                                <span class="text-[0.7rem] font-black text-slate-900">{{ pct }}%</span>
                             </div>
-                            <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                            <div class="w-full bg-slate-200 h-2 md:h-1.5 rounded-full overflow-hidden">
                                 <div class="bg-blue-600 h-full transition-all duration-1000" style="width: {{ pct }}%"></div>
+                            </div>
+                            <div class="mt-2 flex justify-between items-center">
+                                <span class="text-[0.55rem] font-bold text-slate-400 tracking-widest uppercase">{{ c_votes }} Verified</span>
                             </div>
                         </div>
                         {% endfor %}

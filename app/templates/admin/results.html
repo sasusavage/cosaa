@@ -26,14 +26,14 @@
                         <span class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest italic">Live Verification Active</span>
                     </div>
 
-                    <div class="overflow-x-auto">
-                        <table class="w-full enterprise-table">
+                    <div class="overflow-x-auto -mx-8 md:mx-0">
+                        <table class="w-full enterprise-table min-w-[600px] md:min-w-0">
                             <thead>
                                 <tr class="bg-slate-50/50">
-                                    <th class="px-8 py-4 text-left">Identity Profile</th>
-                                    <th class="px-8 py-4 text-center">Verified Tally</th>
-                                    <th class="px-8 py-4 text-left">Relative Magnitude</th>
-                                    <th class="px-8 py-4 text-right">Audit Status</th>
+                                    <th class="px-8 py-4 text-left whitespace-nowrap">Identity Profile</th>
+                                    <th class="px-8 py-4 text-center whitespace-nowrap">Verified Tally</th>
+                                    <th class="px-8 py-4 text-left whitespace-nowrap">Relative Magnitude</th>
+                                    <th class="px-8 py-4 text-right whitespace-nowrap hidden sm:table-cell">Audit Status</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 italic">
@@ -41,12 +41,12 @@
                                     <tr class="hover:bg-slate-50 transition-colors" data-candidate-id="{{ cand.id }}">
                                         <td class="px-8 py-6">
                                             <div class="flex items-center gap-3">
-                                                <div class="w-2 h-2 rounded-full {% if loop.first and cand.count > 0 %}bg-blue-600{% else %}bg-slate-200{% endif %}"></div>
-                                                <div>
-                                                    <p class="font-bold text-slate-900 text-sm italic">{{ cand.name }}</p>
-                                                    {% if loop.first and cand.count > 0 %}
-                                                        <p class="text-[0.6rem] font-black text-blue-600 uppercase tracking-widest mt-0.5 animate-pulse">Primary Lead Agency</p>
-                                                    {% endif %}
+                                                <div class="w-2 h-2 rounded-full flex-shrink-0 {% if loop.first and cand.count > 0 %}bg-blue-600 animate-pulse{% else %}bg-slate-200{% endif %}"></div>
+                                                <div class="min-w-0">
+                                                    <p class="font-bold text-slate-900 text-sm italic truncate">{{ cand.name }}</p>
+                                                    <p class="text-[0.6rem] font-black {% if loop.first and cand.count > 0 %}text-blue-600{% else %}text-slate-400{% endif %} uppercase tracking-widest mt-0.5">
+                                                        {% if loop.first and cand.count > 0 %}Primary Lead{% else %}Standard Node{% endif %}
+                                                    </p>
                                                 </div>
                                             </div>
                                         </td>
@@ -55,15 +55,15 @@
                                         </td>
                                         <td class="px-8 py-6">
                                             <div class="flex items-center gap-4">
-                                                <div class="flex-1 bg-slate-100 h-1.5 rounded-full overflow-hidden min-w-[150px]">
+                                                <div class="flex-1 bg-slate-100 h-2 md:h-1.5 rounded-full overflow-hidden min-w-[100px] md:min-w-[150px]">
                                                     <div class="progress-bar h-full {% if loop.first %}bg-blue-600{% else %}bg-slate-400{% endif %} rounded-full transition-all duration-1000" style="width: 0%" data-pct="{{ cand.pct or 0 }}"></div>
                                                 </div>
-                                                <span class="text-[0.65rem] font-black text-slate-400 w-10">{{ cand.pct|round(1) if cand.pct else 0 }}%</span>
+                                                <span class="text-[0.65rem] font-black text-slate-500 w-10 text-right">{{ cand.pct|round(1) if cand.pct else 0 }}%</span>
                                             </div>
                                         </td>
-                                        <td class="px-8 py-6 text-right">
+                                        <td class="px-8 py-6 text-right hidden sm:table-cell">
                                             {% if loop.first and cand.count > 0 %}
-                                            <span class="text-[0.6rem] font-black text-blue-600 border border-blue-600/20 px-2 py-0.5 rounded uppercase tracking-tighter bg-blue-50">Trend Indicator</span>
+                                            <span class="text-[0.6rem] font-black text-blue-600 border border-blue-600/20 px-2 py-0.5 rounded uppercase tracking-tighter bg-blue-50">Lead Indicator</span>
                                             {% else %}
                                             <span class="text-[0.6rem] font-black text-slate-300 uppercase tracking-tighter">Stabilized</span>
                                             {% endif %}
