@@ -134,7 +134,6 @@ def dashboard():
                            total_users=total_users,
                            voted_count=voted_count,
                            turnout=turnout,
-                           portfolios=portfolios,
                            voting_open=voting_open,
                            voting_start=voting_start,
                            voting_end=voting_end,
