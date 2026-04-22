@@ -230,11 +230,7 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="space-y-1">
                     <label class="text-[0.65rem] font-bold text-slate-500 uppercase tracking-wider">Agent Username</label>
-                    <input type="text" name="username" placeholder="e.g. EC-Agent-01" required class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm focus:border-blue-600 outline-none">
-                </div>
-                <div class="space-y-1">
-                    <label class="text-[0.65rem] font-bold text-slate-500 uppercase tracking-wider">Identifier (Student ID)</label>
-                    <input type="text" name="student_id" placeholder="AGENT001" required class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm focus:border-blue-600 outline-none uppercase">
+                    <input type="text" name="username" placeholder="e.g. AgentJohn" required class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm focus:border-blue-600 outline-none">
                 </div>
                 <div class="space-y-1">
                     <label class="text-[0.65rem] font-bold text-slate-500 uppercase tracking-wider">Initial Password</label>
@@ -251,9 +247,12 @@
             </div>
             <p class="text-[0.65rem] text-red-400 font-bold mb-6 italic uppercase tracking-wider">Permanent destructive actions. Use only at conclusion of polls.</p>
             
-            <form method="POST" action="{{ url_for('admin.archive_election') }}" onsubmit="return confirm('CRITICAL: This will snapshot all final votes to an immutable record, clear all current ballots, and reset the platform for the next cycle. Continue?')">
+            <form method="POST" action="{{ url_for('admin.archive_election') }}" onsubmit="return confirm('CRITICAL: This will snapshot all final votes, clear all current ballots, and reset for the next cycle. Continue?')">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <input type="hidden" name="academic_year" value="{{ academic_year }}"/>
+                <div class="space-y-1 mb-4">
+                    <label class="text-[0.65rem] font-bold text-red-600 uppercase tracking-wider">Confirm Academic Year to Archive</label>
+                    <input type="text" name="academic_year" value="{{ academic_year }}" required class="w-full p-2 bg-white border-2 border-red-100 rounded text-sm focus:border-red-600 outline-none font-black text-red-900" placeholder="e.g. 2025/2026">
+                </div>
                 <button type="submit" class="w-full py-3 bg-red-600 text-white text-xs font-black uppercase tracking-widest rounded shadow-lg shadow-red-900/50 hover:bg-black transition-all">
                     Archive & Reset Election
                 </button>

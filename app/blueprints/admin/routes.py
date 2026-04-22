@@ -76,7 +76,10 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         
-        user = User.query.filter(User.student_id == username, User.role.in_(['admin', 'agent'])).first()
+        user = User.query.filter(
+            db.or_(User.username == username, User.student_id == username), 
+            User.role.in_(['admin', 'agent'])
+        ).first()
         if user and user.check_password(password):
             login_user(user)
             flash(f'{user.role.capitalize()} Session Established', 'success')
@@ -754,7 +757,7 @@ def archive_election():
     # Accept year from the inline form field first, fall back to stored setting
     academic_year = request.form.get('academic_year', '').strip() or Setting.get('academic_year', '').strip()
     if not academic_year:
-        flash('Please enter an Academic Year before archiving.', 'error')
+        flash('Please enter or confirm the Academic Year in the Archive form below.', 'error')
         return redirect(url_for('admin.dashboard'))
 
     # Build snapshot
@@ -850,16 +853,22 @@ def results():
 @admin_required
 def create_polling_agent():
     username = request.form.get('username')
-    student_id = request.form.get('student_id').upper() # Force uppercase for consistency
     password = request.form.get('password')
     
-    if User.query.filter_by(student_id=student_id).first():
-        flash('Agent identifier (Student ID) already exists.', 'error')
+    if not username or not password:
+        flash('Both Username and Password are required.', 'error')
+        return redirect(url_for('admin.dashboard'))
+
+    # For Polling Agents, we use their username as the unique student_id too
+    unique_id = username.strip().upper()
+    
+    if User.query.filter_by(student_id=unique_id).first():
+        flash(f'An agent or user with identifier "{unique_id}" already exists.', 'error')
         return redirect(url_for('admin.dashboard'))
     
-    agent = User(username=username, student_id=student_id, role='agent')
+    agent = User(username=username, student_id=unique_id, role='agent')
     agent.set_password(password)
     db.session.add(agent)
     db.session.commit()
-    flash('Polling Agent registered successfully.', 'success')
+    flash('Polling Agent registered successfully. They can now login with these credentials.', 'success')
     return redirect(url_for('admin.dashboard'))
