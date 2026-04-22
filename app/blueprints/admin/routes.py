@@ -29,22 +29,47 @@ def delete_upload(image_url):
 
 def admin_required(f):
     @wraps(f)
-    @login_required
     def decorated_function(*args, **kwargs):
-        # 🛡️ CLOUDFLARE ZERO TRUST ENFORCEMENT
-        # If your domain is on Cloudflare Access, this header is mandatory.
-        # To enable, set ENFORCE_CLOUDFLARE_ACCESS=True in your .env
+        # 1. 🛡️ CLOUDFLARE ZERO TRUST ENFORCEMENT
+        # This blocks everyone NOT behind your Cloudflare Zero Trust gateway.
         if current_app.config.get('ENFORCE_CLOUDFLARE_ACCESS'):
             cloudflare_assertion = request.headers.get('Cf-Access-Jwt-Assertion')
             if not cloudflare_assertion:
                 from flask import abort
-                return abort(403, description="Access Denied: You must be behind the Cloudflare Zero Trust Gateway to access this resource.")
+                return abort(403, description="Access Denied: Connection must originate from the verified Cloudflare Zero Trust Gateway.")
         
+        # 2. Flask Authentication
+        if not current_user.is_authenticated:
+            # Send them to the special admin login, NOT the student one
+            flash('Admin Authentication Required', 'error')
+            return redirect(url_for('admin.login'))
+            
         if current_user.role != 'admin':
-            flash('Access denied!', 'error')
+            flash('Insufficient Privileges', 'error')
             return redirect(url_for('main.index'))
+            
         return f(*args, **kwargs)
     return decorated_function
+
+@admin.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated and current_user.role == 'admin':
+        return redirect(url_for('admin.dashboard'))
+        
+    if request.method == 'POST':
+        from flask_login import login_user
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        user = User.query.filter_by(student_id=username, role='admin').first()
+        if user and user.check_password(password):
+            login_user(user)
+            flash('Administrative Session Established', 'success')
+            return redirect(url_for('admin.dashboard'))
+        else:
+            flash('Invalid Operator Credentials', 'error')
+            
+    return render_template('admin/login.html')
 
 @admin.route('/cms')
 @admin_required
