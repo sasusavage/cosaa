@@ -6,7 +6,7 @@
 
 {% block admin_content %}
 {# 🏎 Activity Metrics #}
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
     <div class="bg-white stat-card p-6 rounded-lg relative overflow-hidden">
         <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Authenticated Voters</p>
         <h3 class="text-3xl font-bold text-slate-900 tracking-tight">{{ total_users }}</h3>
@@ -28,10 +28,28 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /></svg>
         </div>
     </div>
-    <div class="bg-[#0051c3] p-6 rounded-lg shadow-lg shadow-blue-200">
-        <p class="text-xs font-bold text-white/50 uppercase tracking-widest mb-1">Identity Disputes</p>
-        <h3 class="text-3xl font-bold text-white tracking-tight">{{ disputes|length if disputes else 0 }}</h3>
-        <p class="text-[0.65rem] text-white/70 font-bold mt-1 uppercase tracking-wider">Action Required</p>
+    <div class="bg-white stat-card p-6 rounded-lg relative overflow-hidden">
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Identity Disputes</p>
+        <h3 class="text-3xl font-bold text-red-600 tracking-tight">{{ disputes|length if disputes else 0 }}</h3>
+        <div class="absolute top-0 right-0 p-4 opacity-5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+        </div>
+    </div>
+    
+    {# ⏳ Polling Clock #}
+    <div id="admin-countdown-wrap" class="bg-[#0051c3] p-6 rounded-lg relative overflow-hidden shadow-xl shadow-blue-900/20">
+        <p id="admin-timer-label" class="text-[0.6rem] font-black text-blue-200 uppercase tracking-widest mb-1">Syncing Mission Time...</p>
+        <div class="flex items-baseline gap-1 text-white">
+            <span id="admin-hours" class="text-3xl font-black tracking-tighter">00</span>
+            <span class="text-sm font-bold opacity-50 uppercase">h</span>
+            <span id="admin-minutes" class="text-3xl font-black tracking-tighter ml-2">00</span>
+            <span class="text-sm font-bold opacity-50 uppercase">m</span>
+            <span id="admin-seconds" class="text-xl font-bold opacity-30 tracking-tighter ml-2">00</span>
+            <span class="text-[0.6rem] font-bold opacity-30 uppercase">s</span>
+        </div>
+        <div class="absolute top-0 right-0 p-4 opacity-10 text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        </div>
     </div>
 </div>
 
@@ -313,5 +331,53 @@
         document.getElementById('selfie-modal').classList.remove('hidden');
         document.getElementById('selfie-modal').classList.add('flex');
     }
+
+    (function() {
+        const startStr = "{{ voting_start }}";
+        const endStr = "{{ voting_end }}";
+        
+        if (!startStr || !endStr) return;
+
+        const start = new Date(startStr);
+        const end = new Date(endStr);
+
+        function updateAdminTimer() {
+            const now = new Date();
+            const wrap = document.getElementById('admin-countdown-wrap');
+            const label = document.getElementById('admin-timer-label');
+            
+            if (!wrap || !label) return;
+
+            let target = null;
+            if (now < start) {
+                target = start;
+                label.innerText = "Election Starts In";
+                wrap.style.backgroundColor = "#1e293b"; // Slate-800
+            } else if (now < end) {
+                target = end;
+                label.innerText = "Polls Close In";
+                wrap.style.backgroundColor = "#0051c3"; // Dynamic Blue
+            } else {
+                label.innerText = "Polls Closed";
+                wrap.style.backgroundColor = "#9f1239"; // Rose-900
+                document.getElementById('admin-hours').innerText = "00";
+                document.getElementById('admin-minutes').innerText = "00";
+                document.getElementById('admin-seconds').innerText = "00";
+                return;
+            }
+
+            const diff = target - now;
+            const h = Math.floor(diff / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById('admin-hours').innerText = h.toString().padStart(2, '0');
+            document.getElementById('admin-minutes').innerText = m.toString().padStart(2, '0');
+            document.getElementById('admin-seconds').innerText = s.toString().padStart(2, '0');
+        }
+
+        setInterval(updateAdminTimer, 1000);
+        updateAdminTimer();
+    })();
 </script>
 {% endblock %}
