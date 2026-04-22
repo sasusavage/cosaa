@@ -142,7 +142,9 @@ def dashboard():
                            stats_display_hours=Setting.get('stats_display_hours', '48'),
                            live_stats_on=live_stats_on,
                            recent_votes=recent_votes,
-                           disputes=pending_disputes)
+                           disputes=pending_disputes,
+                           display_live_results=Setting.get('display_live_results', '0'),
+                           display_turnout_stats=Setting.get('display_turnout_stats', '1'))
 
 @admin.route('/voting-window', methods=['POST'])
 @admin_required
@@ -321,8 +323,16 @@ def quick_add_voter():
 @admin.route('/toggle-live-stats', methods=['POST'])
 @admin_required
 def toggle_live_stats():
-    current = Setting.get('live_stats_public', '0')
-    Setting.set('live_stats_public', '0' if current == '1' else '1')
+    current = Setting.get('display_live_results', '0')
+    Setting.set('display_live_results', '0' if current == '1' else '1')
+    db.session.commit()
+    return redirect(url_for('admin.dashboard'))
+
+@admin.route('/toggle-turnout-stats', methods=['POST'])
+@admin_required
+def toggle_turnout_stats():
+    current = Setting.get('display_turnout_stats', '1') # Default ON
+    Setting.set('display_turnout_stats', '0' if current == '1' else '1')
     db.session.commit()
     return redirect(url_for('admin.dashboard'))
 

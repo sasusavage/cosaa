@@ -29,11 +29,29 @@ def index():
     voted_count = User.query.filter_by(has_voted=True).count()
     turnout = (voted_count / total_users * 100) if total_users > 0 else 0
     
+    show_turnout = Setting.get('display_turnout_stats', '1') == '1'
+    
+    show_results = Setting.get('display_live_results', '0') == '1'
+    leaderboard_data = []
+    if show_results:
+        portfolios = Portfolio.query.all()
+        for p in portfolios:
+            candidates = []
+            for c in p.candidates:
+                count = len(c.votes_received)
+                candidates.append({'name': c.name, 'votes': count, 'image': c.image_url})
+            # Sort by votes to show winners first
+            candidates.sort(key=lambda x: x['votes'], reverse=True)
+            leaderboard_data.append({'title': p.title, 'candidates': candidates})
+            
     return render_template('main/index.html',
         voting_open=voting_open,
-        turnout=turnout,
-        voted_count=voted_count,
-        total_users=total_users,
+        turnout=turnout if show_turnout else None,
+        voted_count=voted_count if show_turnout else None,
+        total_users=total_users if show_turnout else None,
+        show_turnout=show_turnout,
+        show_results=show_results,
+        leaderboard_data=leaderboard_data,
         portfolios=Portfolio.query.all() if voting_open else [],
         upcoming_events=Event.query.order_by(Event.order).all(),
         executives=Executive.query.order_by(Executive.order).limit(4).all(),
