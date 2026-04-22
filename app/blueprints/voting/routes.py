@@ -176,28 +176,42 @@ def verify_otp():
     
     return redirect(url_for('voting.login'))
 
-@voting.route('/report-hijack')
+@voting.route('/report-hijack', methods=['GET', 'POST'])
 def report_hijack():
-    student_id = request.args.get('student_id')
-    reporter_phone = request.args.get('phone')
+    student_id = request.args.get('student_id') or request.form.get('student_id')
+    reporter_phone = request.args.get('phone') or request.form.get('phone')
     
     user = User.query.filter_by(student_id=student_id).first()
     if not user:
-        flash('Invalid request.', 'error')
+        flash('Invalid request student not found.', 'error')
         return redirect(url_for('voting.login'))
     
-    from app.models import IdentityDispute
-    dispute = IdentityDispute(
-        student_id=student_id,
-        reporter_phone=reporter_phone,
-        hacker_phone=user.phone_number,
-        ip_address=request.remote_addr,
-        user_agent=request.user_agent.string
-    )
-    db.session.add(dispute)
-    db.session.commit()
-    flash('Identity hijack reported! Our administrators have been notified. Please visit the CS Department office to finalize your verification.', 'success')
-    return redirect(url_for('voting.login'))
+    if request.method == 'POST':
+        selfie_data = request.form.get('selfie_image')
+        if not selfie_data:
+            flash('Selfie capture is required for identity verification.', 'error')
+            return render_template('voting/report_hijack.html', student_id=student_id, phone=reporter_phone)
+            
+        from app.models import IdentityDispute
+        dispute = IdentityDispute(
+            student_id=student_id,
+            reporter_phone=reporter_phone,
+            hacker_phone=user.phone_number,
+            selfie_image=selfie_data, # DataURL
+            ip_address=request.remote_addr,
+            user_agent=request.user_agent.string
+        )
+        # Lock the account immediately upon report
+        user.otp = None
+        user.current_session_id = None
+        
+        db.session.add(dispute)
+        db.session.commit()
+        
+        flash('Identity hijack reported with photo proof! Our administrators have been notified. Please visit the CS Department office to finalize your verification.', 'success')
+        return redirect(url_for('voting.login'))
+        
+    return render_template('voting/report_hijack.html', student_id=student_id, phone=reporter_phone)
 
 @voting.route('/sms-callback', methods=['POST'])
 def sms_callback():

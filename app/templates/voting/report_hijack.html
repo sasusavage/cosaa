@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}Report Identity Hijack{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto py-16 px-4">
+    <div class="bg-white rounded-[3rem] shadow-2xl border border-slate-50 p-10 text-center">
+        <div class="w-20 h-20 bg-rose-100 text-rose-600 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-inner text-3xl">
+            📷
+        </div>
+        
+        <h1 class="text-4xl font-black text-slate-900 tracking-tight mb-4">Identity Verification</h1>
+        <p class="text-slate-500 font-medium mb-10">To report a hijacked ID, you must provide a live photo of your face for administrative review.</p>
+
+        <!-- Camera Container -->
+        <div class="relative rounded-3xl overflow-hidden bg-slate-900 aspect-video mb-8 border-4 border-slate-100 shadow-2xl" id="camera-container">
+            <video id="video" class="w-full h-full object-cover" autoplay playsinline></video>
+            <canvas id="canvas" class="hidden"></canvas>
+            <img id="photo-preview" class="hidden w-full h-full object-cover">
+            
+            <div id="camera-overlay" class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div class="w-64 h-64 border-2 border-white/30 rounded-full border-dashed"></div>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-4">
+            <div class="flex gap-4">
+                <button id="capture-btn" class="flex-1 bg-indigo-600 text-white px-10 py-4 rounded-2xl font-black hover:bg-indigo-700 shadow-xl transition-all flex items-center justify-center gap-3">
+                    📸 Take Photo
+                </button>
+                <button id="flip-btn" class="bg-slate-800 text-white p-4 rounded-2xl font-black hover:bg-slate-900 shadow-xl transition-all flex items-center justify-center">
+                    🔄
+                </button>
+            </div>
+            <button id="retake-btn" class="hidden bg-slate-100 text-slate-600 px-10 py-4 rounded-2xl font-black hover:bg-slate-200 transition-all">
+                Retake Photo
+            </button>
+            
+            <form id="hijack-form" method="POST" class="hidden">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <input type="hidden" name="student_id" value="{{ student_id }}">
+                <input type="hidden" name="phone" value="{{ phone }}">
+                <input type="hidden" name="selfie_image" id="selfie-input">
+                <button type="submit" class="w-full bg-rose-600 text-white px-10 py-4 rounded-2xl font-black hover:bg-rose-700 shadow-xl transition-all uppercase tracking-widest text-sm">
+                    Submit Fraud Report
+                </button>
+            </form>
+        </div>
+
+        <p class="mt-8 text-[10px] text-rose-500 font-black uppercase tracking-[0.2em] opacity-60">
+            ⚠️ False reporting will lead to immediate disqualification.
+        </p>
+    </div>
+</div>
+
+<script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const photoPreview = document.getElementById('photo-preview');
+    const captureBtn = document.getElementById('capture-btn');
+    const retakeBtn = document.getElementById('retake-btn');
+    const flipBtn = document.getElementById('flip-btn');
+    const hijackForm = document.getElementById('hijack-form');
+    const selfieInput = document.getElementById('selfie-input');
+    const cameraContainer = document.getElementById('camera-container');
+
+    let currentStream = null;
+    let currentFacingMode = 'user';
+
+    // Access Camera
+    async function initCamera() {
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop());
+        }
+        try {
+            currentStream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: currentFacingMode }, 
+                audio: false 
+            });
+            video.srcObject = currentStream;
+        } catch (err) {
+            alert("Camera access is required for identity verification. Please enable camera permissions.");
+            console.error(err);
+        }
+    }
+
+    flipBtn.addEventListener('click', () => {
+        currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+        initCamera();
+    });
+
+    captureBtn.addEventListener('click', () => {
+        const context = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        const data = canvas.toDataURL('image/jpeg');
+        selfieInput.value = data;
+        
+        video.classList.add('hidden');
+        photoPreview.src = data;
+        photoPreview.classList.remove('hidden');
+        
+        captureBtn.classList.add('hidden');
+        retakeBtn.classList.remove('hidden');
+        hijackForm.classList.remove('hidden');
+        document.getElementById('camera-overlay').classList.add('hidden');
+    });
+
+    retakeBtn.addEventListener('click', () => {
+        video.classList.remove('hidden');
+        photoPreview.classList.add('hidden');
+        captureBtn.classList.remove('hidden');
+        retakeBtn.classList.add('hidden');
+        hijackForm.classList.add('hidden');
+        document.getElementById('camera-overlay').classList.remove('hidden');
+    });
+
+    initCamera();
+</script>
+{% endblock %}

@@ -157,6 +157,14 @@ def create_app(config_class=None):
                         conn.execute(text(f'ALTER TABLE users ADD COLUMN {col} {col_type}'))
                 conn.commit()
 
+        # Identity Disputes table columns
+        if 'identity_disputes' in insp.get_table_names():
+            dispute_cols = [c['name'] for c in insp.get_columns('identity_disputes')]
+            if 'selfie_image' not in dispute_cols:
+                with db.engine.connect() as conn:
+                    conn.execute(text('ALTER TABLE identity_disputes ADD COLUMN selfie_image TEXT'))
+                    conn.commit()
+
         # ── election_records table (new) — created by db.create_all above ────
         # No manual ALTER needed; SQLAlchemy creates it fresh if missing.
 

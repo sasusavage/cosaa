@@ -138,6 +138,7 @@ class IdentityDispute(db.Model):
     student_id = db.Column(db.String(30), nullable=False)
     reporter_phone = db.Column(db.String(20))
     hacker_phone = db.Column(db.String(20)) # The one currently in the DB
+    selfie_image = db.Column(db.Text)      # Base64 encoded selfie or filename
     ip_address = db.Column(db.String(45))
     user_agent = db.Column(db.String(255))
     status = db.Column(db.String(20), default='pending') # pending, resolved, dismissed

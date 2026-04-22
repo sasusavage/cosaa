@@ -155,7 +155,7 @@
         <div class="grid gap-4">
             {% for dispute in pending_disputes %}
             <div class="bg-white rounded-3xl p-6 shadow-sm border border-rose-100 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:shadow-md transition-all">
-                <div class="space-y-1">
+                <div class="space-y-1 flex-1">
                     <div class="flex items-center gap-3">
                         <span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">Reported Hack</span>
                         <span class="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">{{ dispute.created_at.strftime('%b %d, %H:%M') }}</span>
@@ -164,11 +164,22 @@
                         Student ID: <span class="bg-slate-100 px-2 rounded-lg text-slate-900">{{ dispute.student_id }}</span>
                     </div>
                     <p class="text-xs font-bold text-slate-500">
-                        <span class="text-slate-400">Reporter Phone:</span> {{ dispute.reporter_phone }} 
+                        <span class="text-slate-400">Reporter:</span> {{ dispute.reporter_phone }} 
                         <span class="mx-2 text-slate-200">|</span>
-                        <span class="text-rose-400 italic">Hacker Phone:</span> {{ dispute.hacker_phone }}
+                        <span class="text-rose-400 italic">Suspected Hacker:</span> {{ dispute.hacker_phone }}
                     </p>
                 </div>
+
+                <!-- Selfie Evidence -->
+                {% if dispute.selfie_image %}
+                <div class="flex-shrink-0">
+                    <img src="{{ dispute.selfie_image }}" 
+                         alt="Reporter Selfie" 
+                         onclick="window.open(this.src)"
+                         class="w-24 h-24 rounded-2xl object-cover border-4 border-white shadow-xl cursor-zoom-in hover:scale-105 transition-all">
+                    <p class="text-[8px] font-bold text-slate-400 mt-2 text-center uppercase tracking-widest">Selfie Proof</p>
+                </div>
+                {% endif %}
                 
                 <div class="flex items-center gap-3">
                     <form action="{{ url_for('admin.resolve_dispute', dispute_id=dispute.id) }}" method="POST" class="inline">
