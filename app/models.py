@@ -49,7 +49,7 @@ class Portfolio(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), unique=True, nullable=False)
     candidates = db.relationship('Candidate', backref='portfolio', lazy=True, cascade="all, delete-orphan")
-    votes = db.relationship('Vote', backref='portfolio', lazy=True)
+    votes = db.relationship('Vote', backref='portfolio', lazy=True, cascade="all, delete-orphan")
 
 class Candidate(db.Model):
     __tablename__ = 'candidates'
