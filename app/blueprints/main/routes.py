@@ -58,6 +58,8 @@ def index():
         hero_title=_s('hero_title', 'Empowering the Next Generation of African Innovators.'),
         hero_subtitle=_s('hero_subtitle', 'Welcome to CoSSA. Join our vibrant community of learners and leaders in tech.'),
         hero_image=_s('hero_image', 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&h=600&fit=crop'),
+        voting_start=Setting.get('voting_start', ''),
+        voting_end=Setting.get('voting_end', ''),
         home_execs_subtitle=_s('home_execs_subtitle', 'Meet the dedicated leaders of CoSSA 2025/2026 academic year.'),
         home_newsletter_title=_s('home_newsletter_title', 'Stay Informed, Join Now.'),
         home_newsletter_body=_s('home_newsletter_body', "Don't miss out on important announcements and upcoming CS workshops. Subscribe to the CoSSA Newsletter."),

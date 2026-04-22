@@ -38,6 +38,7 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
     {# 🛡 Identity Dispute Center #}
     <div class="lg:col-span-2 space-y-6">
+        {% if current_user.role == 'admin' %}
         <div class="bg-white border border-slate-200 rounded-lg overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <h3 class="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
@@ -93,6 +94,43 @@
                 </table>
             </div>
         </div>
+        {% endif %}
+
+        {# 📊 Statistical Leaderboard (Agents & Admins) #}
+        <div class="bg-white border border-slate-200 rounded-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+                <h3 class="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                    Live Election Standings — Monitoring Mode
+                </h3>
+            </div>
+            <div class="p-6 space-y-8">
+                {% for p in portfolios %}
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-xs font-black text-slate-900 uppercase tracking-widest">{{ p.title }}</h4>
+                        {% set total_p_votes = p.votes|length %}
+                        <span class="text-[0.65rem] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded uppercase tracking-tighter">{{ total_p_votes }} Ballots Cast</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {% for c in p.candidates %}
+                        {% set c_votes = c.votes_received|length %}
+                        {% set pct = (c_votes / total_p_votes * 100)|round(1) if total_p_votes > 0 else 0 %}
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-[0.7rem] font-bold text-slate-700">{{ c.name }}</span>
+                                <span class="text-[0.7rem] font-black {{ 'text-emerald-600' if loops_max_votes == c_votes and c_votes > 0 else 'text-slate-400' }}">{{ pct }}%</span>
+                            </div>
+                            <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                                <div class="bg-blue-600 h-full transition-all duration-1000" style="width: {{ pct }}%"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 
     {# ⚙ System Control Center #}
@@ -123,6 +161,7 @@
             {% endif %}
         </div>
 
+        {% if current_user.role == 'admin' %}
         <div class="bg-white border border-slate-200 rounded-lg p-6">
             <h3 class="text-[0.7rem] font-black text-slate-400 uppercase tracking-widest mb-6 border-b border-slate-50 pb-2 flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
@@ -142,6 +181,7 @@
                 <button type="submit" class="w-full py-3 bg-emerald-600 text-white text-xs font-black uppercase tracking-widest rounded shadow-lg shadow-emerald-100 hover:brightness-110 transition-all">Register Student →</button>
             </form>
         </div>
+        {% endif %}
 
         <div class="bg-white border border-slate-200 rounded-lg p-6">
             <h3 class="text-[0.7rem] font-black text-slate-400 uppercase tracking-widest mb-6 border-b border-slate-50 pb-2 flex items-center gap-2">

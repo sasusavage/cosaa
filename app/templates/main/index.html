@@ -13,9 +13,37 @@
         <h1 class="text-5xl md:text-7xl font-black mb-8 leading-[1.1] text-slate-900 tracking-tight">
             {{ hero_title }}
         </h1>
-        <p class="text-xl md:text-2xl mb-12 text-slate-500 leading-relaxed font-medium">
+        <p class="text-xl md:text-2xl mb-8 text-slate-500 leading-relaxed font-medium">
             {{ hero_subtitle }}
         </p>
+
+        {# ⏱️ Election Countdown Widget #}
+        {% if voting_start and voting_end %}
+        <div id="election-countdown" class="hidden mb-12 p-6 bg-slate-50/50 border border-slate-200/50 rounded-[2rem] inline-flex flex-col items-center md:items-start group/timer hover:bg-white transition-all shadow-sm">
+            <p id="countdown-label" class="text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-3">Syncing Clock...</p>
+            <div class="flex gap-4 items-baseline">
+                <div class="text-center">
+                    <span id="days" class="text-4xl font-black text-slate-900 tabular-nums">00</span>
+                    <span class="block text-[0.55rem] font-bold text-slate-400 uppercase tracking-widest mt-1">Days</span>
+                </div>
+                <span class="text-3xl font-bold text-slate-200">:</span>
+                <div class="text-center">
+                    <span id="hours" class="text-4xl font-black text-slate-900 tabular-nums">00</span>
+                    <span class="block text-[0.55rem] font-bold text-slate-400 uppercase tracking-widest mt-1">Hrs</span>
+                </div>
+                <span class="text-3xl font-bold text-slate-200">:</span>
+                <div class="text-center">
+                    <span id="minutes" class="text-4xl font-black text-slate-900 tabular-nums">00</span>
+                    <span class="block text-[0.55rem] font-bold text-slate-400 uppercase tracking-widest mt-1">Min</span>
+                </div>
+                <span class="text-3xl font-bold text-slate-200">:</span>
+                <div class="text-center">
+                    <span id="seconds" class="text-4xl font-black text-blue-600 tabular-nums animate-pulse">00</span>
+                    <span class="block text-[0.55rem] font-bold text-slate-400 uppercase tracking-widest mt-1">Sec</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
         <div class="flex flex-col sm:flex-row justify-center md:justify-start gap-5">
             {% if voting_open %}
                 {% if current_user.is_authenticated and current_user.role != 'admin' %}
@@ -58,11 +86,66 @@
                 <div id="turnout-bar-fill" class="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full shadow-lg transition-all duration-1000" style="width: 0%;"></div>
             </div>
             <script>
-                document.addEventListener('DOMContentLoaded', () => {
-                    const bar = document.getElementById('turnout-bar-fill');
-                    if (bar) bar.style.width = "{{ turnout|default(0) }}%";
-                });
-            </script>
+    {% if voting_start and voting_end %}
+    const startStr = "{{ voting_start }}";
+    const endStr = "{{ voting_end }}";
+    
+    function updateCountdown() {
+        const now = new Date();
+        const start = new Date(startStr);
+        const end = new Date(endStr);
+        const timerWrap = document.getElementById('election-countdown');
+        const label = document.getElementById('countdown-label');
+        
+        let target = null;
+        if (now < start) {
+            target = start;
+            label.innerText = "Election Starts In";
+            timerWrap.classList.remove('hidden');
+        } else if (now < end) {
+            target = end;
+            label.innerText = "Polls Close In";
+            label.classList.add('text-blue-600');
+            timerWrap.classList.remove('hidden');
+        } else {
+            timerWrap.classList.add('hidden');
+            return;
+        }
+
+        const diff = target - now;
+        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+        document.getElementById('days').innerText = d.toString().padStart(2, '0');
+        document.getElementById('hours').innerText = h.toString().padStart(2, '0');
+        document.getElementById('minutes').innerText = m.toString().padStart(2, '0');
+        document.getElementById('seconds').innerText = s.toString().padStart(2, '0');
+    }
+
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+    {% endif %}
+
+    // 🏎 Turnout Animation
+    document.addEventListener('DOMContentLoaded', () => {
+        const turnoutBar = document.getElementById('turnout-bar-fill');
+        if (turnoutBar) {
+            setTimeout(() => {
+                turnoutBar.style.width = "{{ turnout|default(0) }}%";
+            }, 300);
+        }
+    });
+
+    {% if show_results %}
+    function toggleLeaderboard(id) {
+        const el = document.getElementById(id);
+        el.classList.toggle('hidden');
+        el.classList.toggle('flex');
+    }
+    {% endif %}
+</script>
         </div>
     </div>
 </div>
