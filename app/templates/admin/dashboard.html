@@ -131,7 +131,8 @@
                         {% for c in p.candidates %}
                             {% set c_votes = c.votes_received|length %}
                             {% set pct = (c_votes / total_p_v * 100) if total_p_v > 0 else 0 %}
-                            <div class="{{ colors[loop.index0 % colors|length] }} h-full transition-all duration-1000 border-r border-white/10 last:border-0" 
+                            {% set bar_color = colors[loop.index0 % colors|length] %}
+                            <div class="{{ bar_color }} h-full transition-all duration-1000 border-r border-white/10 last:border-0" 
                                  style="width: {{ pct }}%" title="{{ c.name }}: {{ pct|round(1) }}%">
                             </div>
                         {% endfor %}
@@ -140,11 +141,9 @@
                     {# 📋 Color-Coded Legend #}
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {% for c in p.candidates %}
-                            {% set c_votes = c.votes_received|length %}
-                            {% set pct = (c_votes / total_p_v * 100)|round(1) if total_p_v > 0 else 0 %}
-                            {% set colors = ['bg-blue-600', 'bg-emerald-500', 'bg-amber-500', 'bg-purple-600', 'bg-rose-500'] %}
+                            {% set bar_color = colors[loop.index0 % colors|length] %}
                              <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
-                                 <div class="w-3 h-3 rounded-full {{ colors[loop.index0 % colors|length] }} flex-shrink-0"></div>
+                                 <div class="w-3 h-3 rounded-full {{ bar_color }} flex-shrink-0"></div>
                                  <div class="min-w-0">
                                      <p class="text-[0.7rem] font-bold text-slate-800 truncate">{{ c.name }}</p>
                                      <p class="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest">Candidate</p>
