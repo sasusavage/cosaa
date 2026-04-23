@@ -22,5 +22,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Expose port and start
-EXPOSE 5000
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "wsgi:app"]
+EXPOSE 3000
+CMD ["gunicorn", "--bind", "0.0.0.0:3000", "wsgi:app"]
