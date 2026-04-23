@@ -68,6 +68,7 @@ def login():
                     sid = str(uuid.uuid4())
                     user.current_session_id = sid
                     user.last_ip = request.remote_addr
+                    user.device_signature = request.headers.get('User-Agent')
                     db.session.commit()
                     session['sid'] = sid
                     
@@ -138,6 +139,7 @@ def verify_otp():
             sid = str(uuid.uuid4())
             user.current_session_id = sid
             user.last_ip = request.remote_addr
+            user.device_signature = request.headers.get('User-Agent')
             session['sid'] = sid
             
             # ── Device Token Generation (The Lock) ──

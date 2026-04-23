@@ -82,6 +82,8 @@ def login():
         ).first()
         if user and user.check_password(password):
             login_user(user)
+            user.device_signature = request.headers.get('User-Agent')
+            db.session.commit()
             flash(f'{user.role.capitalize()} Session Established', 'success')
             return redirect(url_for('admin.dashboard'))
         else:

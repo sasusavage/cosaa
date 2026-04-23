@@ -80,10 +80,12 @@ def create_app(config_class=None):
                 flash('Your account was logged in on another device. Please log in again for security.', 'info')
                 return redirect(url_for('voting.login'))
             
-            # 2. Check IP (Strict binding)
-            if current_user.last_ip and request.remote_addr != current_user.last_ip:
+            # 2. Check Browser Fingerprint (Stable Signature)
+            # This replaces the strict IP check which fails on shared WiFi/NAT.
+            current_signature = request.headers.get('User-Agent')
+            if current_user.device_signature and current_signature != current_user.device_signature:
                 logout_user()
-                flash('Your session location has changed. For security, please log in again.', 'warning')
+                flash('Your session was opened in a different browser. Please log in again for security.', 'warning')
                 return redirect(url_for('voting.login'))
 
     # Register Blueprints
