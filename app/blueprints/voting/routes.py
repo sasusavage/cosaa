@@ -395,7 +395,8 @@ def finalize_vote():
         
         # 🛡️ Generate Digital Receipt for On-Screen Verification
         import hashlib
-        receipt_raw = f"{current_user.student_id}-{Setting.get('academic_year', '2026')}-CoSSA-VOTE"
+        academic_year = Setting.get('academic_year', '2025/2026')
+        receipt_raw = f"{current_user.student_id}-{academic_year}-CoSSA-VOTE"
         receipt_hash = hashlib.sha256(receipt_raw.encode()).hexdigest().upper()[:12]
         
         # Clear sensitive session data
@@ -414,8 +415,8 @@ def finalize_vote():
 def vote_confirmed():
     import hashlib
     # Generate a unique proof-of-vote hash (Digital Receipt)
-    # This proves they voted without exposing WHO they voted for.
-    receipt_raw = f"{current_user.student_id}-{Setting.get('academic_year', '2026')}-CoSSA-VOTE"
+    academic_year_setting = Setting.get('academic_year', '2025/2026')
+    receipt_raw = f"{current_user.student_id}-{academic_year_setting}-CoSSA-VOTE"
     receipt_hash = hashlib.sha256(receipt_raw.encode()).hexdigest().upper()[:12]
     
     show_stats = _should_show_stats()
@@ -444,7 +445,9 @@ def verify_ballot():
         receipt_input = request.form.get('receipt_code', '').strip().upper()
         
         import hashlib
-        expected_raw = f"{student_id}-{Setting.get('academic_year', '2026')}-CoSSA-VOTE"
+        # Standardize fallback to '2025/2026' to stay consistent with confirmed.html
+        academic_year = Setting.get('academic_year', '2025/2026')
+        expected_raw = f"{student_id}-{academic_year}-CoSSA-VOTE"
         expected_hash = hashlib.sha256(expected_raw.encode()).hexdigest().upper()[:12]
         
         if receipt_input == expected_hash:
