@@ -28,6 +28,7 @@
             {% endif %}
 
             <form method="POST" class="space-y-6">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div>
                     <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Student ID</label>
                     <input type="text" name="student_id" required value="{{ student_id or '' }}"
@@ -57,13 +58,15 @@
                 </div>
                 <div>
                     <h2 class="text-xl font-bold text-white">Ballot Verified</h2>
-                    <p class="text-xs text-emerald-100 font-bold uppercase tracking-widest">{{ results[0].voter.full_name }}</p>
+                    <p class="text-xs text-emerald-100 font-bold uppercase tracking-widest">
+                        {% if results %}{{ results[0].voter.full_name }}{% else %}Record Verified{% endif %}
+                    </p>
                 </div>
             </div>
             
             <div class="bg-white/10 p-4 rounded-2xl mb-8 border border-white/10">
                 <p class="text-[0.6rem] font-bold text-emerald-100 uppercase tracking-widest mb-1">Authenticated ID</p>
-                <p class="text-sm font-black text-white italic tracking-widest">{{ results[0].voter.student_id }}</p>
+                <p class="text-sm font-black text-white italic tracking-widest">{% if results %}{{ results[0].voter.student_id }}{% else %}N/A{% endif %}</p>
             </div>
             
             <div class="space-y-3">
@@ -83,7 +86,7 @@
             </div>
 
             <div class="mt-8 pt-6 border-t border-white/10 text-center">
-                <p class="text-[0.6rem] font-bold text-emerald-100 uppercase tracking-widest opacity-60">Verified On: {{ results[0].timestamp.strftime('%Y-%m-%d %H:%M') if results else 'N/A' }} UTC</p>
+                <p class="text-[0.6rem] font-bold text-emerald-100 uppercase tracking-widest opacity-60">Verified On: {% if results %}{{ results[0].timestamp.strftime('%Y-%m-%d %H:%M') }}{% else %}N/A{% endif %} UTC</p>
                 <a href="{{ url_for('main.index') }}" class="mt-4 inline-block text-xs font-black text-white uppercase tracking-widest hover:underline">Return to Hub</a>
             </div>
         </div>

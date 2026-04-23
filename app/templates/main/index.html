@@ -10,7 +10,7 @@
             <span class="w-2 h-2 rounded-full bg-blue-600"></span>
             Official 2026/2027 Election Portal
         </div>
-        <h1 class="text-5xl md:text-7xl font-black mb-8 leading-[1.1] text-slate-900 tracking-tight">
+        <h1 class="text-4xl md:text-7xl font-black mb-8 leading-[1.1] text-slate-900 tracking-tight">
             {{ hero_title }}
         </h1>
         <p class="text-xl md:text-2xl mb-8 text-slate-500 leading-relaxed font-medium">
@@ -23,28 +23,28 @@
             <p id="countdown-label" class="text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-3">Syncing Clock...</p>
             <div class="flex gap-4 items-baseline">
                 <div class="text-center">
-                    <span id="days" class="text-4xl font-black text-slate-900 tabular-nums">00</span>
+                    <span id="days" class="text-3xl md:text-4xl font-black text-slate-900 tabular-nums">00</span>
                     <span class="block text-[0.55rem] font-bold text-slate-400 uppercase tracking-widest mt-1">Days</span>
                 </div>
                 <span class="text-3xl font-bold text-slate-200">:</span>
                 <div class="text-center">
-                    <span id="hours" class="text-4xl font-black text-slate-900 tabular-nums">00</span>
+                    <span id="hours" class="text-3xl md:text-4xl font-black text-slate-900 tabular-nums">00</span>
                     <span class="block text-[0.55rem] font-bold text-slate-400 uppercase tracking-widest mt-1">Hrs</span>
                 </div>
                 <span class="text-3xl font-bold text-slate-200">:</span>
                 <div class="text-center">
-                    <span id="minutes" class="text-4xl font-black text-slate-900 tabular-nums">00</span>
+                    <span id="minutes" class="text-3xl md:text-4xl font-black text-slate-900 tabular-nums">00</span>
                     <span class="block text-[0.55rem] font-bold text-slate-400 uppercase tracking-widest mt-1">Min</span>
                 </div>
                 <span class="text-3xl font-bold text-slate-200">:</span>
                 <div class="text-center">
-                    <span id="seconds" class="text-4xl font-black text-blue-600 tabular-nums animate-pulse">00</span>
+                    <span id="seconds" class="text-3xl md:text-4xl font-black text-blue-600 tabular-nums animate-pulse">00</span>
                     <span class="block text-[0.55rem] font-bold text-slate-400 uppercase tracking-widest mt-1">Sec</span>
                 </div>
             </div>
         </div>
         {% endif %}
-        <div class="flex flex-col sm:flex-row justify-center md:justify-start gap-5">
+        <div class="flex flex-col sm:flex-row justify-center md:justify-start gap-4">
             {% if voting_open %}
                 {% if current_user.is_authenticated and current_user.role != 'admin' %}
                     {% if current_user.has_voted %}
@@ -72,10 +72,10 @@
 {# ── Live Turnout Strip ────────────────────────────────────────────────────── #}
 {% if show_turnout %}
 <div class="max-w-7xl mx-auto mb-24 px-4">
-    <div class="vibrant-card p-8 md:p-10 flex flex-col md:flex-row items-center gap-10 border-blue-100">
+    <div class="vibrant-card p-6 md:p-10 flex flex-col md:flex-row items-center gap-6 md:gap-10 border-blue-100">
         <div class="flex-shrink-0 text-center md:text-left">
             <p class="text-xs font-black uppercase tracking-[0.2em] text-blue-500 mb-2">Live Turnout</p>
-            <h2 class="text-4xl font-black text-slate-800">{{ voted_count }} <span class="text-slate-300 font-light">/ {{ total_users }}</span></h2>
+            <h2 class="text-3xl md:text-4xl font-black text-slate-800">{{ voted_count }} <span class="text-slate-300 font-light">/ {{ total_users }}</span></h2>
         </div>
         <div class="flex-1 w-full">
             <div class="flex justify-between items-end mb-3">
@@ -208,9 +208,9 @@
 <section id="candidates" class="max-w-7xl mx-auto mb-24 scroll-mt-24">
 
     {# Big Vote Now CTA #}
-    <div class="bg-gradient-to-r from-blue-700 to-indigo-700 rounded-[2.5rem] p-10 md:p-14 mb-16 flex flex-col md:flex-row items-center gap-8 shadow-2xl">
+    <div class="bg-gradient-to-r from-blue-700 to-indigo-700 rounded-[2rem] md:rounded-[2.5rem] p-8 md:p-14 mb-16 flex flex-col md:flex-row items-center gap-8 shadow-2xl">
         <div class="flex-1 text-center md:text-left">
-            <h2 class="text-4xl md:text-5xl font-black text-white mb-3 tracking-tight">CoSSA Election 2026/2027</h2>
+            <h2 class="text-3xl md:text-5xl font-black text-white mb-3 tracking-tight">CoSSA Election 2026/2027</h2>
             <p class="text-blue-100 text-lg leading-relaxed">Browse the candidates below, then log in to cast your secure, anonymous vote.</p>
         </div>
         {% if current_user.is_authenticated and current_user.role != 'admin' %}
@@ -295,7 +295,7 @@
         <h2 class="text-4xl font-bold mb-6 text-slate-900">Current Executives</h2>
         <p class="text-slate-500 text-lg">{{ home_execs_subtitle }}</p>
     </div>
-    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-10 max-w-7xl mx-auto">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 max-w-7xl mx-auto">
         {% for exec in executives %}
         <div class="group">
             <div class="relative w-full aspect-square mb-6 overflow-hidden rounded-3xl shadow-lg border-4 border-white group-hover:border-blue-600 transition-all">
@@ -311,7 +311,7 @@
 {% endif %}
 {# ── Identity Guard & Support ─────────────────────────────────────────── #}
 <section class="max-w-7xl mx-auto mb-24 px-4">
-    <div class="bg-slate-900 rounded-[3rem] p-10 md:p-16 relative overflow-hidden group">
+    <div class="bg-slate-900 rounded-[2rem] md:rounded-[3rem] p-8 md:p-16 relative overflow-hidden group">
         {# Decorative Background Elements #}
         <div class="absolute top-0 right-0 w-96 h-96 bg-blue-600/10 rounded-full -mr-32 -mt-32 blur-3xl group-hover:bg-blue-600/20 transition-all duration-700"></div>
         <div class="absolute bottom-0 left-0 w-64 h-64 bg-indigo-600/10 rounded-full -ml-32 -mb-32 blur-3xl group-hover:bg-indigo-600/20 transition-all duration-700"></div>
@@ -322,7 +322,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
                     Election Integrity Guard
                 </div>
-                <h2 class="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight">Protect Your Vote. <br><span class="text-blue-400">Report Account Hijacks.</span></h2>
+                <h2 class="text-3xl md:text-5xl font-black text-white mb-6 tracking-tight">Protect Your Vote. <br><span class="text-blue-400">Report Account Hijacks.</span></h2>
                 <p class="text-slate-400 text-lg md:text-xl leading-relaxed mb-8 max-w-2xl">
                     CoSSA employs a decentralised audit trial. If you suspect your student ID has been misused or your phone number has been changed, use our **Identity Dispute** tool immediately. 
                 </p>
