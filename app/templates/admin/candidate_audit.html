@@ -60,14 +60,20 @@
             </div>
         </div>
 
-        {# 2. Opponents (Voted Others) #}
+        {# 2. Opponents (Voted Others or NO) #}
         <div class="bg-white border border-slate-200 rounded-lg overflow-hidden flex flex-col h-full shadow-sm">
             <div class="px-6 py-4 bg-orange-600 text-white flex items-center justify-between">
-                <h3 class="text-[0.65rem] font-black uppercase tracking-widest">Competitor Reach</h3>
+                <h3 class="text-[0.65rem] font-black uppercase tracking-widest">{{ audit_type }}</h3>
                 <span class="text-xs font-bold bg-white/20 px-2 py-0.5 rounded">{{ voted_others_total }}</span>
             </div>
             <div class="p-6 flex-1">
-                <p class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest mb-6 border-b border-slate-50 pb-2 italic">Other voters in this category</p>
+                <p class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest mb-6 border-b border-slate-50 pb-2 italic">
+                    {% if audit_type == 'NO / NEUTRAL' %}
+                    Specific rejections or skipped ballots
+                    {% else %}
+                    Voted for competitors in this category
+                    {% endif %}
+                </p>
                 <div class="space-y-4">
                     {% for dept, count in voted_others_stats %}
                     <div class="space-y-1">
@@ -81,7 +87,13 @@
                         </div>
                     </div>
                     {% else %}
-                    <p class="text-center py-10 text-slate-300 font-bold text-[0.65rem] uppercase italic">No competitor votes</p>
+                    <p class="text-center py-10 text-slate-300 font-bold text-[0.65rem] uppercase italic">
+                        {% if audit_type == 'NO / NEUTRAL' %}
+                        No rejections recorded
+                        {% else %}
+                        No competitor votes
+                        {% endif %}
+                    </p>
                     {% endfor %}
                 </div>
             </div>

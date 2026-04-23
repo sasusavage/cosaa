@@ -1034,21 +1034,45 @@ def candidate_audit(candidate_id):
     candidate = Candidate.query.get_or_404(candidate_id)
     portfolio = Portfolio.query.get(candidate.portfolio_id)
     
-    # 1. Voters who chose THIS candidate - Breakdown by Dept
+    # Total candidates in this portfolio
+    candidate_count = Candidate.query.filter_by(portfolio_id=portfolio.id).count()
+    
+    # 1. Supporters (Voted YES for this candidate)
     voted_for_stats = db.session.query(User.department, db.func.count(User.id))\
         .join(Vote).filter(Vote.candidate_id == candidate.id)\
         .group_by(User.department).all()
-    voted_for_total = db.session.query(db.func.count(Vote.id)).filter(Vote.candidate_id == candidate.id).scalar()
+    voted_for_total = db.session.query(db.func.count(Vote.id)).filter(Vote.candidate_id == candidate.id).scalar() or 0
     
-    # 2. Others in Portfolio - Breakdown by Dept
-    portfolio_voters_ids = db.session.query(Vote.user_id).filter(Vote.portfolio_id == portfolio.id, Vote.candidate_id != candidate.id).all()
-    portfolio_voters_ids = [v[0] for v in portfolio_voters_ids]
-    voted_others_stats = db.session.query(User.department, db.func.count(User.id))\
-        .filter(User.id.in_(portfolio_voters_ids))\
-        .group_by(User.department).all() if portfolio_voters_ids else []
-    voted_others_total = len(portfolio_voters_ids)
+    # 2. "No" Votes or "Voted Others"
+    if candidate_count == 1:
+        # SINGLE CANDIDATE: "No/Neutral" are people who voted in the election but NOT for this candidate
+        all_voter_ids = db.session.query(User.id).filter_by(has_voted=True).all()
+        all_voter_ids = [v[0] for v in all_voter_ids]
+        
+        # Supporters of this candidate
+        supporter_ids = db.session.query(Vote.user_id).filter_by(candidate_id=candidate.id).all()
+        supporter_ids = [v[0] for v in supporter_ids]
+        
+        # No/Neutral = Total Voters - Supporters
+        no_voters_ids = [uid for uid in all_voter_ids if uid not in supporter_ids]
+        
+        voted_others_stats = db.session.query(User.department, db.func.count(User.id))\
+            .filter(User.id.in_(no_voters_ids))\
+            .group_by(User.department).all() if no_voters_ids else []
+        voted_others_total = len(no_voters_ids)
+        audit_type = "NO / NEUTRAL"
+    else:
+        # OPPOSED: Standard logic (voted for someone else in same portfolio)
+        portfolio_voters_ids = db.session.query(Vote.user_id).filter(Vote.portfolio_id == portfolio.id, Vote.candidate_id != candidate.id).all()
+        portfolio_voters_ids = [v[0] for v in portfolio_voters_ids]
+        
+        voted_others_stats = db.session.query(User.department, db.func.count(User.id))\
+            .filter(User.id.in_(portfolio_voters_ids))\
+            .group_by(User.department).all() if portfolio_voters_ids else []
+        voted_others_total = len(portfolio_voters_ids)
+        audit_type = "VOTED OTHERS"
     
-    # 3. Non-Voters - Breakdown by Dept
+    # 3. Non-Voters (Did not vote in election at all)
     non_voters_stats = db.session.query(User.department, db.func.count(User.id))\
         .filter(User.has_voted == False, User.role == 'student')\
         .group_by(User.department).all()
@@ -1062,7 +1086,8 @@ def candidate_audit(candidate_id):
         voted_others_total=voted_others_total,
         voted_others_stats=voted_others_stats,
         non_voters_total=non_voters_total,
-        non_voters_stats=non_voters_stats
+        non_voters_stats=non_voters_stats,
+        audit_type=audit_type
     )
 
 @admin.route('/agents/create', methods=['POST'])
