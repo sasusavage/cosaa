@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template
+from app import db
 from app.models import User, Portfolio, Setting, Executive, Resource, Event
 from datetime import datetime, timezone
 

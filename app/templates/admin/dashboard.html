@@ -150,9 +150,9 @@
                             {% set c_votes = c.votes_received|length %}
                             {% set pct = (c_votes / total_p_v * 100) if total_p_v > 0 else 0 %}
                             {% set bar_color = colors[loop.index0 % colors|length] %}
-                            {% set bar_width = pct|round(2)|string + '%' %}
+                            {% set bar_width_val = pct|round(2) %}
                             <div class="{{ bar_color }} h-full transition-all duration-1000 border-r border-white/10 last:border-0" 
-                                 style="width: {{ bar_width }}" title="{{ c.name }}: {{ pct|round(1) }}%">
+                                 style="width: {{ bar_width_val }}%" title="{{ c.name }}: {{ pct|round(1) }}%">
                             </div>
                         {% endfor %}
                     </div>

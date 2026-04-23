@@ -60,8 +60,9 @@
                             <span class="flex-shrink-0 ml-3 text-slate-500 text-sm">{{ candidate.votes }} votes ({{ candidate.pct }}%)</span>
                         </div>
                         <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                            {% set bar_pct = candidate.pct %}
                             <div class="h-full rounded-full {% if is_winner %}bg-gradient-to-r from-emerald-400 to-emerald-600{% else %}bg-gradient-to-r from-blue-400 to-blue-600{% endif %}"
-                                 style="width: {{ candidate.pct }}%"></div>
+                                 style="width: {{ bar_pct }}%"></div>
                         </div>
                     </div>
                 </div>

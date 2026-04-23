@@ -39,7 +39,8 @@
                             <tbody class="divide-y divide-slate-100 italic">
                                 {% for cand in p_data.results|sort(attribute='count', reverse=True) %}
                                     <tr class="hover:bg-slate-50 transition-colors cursor-pointer" 
-                                        onclick="window.location.href='{{ url_for('admin.candidate_audit', candidate_id=cand.id) }}'"
+                                        data-url="{{ url_for('admin.candidate_audit', candidate_id=cand.id) }}"
+                                        onclick="window.location.href=this.dataset.url"
                                         data-candidate-id="{{ cand.id }}">
                                         <td class="px-8 py-6">
                                             <div class="flex items-center gap-3">
