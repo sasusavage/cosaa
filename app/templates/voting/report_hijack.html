@@ -34,10 +34,35 @@
                 Retake Photo
             </button>
             
-            <form id="hijack-form" method="POST" class="hidden">
+            <form id="hijack-form" method="POST" class="hidden space-y-4">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                
+                {% if not student_id %}
+                <div class="text-left">
+                    <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Your Student ID</label>
+                    <input type="text" name="student_id" required
+                           class="w-full p-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-rose-500 outline-none transition-all font-bold text-slate-900 placeholder:text-slate-300"
+                           placeholder="Enter your ID (e.g. EC/BAS/22/...)">
+                </div>
+                {% else %}
                 <input type="hidden" name="student_id" value="{{ student_id }}">
+                <div class="p-4 bg-slate-50 rounded-2xl flex items-center justify-between border border-slate-100">
+                    <span class="text-xs font-bold text-slate-400">Reporting ID:</span>
+                    <span class="text-sm font-black text-slate-900 font-mono">{{ student_id }}</span>
+                </div>
+                {% endif %}
+
+                {% if not phone %}
+                <div class="text-left">
+                    <label class="block text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Your Current Phone Number</label>
+                    <input type="text" name="phone" required
+                           class="w-full p-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-rose-500 outline-none transition-all font-bold text-slate-900 placeholder:text-slate-300"
+                           placeholder="Enter your phone (e.g. 054...)">
+                </div>
+                {% else %}
                 <input type="hidden" name="phone" value="{{ phone }}">
+                {% endif %}
+
                 <input type="hidden" name="selfie_image" id="selfie-input">
                 <button type="submit" class="w-full bg-rose-600 text-white px-10 py-4 rounded-2xl font-black hover:bg-rose-700 shadow-xl transition-all uppercase tracking-widest text-sm">
                     Submit Fraud Report
@@ -82,38 +107,48 @@
         }
     }
 
-    flipBtn.addEventListener('click', () => {
-        currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
-        initCamera();
-    });
+    if (flipBtn) {
+        flipBtn.addEventListener('click', () => {
+            currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+            initCamera();
+        });
+    }
 
-    captureBtn.addEventListener('click', () => {
-        const context = canvas.getContext('2d');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        const data = canvas.toDataURL('image/jpeg');
-        selfieInput.value = data;
-        
-        video.classList.add('hidden');
-        photoPreview.src = data;
-        photoPreview.classList.remove('hidden');
-        
-        captureBtn.classList.add('hidden');
-        retakeBtn.classList.remove('hidden');
-        hijackForm.classList.remove('hidden');
-        document.getElementById('camera-overlay').classList.add('hidden');
-    });
+    if (captureBtn) {
+        captureBtn.addEventListener('click', () => {
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            const data = canvas.toDataURL('image/jpeg');
+            selfieInput.value = data;
+            
+            video.classList.add('hidden');
+            photoPreview.src = data;
+            photoPreview.classList.remove('hidden');
+            
+            captureBtn.classList.add('hidden');
+            if (retakeBtn) retakeBtn.classList.remove('hidden');
+            if (hijackForm) hijackForm.classList.remove('hidden');
+            
+            const overlay = document.getElementById('camera-overlay');
+            if (overlay) overlay.classList.add('hidden');
+        });
+    }
 
-    retakeBtn.addEventListener('click', () => {
-        video.classList.remove('hidden');
-        photoPreview.classList.add('hidden');
-        captureBtn.classList.remove('hidden');
-        retakeBtn.classList.add('hidden');
-        hijackForm.classList.add('hidden');
-        document.getElementById('camera-overlay').classList.remove('hidden');
-    });
+    if (retakeBtn) {
+        retakeBtn.addEventListener('click', () => {
+            video.classList.remove('hidden');
+            photoPreview.classList.add('hidden');
+            if (captureBtn) captureBtn.classList.remove('hidden');
+            retakeBtn.classList.add('hidden');
+            if (hijackForm) hijackForm.classList.add('hidden');
+            
+            const overlay = document.getElementById('camera-overlay');
+            if (overlay) overlay.classList.remove('hidden');
+        });
+    }
 
     initCamera();
 </script>

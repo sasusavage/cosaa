@@ -168,12 +168,23 @@ def report_hijack():
     student_id = request.args.get('student_id') or request.form.get('student_id')
     reporter_phone = request.args.get('phone') or request.form.get('phone')
     
-    user = User.query.filter_by(student_id=student_id).first()
-    if not user:
-        flash('Invalid request student not found.', 'error')
-        return redirect(url_for('voting.login'))
+    # We NO LONGER redirect if student_id is missing here. 
+    # Instead, we let the template handle the input if it's not provided.
     
     if request.method == 'POST':
+        # Ensure we have the student_id from the form if it wasn't in args
+        if not student_id:
+            student_id = request.form.get('student_id')
+            
+        if not student_id:
+            flash('Student ID is required.', 'error')
+            return render_template('voting/report_hijack.html', student_id=None, phone=reporter_phone)
+
+        user = User.query.filter(db.func.upper(User.student_id) == student_id.upper()).first()
+        if not user:
+            flash(f'No student found with ID: {student_id}', 'error')
+            return render_template('voting/report_hijack.html', student_id=None, phone=reporter_phone)
+            
         selfie_data = request.form.get('selfie_image')
         if not selfie_data:
             flash('Selfie capture is required for identity verification.', 'error')
