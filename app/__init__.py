@@ -179,6 +179,7 @@ def create_app(config_class=None):
                 'device_signature': 'VARCHAR(255)',
                 'reminder_sms_sent': 'BOOLEAN DEFAULT FALSE',
                 'turnout_blast_sent': 'BOOLEAN DEFAULT FALSE',
+                'results_sms_sent': 'BOOLEAN DEFAULT FALSE',
             }
             with db.engine.connect() as conn:
                 for col, col_type in new_user_cols.items():

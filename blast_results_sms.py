@@ -33,7 +33,7 @@ def run_results_blast():
         # Prepare the message
         site_url = os.environ.get('BASE_URL', 'https://cossa.sasulabs.me')
         message = (
-            "CoSSA Election Results are OUT! 🏆 \n"
+            "CoSSA Election Results are OUT! \n"
             "The official certified winners have been announced. Visit the portal now to check the results: "
             f"{site_url}/results"
         )
