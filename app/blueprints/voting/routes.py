@@ -103,15 +103,12 @@ def login():
         user.otp_expiry = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(minutes=10)
         db.session.commit()
         
-        # Send SMS
+        # Send SMS in background to prevent UI stalling
         message = f"Your CoSSA Voting Verification Code is: {otp}. This code expires in 10 minutes."
-        sms_sent = send_sms(user.phone_number, message)
+        from app.utils import send_sms_async
+        send_sms_async(user.phone_number, message)
         
-        if sms_sent:
-            return render_template('voting/verify_otp.html', student_id=user.student_id)
-        else:
-            flash('OTP generated but failed to send SMS. Please try again.', 'error')
-            return redirect(url_for('voting.login'))
+        return render_template('voting/verify_otp.html', student_id=user.student_id)
             
     return render_template('voting/login.html')
 

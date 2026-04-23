@@ -2,6 +2,7 @@ import os
 import requests
 import random
 import string
+import threading
 from datetime import datetime, timedelta
 
 def format_gh_number(number):
@@ -54,6 +55,15 @@ def send_sms(recipients, message):
     except Exception as e:
         print(f"Network/Internal Error sending SMS: {e}")
         return None
+
+def send_sms_async(recipients, message):
+    """
+    Sends SMS in a background thread so the user doesn't have to wait 
+    for the API response.
+    """
+    thread = threading.Thread(target=send_sms, args=(recipients, message))
+    thread.start()
+    return True
 
 def generate_otp(length=6):
     """Generates a numeric OTP."""
