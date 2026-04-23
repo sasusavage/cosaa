@@ -17,7 +17,7 @@ migrate = Migrate()
 csrf = CSRFProtect()
 limiter = Limiter(
     key_func=get_remote_address, 
-    default_limits=[], # Remove global restrictions to prevent NAT blockers
+    default_limits=[], # No global limits; we only apply to specific admin routes
     storage_uri=os.environ.get('RATELIMIT_STORAGE_URL', 'memory://'),
     strategy="fixed-window"
 )

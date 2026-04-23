@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_user, logout_user, login_required, current_user
 from app.models import User, Portfolio, Vote, Setting, db
 from app.utils import send_sms, generate_otp
-from app import db, limiter
+from app import db
 from datetime import datetime, timedelta, timezone
 import uuid
 
@@ -29,7 +29,6 @@ def _voting_window():
         return False, start_s, end_s
 
 @voting.route('/login', methods=['GET', 'POST'])
-@limiter.limit("20 per 5 minutes")
 def login():
     if current_user.is_authenticated:
         if current_user.role == 'admin':
@@ -116,7 +115,6 @@ def login():
     return render_template('voting/login.html')
 
 @voting.route('/verify-otp', methods=['POST'])
-@limiter.limit("20 per 5 minutes")
 def verify_otp():
     student_id = request.form.get('student_id')
     otp_input = request.form.get('otp')
@@ -163,7 +161,6 @@ def verify_otp():
     return redirect(url_for('voting.login'))
 
 @voting.route('/report-hijack', methods=['GET', 'POST'])
-@limiter.limit("10 per 5 minutes")
 def report_hijack():
     student_id = request.args.get('student_id') or request.form.get('student_id')
     reporter_phone = request.args.get('phone') or request.form.get('phone')
@@ -365,7 +362,6 @@ def review():
 
 @voting.route('/finalize-vote', methods=['POST'])
 @login_required
-@limiter.limit("1 per minute")
 def finalize_vote():
     if current_user.role == 'admin' or current_user.has_voted:
         return redirect(url_for('voting.ballot'))
@@ -445,7 +441,6 @@ def already_voted():
     return render_template('voting/already_voted.html', show_stats=show_stats, academic_year=academic_year)
 
 @voting.route('/verify-ballot', methods=['GET', 'POST'])
-@limiter.limit("20 per 5 minutes")
 def verify_ballot():
     results = None
     student_id = None
