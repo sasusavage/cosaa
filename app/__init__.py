@@ -36,6 +36,11 @@ def create_app(config_class=None):
     app.config['UPLOAD_FOLDER'] = upload_folder
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB
     app.config['ENFORCE_CLOUDFLARE_ACCESS'] = os.environ.get('ENFORCE_CLOUDFLARE_ACCESS', 'False').lower() == 'true'
+    
+    # 🛡️ SECURITY: Prevent CSRF/Session timeouts during the election
+    app.config['WTF_CSRF_TIME_LIMIT'] = 86400  # 24 hours
+    from datetime import timedelta
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=1)
     os.makedirs(upload_folder, exist_ok=True)
 
     if config_class:
@@ -53,10 +58,22 @@ def create_app(config_class=None):
         from flask import render_template
         return render_template('errors/404.html'), 404
 
+    @app.errorhandler(400)
+    def bad_request(e):
+        from flask import render_template
+        return render_template('errors/400.html'), 400
+
     @app.errorhandler(500)
     def internal_server_error(e):
         from flask import render_template
         return render_template('errors/500.html'), 500
+
+    # Handle CSRF failures explicitly to provide better feedback
+    from flask_wtf.csrf import CSRFError
+    @app.errorhandler(CSRFError)
+    def handle_csrf_error(e):
+        from flask import render_template, request
+        return render_template('errors/400.html', reason=e.description), 400
 
     @app.errorhandler(429)
     def ratelimit_handler(e):

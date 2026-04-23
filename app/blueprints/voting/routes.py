@@ -148,6 +148,7 @@ def verify_otp():
             # ────────────────────────────────────────
             
             db.session.commit()
+            session.permanent = True
             login_user(user)
             flash(f'Identity Verified. This device is now trusted.', 'success')
             

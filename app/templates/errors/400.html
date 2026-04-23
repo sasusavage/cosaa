@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Session Expired - CoSSA{% endblock %}
+{% block content %}
+<div class="max-w-xl mx-auto py-24 px-6 text-center">
+    <div class="bg-white rounded-[3rem] shadow-2xl border border-slate-50 p-14">
+        <div class="w-24 h-24 bg-amber-100 rounded-3xl flex items-center justify-center mx-auto mb-10 shadow-inner">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </div>
+        
+        <h1 class="text-4xl font-black text-slate-900 mb-4 tracking-tight">Session Timing Issue</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed font-medium">
+            Your security token has expired or is invalid. This usually happens if you stay on a page for too long or used the "Refresh" button after submitting a form.
+            <br><br>
+            <span class="text-sm font-bold text-slate-400 italic">Error Detail: {{ reason or 'Bad Request / CSRF Token Missing' }}</span>
+        </p>
+
+        <div class="flex flex-col gap-4">
+            <a href="{{ url_for('main.index') }}" class="w-full bg-[#0051c3] text-white px-10 py-5 rounded-3xl font-black text-lg hover:bg-black shadow-xl shadow-blue-100 transition-all">
+                Refresh My Session
+            </a>
+            <a href="javascript:history.back()" class="w-full bg-slate-50 text-slate-500 px-10 py-4 rounded-3xl font-bold text-base hover:bg-slate-100 transition-all border border-slate-100">
+                Go Back
+            </a>
+        </div>
+    </div>
+    
+    <p class="mt-8 text-slate-400 text-sm font-bold uppercase tracking-widest opacity-60">Security Protocol 400-CSRF</p>
+</div>
+{% endblock %}
