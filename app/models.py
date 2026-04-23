@@ -24,6 +24,7 @@ class User(db.Model, UserMixin):
     share_sms_sent = db.Column(db.Boolean, default=False)
     reminder_sms_sent = db.Column(db.Boolean, default=False)
     turnout_blast_sent = db.Column(db.Boolean, default=False)
+    results_sms_sent = db.Column(db.Boolean, default=False)
     role = db.Column(db.String(10), default='student')  # 'student' or 'admin'
     
     # 🕵️ Security & Hardware Locking
