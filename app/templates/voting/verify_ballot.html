@@ -66,15 +66,17 @@
                 <p class="text-sm font-black text-white italic tracking-widest">{{ results[0].voter.student_id }}</p>
             </div>
             
-            <div class="space-y-4">
+            <div class="space-y-3">
                 {% for vote in results %}
-                <div class="flex items-center justify-between p-4 bg-white/10 rounded-2xl border border-white/10">
-                    <div class="min-w-0">
-                        <p class="text-[0.6rem] font-bold text-emerald-100 uppercase tracking-widest">{{ vote.portfolio.title }}</p>
-                        <p class="text-sm font-black text-white truncate">{{ vote.candidate.name }}</p>
+                <div class="p-4 bg-white rounded-2xl shadow-sm border border-emerald-100 flex items-center justify-between">
+                    <div>
+                        <p class="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest mb-0.5">{{ vote.portfolio.title }}</p>
+                        <p class="text-base font-black text-slate-900">{{ vote.candidate.name }}</p>
                     </div>
-                    <div class="flex-shrink-0 bg-emerald-400/30 px-3 py-1 rounded-lg">
-                        <p class="text-[0.55rem] font-black text-white uppercase tracking-tighter italic">Secured</p>
+                    <div class="text-emerald-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
                     </div>
                 </div>
                 {% endfor %}
