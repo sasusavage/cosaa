@@ -39,9 +39,11 @@ def login():
         raw_id = (request.form.get('student_id') or '').strip().upper()
         user = User.query.filter(db.func.upper(User.student_id) == raw_id).first()
 
-        # Access Denial Logic (Cloaks Admins & Invalid IDs)
+        # Access Denial Logic
         if not user or user.role == 'admin':
-            flash('Invalid Student ID or Phone Number.', 'error')
+            from markupsafe import Markup
+            msg = Markup("Student ID not found in the official election record. Please <b>contact the EC Administrator immediately</b> to be manually added to the system.")
+            flash(msg, 'error')
             return redirect(url_for('voting.login'))
 
         input_phone = request.form.get('phone_number', '').strip()

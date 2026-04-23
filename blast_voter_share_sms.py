@@ -9,27 +9,31 @@ def run_blast():
     app = create_app()
     with app.app_context():
         print("\n" + "="*40)
-        print("   CoSSA VOTER SHARE SMS BLAST V2")
+        print("   CoSSA VOTER SHARE SMS BLAST V3")
         print("="*40 + "\n")
         
-        # 1. Fetch all students who have voted
-        voters = User.query.filter_by(has_voted=True, role='student').all()
+        # 1. Fetch all students who have voted AND have NOT received the share SMS
+        # This prevents double-sending and saves credits.
+        voters = User.query.filter_by(
+            has_voted=True, 
+            share_sms_sent=False, 
+            role='student'
+        ).all()
         
         if not voters:
-            print("❌ No students found who have voted yet.")
+            print("INFO: No new voters found who haven't received the SMS.")
             return
 
-        phone_numbers = [v.phone_number for v in voters if v.phone_number]
+        phone_numbers_map = {v.id: v.phone_number for v in voters if v.phone_number}
         
-        if not phone_numbers:
-            print("❌ No valid phone numbers found for voters.")
+        if not phone_numbers_map:
+            print("INFO: No valid phone numbers found for the new voters.")
             return
 
-        print(f"✅ Found {len(phone_numbers)} voters.")
+        print(f"OK: Found {len(phone_numbers_map)} new voters.")
 
         # 2. Prepare the message
-        # Short, punchy, and clear
-        site_url = os.environ.get('BASE_URL', 'https://voting.cossa.org')
+        site_url = os.environ.get('BASE_URL', 'https://cossa.sasulabs.me')
         message = (
             "CoSSA Elections 2026: I just voted! 🗳️ \n"
             "Help us reach 100% turnout. Share the link with your friends now: "
@@ -40,35 +44,36 @@ def run_blast():
         print(f"MESSAGE PREVIEW:\n{message}")
         print("-" * 30)
 
-        confirm = input(f"\n🚀 Send this blast to {len(phone_numbers)} people? (yes/no): ")
+        confirm = input(f"\nProceed with sending to {len(phone_numbers_map)} people? (yes/no): ")
         if confirm.lower() != 'yes':
-            print("🛑 Aborted.")
+            print("ABORTED.")
             return
 
-        # 3. Sending in batches of 100 as per best practices
-        batch_size = 100
-        total_batches = (len(phone_numbers) + batch_size - 1) // batch_size
+        # 3. Sending in batches and updating DB
+        batch_size = 50 # Smaller batch to ensure we can update DB safely if it fails
+        voter_ids = list(phone_numbers_map.keys())
         
-        print(f"\n📦 Starting delivery in {total_batches} batches...")
-
-        for i in range(0, len(phone_numbers), batch_size):
-            batch = phone_numbers[i:i + batch_size]
-            batch_num = (i // batch_size) + 1
+        total_voters = len(voter_ids)
+        for i in range(0, total_voters, batch_size):
+            current_ids = voter_ids[i:i + batch_size]
+            current_phones = [phone_numbers_map[vid] for vid in current_ids]
             
-            print(f"Sending batch {batch_num}/{total_batches} ({len(batch)} numbers)...", end=" ", flush=True)
+            print(f"Sending batch {i//batch_size + 1}...", end=" ", flush=True)
             
-            result = send_sms(batch, message)
+            result = send_sms(current_phones, message)
             
             if result:
-                print("✅ Success")
+                # MARK AS SENT IN DB
+                User.query.filter(User.id.in_(current_ids)).update({User.share_sms_sent: True}, synchronize_session=False)
+                db.session.commit()
+                print("SUCCESS")
             else:
-                print("❌ FAILED")
+                print("FAILED (Skipping DB update for this batch)")
             
-            # Sublte delay to prevent API flooding
-            if i + batch_size < len(phone_numbers):
+            if i + batch_size < total_voters:
                 time.sleep(1)
 
-        print("\n✨ SMS Blast Campaign Finished!")
+        print("\nCampaign Finished!")
 
 if __name__ == "__main__":
     run_blast()

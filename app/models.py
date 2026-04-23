@@ -21,6 +21,7 @@ class User(db.Model, UserMixin):
     otp = db.Column(db.String(10))
     otp_expiry = db.Column(db.DateTime)
     has_voted = db.Column(db.Boolean, default=False)
+    share_sms_sent = db.Column(db.Boolean, default=False)
     role = db.Column(db.String(10), default='student')  # 'student' or 'admin'
     
     # 🕵️ Security & Hardware Locking
