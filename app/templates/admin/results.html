@@ -73,6 +73,33 @@
                                         </td>
                                     </tr>
                                 {% endfor %}
+                                {# Null/Rejected Votes Row #}
+                                <tr class="bg-slate-50/30">
+                                    <td class="px-8 py-6">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-2 h-2 rounded-full flex-shrink-0 bg-red-400"></div>
+                                            <div class="min-w-0">
+                                                <p class="font-bold text-slate-900 text-sm italic truncate">Null Votes / Rejections</p>
+                                                <p class="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest mt-0.5">Skipped or Specifically Rejected</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-8 py-6 text-center">
+                                        <span class="text-2xl font-black text-slate-400 tracking-tighter">{{ p_data.null_votes }}</span>
+                                    </td>
+                                    <td class="px-8 py-6">
+                                        <div class="flex items-center gap-4">
+                                            <div class="flex-1 bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                                {% set bar_pct = p_data.null_pct %}
+                                                <div class="h-full bg-red-400 rounded-full transition-all duration-1000" style="width: {{ bar_pct }}%"></div>
+                                            </div>
+                                            <span class="text-[0.65rem] font-black text-slate-500 w-10 text-right">{{ p_data.null_pct|round(1) }}%</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-8 py-6 text-right hidden sm:table-cell">
+                                        <span class="text-[0.6rem] font-black text-red-500 border border-red-500/20 px-2 py-0.5 rounded uppercase tracking-tighter bg-red-50">Null Signal</span>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>

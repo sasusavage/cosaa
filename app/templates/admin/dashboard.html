@@ -143,18 +143,27 @@
                     </div>
 
                     {# 📊 Unified Multi-Candidate Bar #}
-                    {% set total_p_v = p.votes|length %}
+                    {% set total_election_voters = voted_count %}
                     <div class="w-full bg-slate-100 h-6 md:h-8 rounded-xl overflow-hidden flex shadow-inner border border-slate-200">
                         {% set colors = ['bg-blue-600', 'bg-emerald-500', 'bg-amber-500', 'bg-purple-600', 'bg-rose-500'] %}
+                        {% set total_portfolio_votes = p.votes|length %}
+                        
                         {% for c in p.candidates %}
                             {% set c_votes = c.votes_received|length %}
-                            {% set pct = (c_votes / total_p_v * 100) if total_p_v > 0 else 0 %}
+                            {% set pct = (c_votes / total_election_voters * 100) if total_election_voters > 0 else 0 %}
                             {% set bar_color = colors[loop.index0 % colors|length] %}
                             {% set bar_width_val = pct|round(2) %}
-                            <div class="{{ bar_color }} h-full transition-all duration-1000 border-r border-white/10 last:border-0" 
+                            <div class="{{ bar_color }} h-full transition-all duration-1000 border-r border-white/10" 
                                  style="width: {{ bar_width_val }}%" title="{{ c.name }}: {{ pct|round(1) }}%">
                             </div>
                         {% endfor %}
+                        
+                        {# Null/No Vote Segment #}
+                        {% set null_votes = total_election_voters - total_portfolio_votes %}
+                        {% set null_pct = (null_votes / total_election_voters * 100) if total_election_voters > 0 else 0 %}
+                        <div class="bg-slate-300 h-full transition-all duration-1000" 
+                             style="width: {{ null_pct|round(2) }}%" title="Null/No Votes: {{ null_pct|round(1) }}%">
+                        </div>
                     </div>
 
                     {# 📋 Color-Coded Legend #}
@@ -164,11 +173,21 @@
                              <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
                                  <div class="w-3 h-3 rounded-full {{ bar_color }} flex-shrink-0"></div>
                                  <div class="min-w-0">
-                                     <p class="text-[0.7rem] font-bold text-slate-800 truncate">{{ c.name }}</p>
-                                     <p class="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest">Candidate</p>
+                                     <p class="text-[0.6rem] font-black text-slate-800 uppercase truncate leading-tight">{{ c.name }}</p>
+                                     <p class="text-[0.55rem] font-bold text-slate-400 uppercase tracking-tighter">{{ c.votes_received|length }} votes</p>
                                  </div>
                              </div>
                         {% endfor %}
+                        
+                        {# Null Vote Legend Item #}
+                        {% set null_votes = total_election_voters - p.votes|length %}
+                        <div class="flex items-center gap-3 p-3 bg-slate-100/50 rounded-lg border border-slate-200 border-dashed">
+                             <div class="w-3 h-3 rounded-full bg-slate-300 flex-shrink-0"></div>
+                             <div class="min-w-0">
+                                 <p class="text-[0.6rem] font-black text-slate-500 uppercase truncate leading-tight">No Vote / Null</p>
+                                 <p class="text-[0.55rem] font-bold text-slate-400 uppercase tracking-tighter">{{ null_votes }} votes</p>
+                             </div>
+                        </div>
                     </div>
                 </div>
                 {% endfor %}

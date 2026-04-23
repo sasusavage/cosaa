@@ -1009,21 +1009,32 @@ def election_detail(record_id):
 def results():
     data = []
     portfolios = Portfolio.query.all()
+    total_ballots_cast = User.query.filter_by(has_voted=True).count()
+    
     for portfolio in portfolios:
         portfolio_results = []
         total_p_votes = Vote.query.filter_by(portfolio_id=portfolio.id).count()
+        
+        # Calculate Null Votes: People who voted in the election but skipped this position
+        null_votes = total_ballots_cast - total_p_votes
+        null_pct = (null_votes / total_ballots_cast * 100) if total_ballots_cast > 0 else 0
+        
         for candidate in portfolio.candidates:
             count = Vote.query.filter_by(candidate_id=candidate.id).count()
             portfolio_results.append({
                 'id': candidate.id,
                 'name': candidate.name,
                 'count': count,
-                'pct': (count / total_p_votes * 100) if total_p_votes > 0 else 0
+                'pct': (count / total_ballots_cast * 100) if total_ballots_cast > 0 else 0
             })
+        
         data.append({
             'id': portfolio.id,
             'title': portfolio.title,
-            'results': portfolio_results
+            'results': portfolio_results,
+            'null_votes': null_votes,
+            'null_pct': null_pct,
+            'total_ballots': total_ballots_cast
         })
     return render_template('admin/results.html', data=data)
 
