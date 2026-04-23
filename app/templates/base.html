@@ -68,6 +68,7 @@
             <a href="{{ url_for('main.about') }}" class="hover:text-blue-600 transition-colors">About</a>
             <a href="{{ url_for('main.executives') }}" class="hover:text-blue-600 transition-colors">Executives</a>
             <a href="{{ url_for('main.resources') }}" class="hover:text-blue-600 transition-colors">Resources</a>
+            <a href="{{ url_for('main.results') }}" class="text-emerald-600 font-bold hover:text-emerald-700 transition-colors">Election Results</a>
             <a href="{{ url_for('voting.verify_ballot') }}" class="text-slate-600 hover:text-blue-600 transition-colors">Verify Ballot</a>
             {% if current_user.is_authenticated %}
                 {% if current_user.role == 'admin' %}
@@ -167,6 +168,7 @@
                     <li><a href="{{ url_for('main.about') }}" class="hover:text-blue-600">About</a></li>
                     <li><a href="{{ url_for('main.executives') }}" class="hover:text-blue-600">Executives</a></li>
                     <li><a href="{{ url_for('main.resources') }}" class="hover:text-blue-600">Resources</a></li>
+                    <li><a href="{{ url_for('main.results') }}" class="text-emerald-600 font-bold hover:text-emerald-700">Election Results</a></li>
                     <li><a href="{{ url_for('voting.report_hijack') }}" class="text-red-500 font-bold hover:text-red-700">Report Identity Fraud</a></li>
                 </ul>
             </div>

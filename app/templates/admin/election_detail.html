@@ -71,5 +71,72 @@
         {% endfor %}
     </div>
 
+    {# Turnout Breakdown #}
+    {% if dept_turnout or prog_turnout %}
+    <div class="mt-20">
+        <h2 class="text-3xl font-black text-slate-800 mb-8 border-b-2 border-slate-100 pb-4">Participation Breakdown</h2>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            {# Dept Breakdown #}
+            <div class="bg-white rounded-[2rem] shadow-xl border border-slate-50 overflow-hidden">
+                <div class="bg-slate-900 px-8 py-5">
+                    <h3 class="text-white font-black text-xs uppercase tracking-[0.2em]">Turnout by Department</h3>
+                </div>
+                <div class="p-8">
+                    <table class="w-full text-left text-sm">
+                        <thead class="border-b-2 border-slate-50">
+                            <tr>
+                                <th class="py-3 font-black text-slate-400 uppercase tracking-widest text-[0.65rem]">Department</th>
+                                <th class="py-3 font-black text-slate-400 uppercase tracking-widest text-[0.65rem]">Total</th>
+                                <th class="py-3 font-black text-slate-400 uppercase tracking-widest text-[0.65rem]">Voted</th>
+                                <th class="py-3 font-black text-slate-400 uppercase tracking-widest text-[0.65rem]">Turnout</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50">
+                            {% for item in dept_turnout %}
+                            <tr>
+                                <td class="py-4 font-bold text-slate-700">{{ item.name }}</td>
+                                <td class="py-4 font-medium text-slate-500">{{ item.total }}</td>
+                                <td class="py-4 font-black text-emerald-600">{{ item.voted }}</td>
+                                <td class="py-4 font-black text-blue-600">{{ ((item.voted / item.total * 100) | round(1)) if item.total else 0 }}%</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {# Program Breakdown #}
+            <div class="bg-white rounded-[2rem] shadow-xl border border-slate-50 overflow-hidden">
+                <div class="bg-slate-900 px-8 py-5">
+                    <h3 class="text-white font-black text-xs uppercase tracking-[0.2em]">Turnout by Program</h3>
+                </div>
+                <div class="p-8">
+                    <table class="w-full text-left text-sm">
+                        <thead class="border-b-2 border-slate-50">
+                            <tr>
+                                <th class="py-3 font-black text-slate-400 uppercase tracking-widest text-[0.65rem]">Program</th>
+                                <th class="py-3 font-black text-slate-400 uppercase tracking-widest text-[0.65rem]">Total</th>
+                                <th class="py-3 font-black text-slate-400 uppercase tracking-widest text-[0.65rem]">Voted</th>
+                                <th class="py-3 font-black text-slate-400 uppercase tracking-widest text-[0.65rem]">Turnout</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50">
+                            {% for item in prog_turnout %}
+                            <tr>
+                                <td class="py-4 font-bold text-slate-700">{{ item.name }}</td>
+                                <td class="py-4 font-medium text-slate-500">{{ item.total }}</td>
+                                <td class="py-4 font-black text-emerald-600">{{ item.voted }}</td>
+                                <td class="py-4 font-black text-blue-600">{{ ((item.voted / item.total * 100) | round(1)) if item.total else 0 }}%</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
 </div>
 {% endblock %}

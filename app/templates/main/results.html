@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-12">
+    {# 🏆 Winner's Banner #}
+    <div class="bg-gradient-to-br from-slate-900 to-blue-900 rounded-[3rem] p-10 md:p-20 text-center relative overflow-hidden mb-16 shadow-2xl">
+        <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+            <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <path d="M0 100 C 20 0, 50 0, 100 100 Z" fill="white" />
+            </svg>
+        </div>
+        
+        <div class="relative z-10">
+            <div class="inline-flex items-center gap-3 bg-blue-500/20 text-blue-300 px-6 py-2 rounded-full text-xs font-black uppercase tracking-[0.3em] mb-8 backdrop-blur-md border border-white/10">
+                Official Certification
+            </div>
+            <h1 class="text-4xl md:text-7xl font-black text-white mb-6 tracking-tighter leading-none">
+                Election <span class="text-blue-400">Results</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-slate-300 font-medium mb-10">CoSSA Academic Year {{ academic_year }}</p>
+            
+            <div class="flex flex-wrap justify-center gap-8 md:gap-16">
+                <div class="text-center">
+                    <p class="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest mb-1">Total Ballots</p>
+                    <p class="text-3xl font-black text-white">{{ voted_count }}</p>
+                </div>
+                <div class="w-px h-10 bg-white/10 hidden md:block mt-2"></div>
+                <div class="text-center">
+                    <p class="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest mb-1">Turnout</p>
+                    <p class="text-3xl font-black text-emerald-400">{{ turnout|round(1) }}%</p>
+                </div>
+                <div class="w-px h-10 bg-white/10 hidden md:block mt-2"></div>
+                <div class="text-center">
+                    <p class="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                    <p class="text-3xl font-black text-blue-400">Verified</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# 🎖️ The Winner's Circle #}
+    <div class="space-y-20">
+        {% for portfolio in results_data %}
+        <div class="scroll-mt-24" id="portfolio-{{ loop.index }}">
+            <div class="flex items-end justify-between mb-10 border-b-2 border-slate-100 pb-6">
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">{{ portfolio.title }}</h2>
+                    <p class="text-slate-400 font-bold uppercase tracking-widest text-xs mt-2">Final Declared Results</p>
+                </div>
+                <div class="text-right hidden md:block">
+                    <span class="text-sm font-black text-slate-300 uppercase tracking-widest">Total Portfolio Votes: {{ portfolio.total_portfolio_votes }}</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                {% for candidate in portfolio.candidates %}
+                <div class="relative bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-xl transition-all hover:shadow-2xl hover:-translate-y-2 group overflow-hidden {{ 'ring-4 ring-emerald-500 ring-offset-4 shadow-emerald-100' if loop.first }}">
+                    
+                    {% if loop.first %}
+                    <div class="absolute top-0 right-0 bg-emerald-500 text-white px-6 py-2 rounded-bl-3xl font-black text-[0.65rem] uppercase tracking-widest shadow-lg z-20">
+                        Elected Winner
+                    </div>
+                    {% endif %}
+
+                    <div class="flex flex-col items-center text-center">
+                        <div class="w-32 h-32 md:w-40 md:h-40 rounded-[2rem] overflow-hidden mb-6 border-4 border-white shadow-xl relative">
+                            <img src="{{ candidate.image or 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop' }}" 
+                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                            {% if loop.first %}
+                            <div class="absolute inset-0 bg-emerald-500/10 flex items-center justify-center">
+                                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-emerald-500 shadow-lg translate-y-12 group-hover:translate-y-0 transition-transform duration-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <h3 class="text-xl md:text-2xl font-black text-slate-800 mb-2 leading-tight">{{ candidate.name }}</h3>
+                        
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="text-4xl font-black text-slate-900 tracking-tighter">{{ candidate.votes }}</div>
+                            <div class="text-left">
+                                <p class="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest leading-none">Total Votes</p>
+                                <p class="text-xs font-bold text-blue-600 mt-0.5">{{ (candidate.votes / portfolio.total_portfolio_votes * 100)|round(1) if portfolio.total_portfolio_votes > 0 else 0 }}% of Portfolio</p>
+                            </div>
+                        </div>
+
+                        {# Progress Bar #}
+                        {% set pct = (candidate.votes / portfolio.total_portfolio_votes * 100) if portfolio.total_portfolio_votes > 0 else 0 %}
+                        <div class="w-full bg-slate-50 h-3 rounded-full overflow-hidden border border-slate-100 shadow-inner">
+                            <div class="h-full {{ 'bg-emerald-500 shadow-emerald-100' if loop.first else 'bg-blue-600 shadow-blue-100' }} shadow-md" style="width: {{ pct }}%"></div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {# 📊 Participation Deep Dive #}
+    {% if dept_analytics or prog_analytics %}
+    <div class="mt-32">
+        <div class="flex flex-col md:flex-row items-center gap-6 mb-16 text-center md:text-left">
+            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-[1.5rem] flex items-center justify-center shadow-inner">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
+            </div>
+            <div>
+                <h2 class="text-4xl font-black text-slate-900 tracking-tight">Participation Deep Dive</h2>
+                <p class="text-slate-400 font-bold uppercase tracking-widest text-xs mt-1">Voter Turnout by Department & Program</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {# Department Stats #}
+            <div class="bg-white rounded-[2.5rem] p-8 md:p-12 border border-slate-100 shadow-xl relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full -mr-32 -mt-32 opacity-50 group-hover:scale-110 transition-transform duration-700"></div>
+                <h3 class="text-2xl font-black text-slate-800 mb-10 flex items-center gap-3">
+                    <span class="w-2 h-8 bg-blue-600 rounded-full"></span>
+                    Department Leaderboard
+                </h3>
+                
+                <div class="space-y-8">
+                    {% for dept in dept_analytics %}
+                    <div>
+                        <div class="flex justify-between items-end mb-3">
+                            <span class="font-black text-slate-700">{{ dept.name }}</span>
+                            <span class="text-blue-600 font-black">{{ dept.pct }}%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-4 rounded-full p-1 border border-slate-200 overflow-hidden shadow-inner">
+                            <div class="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full shadow-md transition-all duration-1000" style="width: {{ dept.pct }}%"></div>
+                        </div>
+                        <div class="mt-2 text-[0.6rem] font-bold text-slate-400 uppercase tracking-widest">
+                            {{ dept.voted }} of {{ dept.total }} Students Voted
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {# Program Stats #}
+            <div class="bg-white rounded-[2.5rem] p-8 md:p-12 border border-slate-100 shadow-xl relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full -mr-32 -mt-32 opacity-50 group-hover:scale-110 transition-transform duration-700"></div>
+                <h3 class="text-2xl font-black text-slate-800 mb-10 flex items-center gap-3">
+                    <span class="w-2 h-8 bg-indigo-600 rounded-full"></span>
+                    Program Ranking
+                </h3>
+                
+                <div class="space-y-8">
+                    {% for prog in prog_analytics %}
+                    <div>
+                        <div class="flex justify-between items-end mb-3">
+                            <span class="font-black text-slate-700">{{ prog.name }}</span>
+                            <span class="text-indigo-600 font-black">{{ prog.pct }}%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-4 rounded-full p-1 border border-slate-200 overflow-hidden shadow-inner">
+                            <div class="h-full bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full shadow-md transition-all duration-1000" style="width: {{ prog.pct }}%"></div>
+                        </div>
+                        <div class="mt-2 text-[0.6rem] font-bold text-slate-400 uppercase tracking-widest">
+                            {{ prog.voted }} of {{ prog.total }} Students Voted
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# 📣 Share & CTA #}
+    <div class="mt-32 text-center bg-slate-50 rounded-[3rem] p-12 md:p-20 border border-slate-100">
+        <h2 class="text-3xl md:text-4xl font-black text-slate-900 mb-4">Official Results declared.</h2>
+        <p class="text-slate-500 font-medium text-lg mb-12">Congratulations to all candidates for a successful and transparent election cycle. <br>Share the results with the student body now.</p>
+        
+        <div class="flex flex-wrap justify-center gap-4">
+            <button onclick="shareResults('whatsapp')" class="bg-[#25D366] text-white px-10 py-5 rounded-2xl font-black text-lg hover:brightness-110 shadow-xl transition-all flex items-center gap-3">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.319 1.592 5.548 0 10.051-4.503 10.051-10.05 0-2.69-1.047-5.216-2.946-7.111-1.892-1.892-4.417-2.938-7.106-2.938-5.548 0-10.054 4.506-10.054 10.051 0 2.093.561 3.64 1.599 5.43l-.634 2.316 2.385-.626zm12.692-8.32c-.36-.18-2.127-1.049-2.457-1.17-.33-.12-.57-.18-.81.18-.24.36-.93 1.17-1.14 1.41-.21.24-.42.27-.78.09-.36-.18-1.515-.558-2.89-1.787-1.07-.955-1.791-2.134-2.001-2.495-.21-.361-.022-.556.158-.735.162-.162.36-.42.54-.63.18-.21.24-.36.36-.6.12-.24.06-.45-.03-.63-.09-.18-.81-1.95-1.11-2.672-.293-.703-.592-.609-.81-.619-.21-.011-.45-.011-.69-.011-.24 0-.63.09-.96.45-.33.36-1.26 1.23-1.26 3 0 1.77 1.29 3.48 1.47 3.72.18.24 2.54 3.87 6.15 5.42.86.37 1.53.59 2.05.76.86.27 1.64.23 2.26.14.69-.1 2.127-.869 2.427-1.708.3-.839.3-1.558.21-1.708-.09-.15-.33-.24-.69-.42z"/></svg>
+                WhatsApp
+            </button>
+            <button onclick="shareResults('x')" class="bg-black text-white px-10 py-5 rounded-2xl font-black text-lg hover:bg-slate-800 shadow-xl transition-all flex items-center gap-3">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                Share on X
+            </button>
+            <button onclick="window.print()" class="bg-white border border-slate-200 text-slate-600 px-10 py-5 rounded-2xl font-bold text-lg hover:bg-slate-50 transition-all flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                Print Report
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function shareResults(platform) {
+    const url = window.location.href;
+    const text = "CoSSA Election {{ academic_year }} Official Results are out! Check out the winners here: ";
+    
+    if (platform === 'whatsapp') {
+        window.open(`https://wa.me/?text=${encodeURIComponent(text + url)}`, '_blank');
+    } else if (platform === 'x') {
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+    }
+}
+</script>
+
+<style>
+@media print {
+    nav, footer, .share-buttons, button { display: none !important; }
+    body { background: white; }
+    .max-w-7xl { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+    .bg-gradient-to-br { color: black !important; background: none !important; border: 2px solid black !important; }
+    .text-white { color: black !important; }
+    .text-blue-400, .text-blue-300 { color: #0051c3 !important; }
+    .bg-emerald-500 { background: #10b981 !important; print-color-adjust: exact; }
+}
+</style>
+{% endblock %}

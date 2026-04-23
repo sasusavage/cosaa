@@ -38,7 +38,9 @@
                             </thead>
                             <tbody class="divide-y divide-slate-100 italic">
                                 {% for cand in p_data.results|sort(attribute='count', reverse=True) %}
-                                    <tr class="hover:bg-slate-50 transition-colors" data-candidate-id="{{ cand.id }}">
+                                    <tr class="hover:bg-slate-50 transition-colors cursor-pointer" 
+                                        onclick="window.location.href='{{ url_for('admin.candidate_audit', candidate_id=cand.id) }}'"
+                                        data-candidate-id="{{ cand.id }}">
                                         <td class="px-8 py-6">
                                             <div class="flex items-center gap-3">
                                                 <div class="w-2 h-2 rounded-full flex-shrink-0 {% if loop.first and cand.count > 0 %}bg-blue-600 animate-pulse{% else %}bg-slate-200{% endif %}"></div>

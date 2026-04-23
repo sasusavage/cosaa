@@ -783,12 +783,38 @@ def archive_election():
         candidates.sort(key=lambda x: x['votes'], reverse=True)
         snapshot.append({'id': p.id, 'title': p.title, 'candidates': candidates})
 
+    # NEW: Detailed Turnout Snapshot for historical records
+    from sqlalchemy import func
+    dept_turnout = []
+    dept_stats = db.session.query(
+        User.department,
+        func.count(User.id),
+        func.count(User.id).filter(User.has_voted == True)
+    ).filter(User.role == 'student').group_by(User.department).all()
+    for dept, total, voted in dept_stats:
+        dept_turnout.append({'name': dept or 'Unknown', 'total': total, 'voted': voted})
+
+    prog_turnout = []
+    prog_stats = db.session.query(
+        User.program,
+        func.count(User.id),
+        func.count(User.id).filter(User.has_voted == True)
+    ).filter(User.role == 'student').group_by(User.program).all()
+    for prog, total, voted in prog_stats:
+        prog_turnout.append({'name': prog or 'Unknown', 'total': total, 'voted': voted})
+
+    full_record_data = {
+        'results': snapshot,
+        'dept_turnout': dept_turnout,
+        'prog_turnout': prog_turnout
+    }
+
     record = ElectionRecord(
         academic_year=academic_year,
         archived_at=datetime.now(timezone.utc),
         total_students=total_students,
         total_voted=total_voted,
-        results_json=json.dumps(snapshot),
+        results_json=json.dumps(full_record_data),
     )
     db.session.add(record)
 
@@ -800,8 +826,11 @@ def archive_election():
         'phone_verified': False,
         'otp': None,
         'otp_expiry': None,
+        'current_session_id': None,
         'device_token': None,
-        'device_signature': None
+        'share_sms_sent': False,
+        'reminder_sms_sent': False,
+        'turnout_blast_sent': False
     })
 
     # Clear voting window and academic year so system is clean for next election
@@ -809,8 +838,136 @@ def archive_election():
         Setting.set(key, '')
 
     db.session.commit()
-    flash(f'Election {academic_year} archived successfully. Votes cleared — ready for next election.', 'success')
+    flash(f'Election for {academic_year} has been archived successfully. All vote flags have been reset for the next cycle.', 'success')
     return redirect(url_for('admin.dashboard'))
+
+@admin.route('/export/results')
+@admin_required
+def export_results():
+    import csv
+    import io
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Header
+    writer.writerow(['Portfolio', 'Candidate Name', 'Votes Received', 'Percentage of Turnout'])
+    
+    total_voted = User.query.filter_by(has_voted=True, role='student').count()
+    portfolios = Portfolio.query.order_by(Portfolio.order).all()
+    
+    for p in portfolios:
+        for c in p.candidates:
+            vote_count = len(c.votes_received)
+            pct = round(vote_count / total_voted * 100, 2) if total_voted > 0 else 0
+            writer.writerow([p.title, c.name, vote_count, f"{pct}%"])
+            
+    output.seek(0)
+    from flask import Response
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-disposition": "attachment; filename=election_results.csv"}
+    )
+
+@admin.route('/export/voters')
+@admin_required
+def export_voters():
+    import csv
+    import io
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Header
+    writer.writerow(['Student ID', 'Full Name', 'Program', 'Department', 'Campus', 'Voted At'])
+    
+    # We find users who have voted. 
+    # Note: If votes were deleted during archive, this must be run BEFORE archiving.
+    voters = User.query.filter_by(has_voted=True, role='student').all()
+    
+    for v in voters:
+        # Find their last vote timestamp for context (optional)
+        last_vote = Vote.query.filter_by(user_id=v.id).order_by(Vote.timestamp.desc()).first()
+        voted_at = last_vote.timestamp.strftime('%Y-%m-%d %H:%M:%S') if last_vote else "Unknown"
+        writer.writerow([v.student_id, v.username, v.program, v.department, v.campus, voted_at])
+            
+    output.seek(0)
+    from flask import Response
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-disposition": "attachment; filename=voted_students.csv"}
+    )
+
+@admin.route('/export/non-voters')
+@admin_required
+def export_non_voters():
+    import csv
+    import io
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Header
+    writer.writerow(['Student ID', 'Full Name', 'Program', 'Department', 'Campus'])
+    
+    non_voters = User.query.filter_by(has_voted=False, role='student').all()
+    
+    for v in non_voters:
+        writer.writerow([v.student_id, v.username, v.program, v.department, v.campus])
+            
+    output.seek(0)
+    from flask import Response
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-disposition": "attachment; filename=non_voters.csv"}
+    )
+
+@admin.route('/export/turnout-stats')
+@admin_required
+def export_turnout_stats():
+    import csv
+    import io
+    from sqlalchemy import func
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Section 1: Department Breakdown
+    writer.writerow(['--- DEPARTMENT TURNOUT ---'])
+    writer.writerow(['Department', 'Total Students', 'Voted', 'Turnout %'])
+    
+    dept_stats = db.session.query(
+        User.department,
+        func.count(User.id),
+        func.count(User.id).filter(User.has_voted == True)
+    ).filter(User.role == 'student').group_by(User.department).all()
+    
+    for dept, total, voted in dept_stats:
+        pct = round(voted / total * 100, 2) if total > 0 else 0
+        writer.writerow([dept or 'Unknown', total, voted, f"{pct}%"])
+    
+    writer.writerow([]) # Spacer
+    
+    # Section 2: Program Breakdown
+    writer.writerow(['--- PROGRAM TURNOUT ---'])
+    writer.writerow(['Program', 'Total Students', 'Voted', 'Turnout %'])
+    
+    prog_stats = db.session.query(
+        User.program,
+        func.count(User.id),
+        func.count(User.id).filter(User.has_voted == True)
+    ).filter(User.role == 'student').group_by(User.program).all()
+    
+    for prog, total, voted in prog_stats:
+        pct = round(voted / total * 100, 2) if total > 0 else 0
+        writer.writerow([prog or 'Unknown', total, voted, f"{pct}%"])
+        
+    output.seek(0)
+    from flask import Response
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-disposition": "attachment; filename=turnout_analytics.csv"}
+    )
 
 
 @admin.route('/elections')
@@ -825,8 +982,24 @@ def election_history():
 def election_detail(record_id):
     import json
     record = ElectionRecord.query.get_or_404(record_id)
-    portfolios = json.loads(record.results_json)
-    return render_template('admin/election_detail.html', record=record, portfolios=portfolios)
+    raw_data = json.loads(record.results_json)
+    
+    # Handle old snapshot format (list) vs new format (dict)
+    if isinstance(raw_data, list):
+        portfolios = raw_data
+        dept_turnout = []
+        prog_turnout = []
+    else:
+        portfolios = raw_data.get('results', [])
+        dept_turnout = raw_data.get('dept_turnout', [])
+        prog_turnout = raw_data.get('prog_turnout', [])
+        
+    return render_template('admin/election_detail.html', 
+        record=record, 
+        portfolios=portfolios,
+        dept_turnout=dept_turnout,
+        prog_turnout=prog_turnout
+    )
 
 
 # ── Results ────────────────────────────────────────────────────────────────────
@@ -838,18 +1011,59 @@ def results():
     portfolios = Portfolio.query.all()
     for portfolio in portfolios:
         portfolio_results = []
+        total_p_votes = Vote.query.filter_by(portfolio_id=portfolio.id).count()
         for candidate in portfolio.candidates:
-            # Simple count of votes for this candidate
             count = Vote.query.filter_by(candidate_id=candidate.id).count()
             portfolio_results.append({
+                'id': candidate.id,
                 'name': candidate.name,
-                'count': count
+                'count': count,
+                'pct': (count / total_p_votes * 100) if total_p_votes > 0 else 0
             })
         data.append({
+            'id': portfolio.id,
             'title': portfolio.title,
             'results': portfolio_results
         })
     return render_template('admin/results.html', data=data)
+
+@admin.route('/audit/candidate/<int:candidate_id>')
+@admin_required
+def candidate_audit(candidate_id):
+    from app.models import Candidate, User, Vote, Portfolio
+    candidate = Candidate.query.get_or_404(candidate_id)
+    portfolio = Portfolio.query.get(candidate.portfolio_id)
+    
+    # 1. Voters who chose THIS candidate - Breakdown by Dept
+    voted_for_stats = db.session.query(User.department, db.func.count(User.id))\
+        .join(Vote).filter(Vote.candidate_id == candidate.id)\
+        .group_by(User.department).all()
+    voted_for_total = db.session.query(db.func.count(Vote.id)).filter(Vote.candidate_id == candidate.id).scalar()
+    
+    # 2. Others in Portfolio - Breakdown by Dept
+    portfolio_voters_ids = db.session.query(Vote.user_id).filter(Vote.portfolio_id == portfolio.id, Vote.candidate_id != candidate.id).all()
+    portfolio_voters_ids = [v[0] for v in portfolio_voters_ids]
+    voted_others_stats = db.session.query(User.department, db.func.count(User.id))\
+        .filter(User.id.in_(portfolio_voters_ids))\
+        .group_by(User.department).all() if portfolio_voters_ids else []
+    voted_others_total = len(portfolio_voters_ids)
+    
+    # 3. Non-Voters - Breakdown by Dept
+    non_voters_stats = db.session.query(User.department, db.func.count(User.id))\
+        .filter(User.has_voted == False, User.role == 'student')\
+        .group_by(User.department).all()
+    non_voters_total = User.query.filter_by(has_voted=False, role='student').count()
+    
+    return render_template('admin/candidate_audit.html',
+        candidate=candidate,
+        portfolio=portfolio,
+        voted_for_total=voted_for_total,
+        voted_for_stats=voted_for_stats,
+        voted_others_total=voted_others_total,
+        voted_others_stats=voted_others_stats,
+        non_voters_total=non_voters_total,
+        non_voters_stats=non_voters_stats
+    )
 
 @admin.route('/agents/create', methods=['POST'])
 @admin_required

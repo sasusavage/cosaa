@@ -65,6 +65,81 @@ def index():
         home_newsletter_body=_s('home_newsletter_body', "Don't miss out on important announcements and upcoming CS workshops. Subscribe to the CoSSA Newsletter."),
     )
 
+@main.route('/results')
+def results():
+    show_results = Setting.get('display_live_results', '0') == '1'
+    if not show_results:
+        from flask import flash, redirect, url_for
+        flash('Election results are not yet public.', 'info')
+        return redirect(url_for('main.index'))
+        
+    total_users = User.query.filter_by(role='student').count()
+    voted_count = User.query.filter_by(has_voted=True, role='student').count()
+    turnout = (voted_count / total_users * 100) if total_users > 0 else 0
+    
+    portfolios = Portfolio.query.order_by(Portfolio.order).all()
+    results_data = []
+    for p in portfolios:
+        candidates = []
+        for c in p.candidates:
+            count = len(c.votes_received)
+            candidates.append({
+                'name': c.name, 
+                'votes': count, 
+                'image': c.image_url,
+                'id': c.id
+            })
+        # Sort to find winner
+        candidates.sort(key=lambda x: x['votes'], reverse=True)
+        results_data.append({
+            'title': p.title, 
+            'candidates': candidates,
+            'total_portfolio_votes': sum(c['votes'] for c in candidates)
+        })
+        
+    from sqlalchemy import func
+    dept_stats = db.session.query(
+        User.department,
+        func.count(User.id),
+        func.count(User.id).filter(User.has_voted == True)
+    ).filter(User.role == 'student').group_by(User.department).all()
+    
+    dept_analytics = []
+    for dept, total, voted in dept_stats:
+        dept_analytics.append({
+            'name': dept or 'Other',
+            'total': total,
+            'voted': voted,
+            'pct': round(voted / total * 100, 1) if total > 0 else 0
+        })
+    dept_analytics.sort(key=lambda x: x['pct'], reverse=True)
+
+    prog_stats = db.session.query(
+        User.program,
+        func.count(User.id),
+        func.count(User.id).filter(User.has_voted == True)
+    ).filter(User.role == 'student').group_by(User.program).all()
+    
+    prog_analytics = []
+    for prog, total, voted in prog_stats:
+        prog_analytics.append({
+            'name': prog or 'Other',
+            'total': total,
+            'voted': voted,
+            'pct': round(voted / total * 100, 1) if total > 0 else 0
+        })
+    prog_analytics.sort(key=lambda x: x['pct'], reverse=True)
+        
+    return render_template('main/results.html',
+        results_data=results_data,
+        dept_analytics=dept_analytics,
+        prog_analytics=prog_analytics,
+        total_users=total_users,
+        voted_count=voted_count,
+        turnout=turnout,
+        academic_year=Setting.get('academic_year', '2026/2027')
+    )
+
 @main.route('/about')
 def about():
     return render_template('main/about.html',
