@@ -29,7 +29,7 @@ def _voting_window():
         return False, start_s, end_s
 
 @voting.route('/login', methods=['GET', 'POST'])
-@limiter.limit("2 per minute")
+@limiter.limit("20 per 5 minutes")
 def login():
     if current_user.is_authenticated:
         if current_user.role == 'admin':
@@ -116,7 +116,7 @@ def login():
     return render_template('voting/login.html')
 
 @voting.route('/verify-otp', methods=['POST'])
-@limiter.limit("2 per minute")
+@limiter.limit("20 per 5 minutes")
 def verify_otp():
     student_id = request.form.get('student_id')
     otp_input = request.form.get('otp')
@@ -163,6 +163,7 @@ def verify_otp():
     return redirect(url_for('voting.login'))
 
 @voting.route('/report-hijack', methods=['GET', 'POST'])
+@limiter.limit("10 per 5 minutes")
 def report_hijack():
     student_id = request.args.get('student_id') or request.form.get('student_id')
     reporter_phone = request.args.get('phone') or request.form.get('phone')
@@ -432,6 +433,7 @@ def already_voted():
     return render_template('voting/already_voted.html', show_stats=show_stats, academic_year=academic_year)
 
 @voting.route('/verify-ballot', methods=['GET', 'POST'])
+@limiter.limit("20 per 5 minutes")
 def verify_ballot():
     results = None
     student_id = None
@@ -452,7 +454,7 @@ def verify_ballot():
             else:
                 error = "No voting record found for this Student ID."
         else:
-            error = "Invalid Receipt Code. Please check the code sent to your SMS."
+            error = "Invalid Receipt Code. Please check the code captured in your screenshot."
             
     return render_template('voting/verify_ballot.html', results=results, student_id=student_id, error=error)
 
